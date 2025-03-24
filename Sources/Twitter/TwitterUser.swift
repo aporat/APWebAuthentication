@@ -1,0 +1,21 @@
+import SwiftyJSON
+import Foundation
+
+public final class TwitterUser: BaseUser {
+    public required init?(info: JSON) {
+        if let id = info["id_str"].idString {
+            super.init(userId: id)
+        } else if let id = info["id"].idString {
+            super.init(userId: String(id))
+        } else {
+            return nil
+        }
+
+        username = info["screen_name"].string
+        fullname = info["name"].string
+
+        if let currentProfilePicture = info["profile_image_url_https"].string {
+            avatarPicture = URL(string: currentProfilePicture.replacingOccurrences(of: "_normal", with: "_bigger"))
+        }
+    }
+}
