@@ -5,7 +5,7 @@ public enum MediaItemType: Int16 {
     case photo = 1
     case video = 2
     case album = 3
-    case tweet = 4
+    case post = 4
 }
 
 public protocol MediaItem {

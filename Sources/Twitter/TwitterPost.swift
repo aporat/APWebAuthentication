@@ -1,8 +1,8 @@
 import SwiftyJSON
 import Foundation
 
-public final class TwitterTweet: MediaItem, Hashable {
-    public var type = MediaItemType.tweet
+public final class TwitterPost: MediaItem, Hashable {
+    public var type = MediaItemType.post
     public var mediaId: String
     public var shortcode: String?
     public var userId: String?
@@ -13,7 +13,7 @@ public final class TwitterTweet: MediaItem, Hashable {
     public var dateTaken: Date
     public var commentsCount: Int32 = 0
     public var likesCount: Int32
-    public var retweetsCount: Int32
+    public var repostsCount: Int32
     public var viewsCount: Int32 = 0
 
     public required init?(info: JSON) {
@@ -34,7 +34,7 @@ public final class TwitterTweet: MediaItem, Hashable {
 
         text = info["text"].string
 
-        retweetsCount = info["retweet_count"].int32Number ?? 0
+        repostsCount = info["repost_count"].int32Number ?? 0
         likesCount = info["favorite_count"].int32Number ?? 0
     }
 
@@ -42,11 +42,11 @@ public final class TwitterTweet: MediaItem, Hashable {
         hasher.combine(mediaId.hashValue)
     }
 
-    public static func == (lhs: TwitterTweet, rhs: TwitterTweet) -> Bool {
+    public static func == (lhs: TwitterPost, rhs: TwitterPost) -> Bool {
         lhs.mediaId == rhs.mediaId
     }
 
     public var totalCount: Int32 {
-        Int32(likesCount + commentsCount + retweetsCount)
+        Int32(likesCount + commentsCount + repostsCount)
     }
 }
