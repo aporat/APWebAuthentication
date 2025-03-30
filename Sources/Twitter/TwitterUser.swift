@@ -11,10 +11,10 @@ public final class TwitterUser: BaseUser {
             return nil
         }
 
-        username = info["screen_name"].string
+        username = info["username"].string
         fullname = info["name"].string
 
-        if let currentProfilePicture = info["profile_image_url_https"].string {
+        if let currentProfilePicture = info["profile_image_url"].string {
             avatarPicture = URL(string: currentProfilePicture.replacingOccurrences(of: "_normal", with: "_bigger"))
         }
     }

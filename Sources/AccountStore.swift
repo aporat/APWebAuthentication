@@ -18,7 +18,7 @@ public extension DefaultsKeys {
 
 public final class AccountStore {
     public static let instagram = AccountType(code: AccountType.Code.instagram, webAddress: "instagram.com", description: "Instagram", color: UIColor.Social.instagram)
-    public static let twitter = AccountType(code: AccountType.Code.twitter, webAddress: "twitter.com", description: "Twitter", color: UIColor.Social.twitter)
+    public static let twitter = AccountType(code: AccountType.Code.twitter, webAddress: "x.com", description: "X", color: UIColor.Social.twitter)
     public static let pinterest = AccountType(code: AccountType.Code.pinterest, webAddress: "pinterest.com", description: "Pinterest", color: UIColor.Social.pinterest)
     public static let tumblr = AccountType(code: AccountType.Code.tumblr, webAddress: "tumblr.com", description: "Tumblr", color: UIColor.Social.tumblr)
     public static let twitch = AccountType(code: AccountType.Code.twitch, webAddress: "twitch.tv", description: "Twitch", color: UIColor(hex: 0x6441A5)!)
