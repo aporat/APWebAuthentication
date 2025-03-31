@@ -13,6 +13,8 @@ public final class PinterestWebAPIClient: AuthClient {
         requestAdapter = PinterestWebRequestAdapter(auth: auth)
         super.init(baseURLString: baseURLString)
 
+        requestInterceptor = Interceptor(adapters: [requestAdapter], retriers: [requestRetrier])
+
         let configuration = URLSessionConfiguration.default
         configuration.httpCookieStorage = auth.cookieStorage
         sessionManager = makeSessionManager(configuration: configuration)

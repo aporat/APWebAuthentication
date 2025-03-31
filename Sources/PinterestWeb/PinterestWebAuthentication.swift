@@ -9,9 +9,11 @@ public final class PinterestWebAuthentication: SessionAuthentication {
         static let appId = "app_id"
         static let sessionId = "session_id"
         static let csrfToken = "csrf_token"
+        static let username = "username"
     }
 
-    var appId = "5e49ebb"
+    var appId = "ad0e169"
+    public var username: String?
 
     public required init() {
         super.init()
@@ -46,6 +48,7 @@ public final class PinterestWebAuthentication: SessionAuthentication {
 
             Keys.sessionId: sessionId,
             Keys.csrfToken: csrfToken,
+            Keys.username: username,
         ]
 
         if let authSettingsURL = authSettingsURL {
@@ -75,6 +78,8 @@ public final class PinterestWebAuthentication: SessionAuthentication {
                     sessionId = currentValue
                 } else if key == Keys.csrfToken, let currentValue = value as? String {
                     csrfToken = currentValue
+                } else if key == Keys.username, let currentValue = value as? String {
+                    username = currentValue
                 }
             }
         }
