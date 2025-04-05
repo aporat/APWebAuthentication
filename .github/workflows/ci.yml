@@ -11,7 +11,7 @@ jobs:
     name: ${{ matrix.platform }} on ${{ matrix.os }}
     runs-on: macos-15
     env:
-      scheme: APWebAuthenticationTests
+      scheme: APWebAuthentication
     strategy:
       fail-fast: false
       matrix:
