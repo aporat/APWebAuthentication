@@ -31,9 +31,7 @@ open class Authentication {
     open var userAgent: String? {
         if let currentUserAgent = customUserAgent, !currentUserAgent.isEmpty {
             return currentUserAgent
-        } else if browserMode == .default {
-            return UserAgentBuilder().build(desktopMode: false)
-        } else if browserMode == .ios {
+        } else if browserMode == .default || browserMode == .ios {
             return UserAgentBuilder().build(desktopMode: false)
         } else if browserMode == .webView {
             return nil

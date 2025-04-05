@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		537EDD0E24F49F1E003DC54A /* APWebAuthentication.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 537EDD0424F49F1E003DC54A /* APWebAuthentication.framework */; };
+		770E13A82DA05A2F005FCBE1 /* TwitterPost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 770E13A72DA05A2F005FCBE1 /* TwitterPost.swift */; };
 		778D4D372D5E4010008738C8 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 778D4D362D5E4010008738C8 /* Alamofire */; };
 		778D4D3A2D5E4024008738C8 /* SwifterSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 778D4D392D5E4024008738C8 /* SwifterSwift */; };
 		778D4D3D2D5E4034008738C8 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 778D4D3C2D5E4034008738C8 /* SnapKit */; };
@@ -40,7 +41,6 @@
 		77BAE9672D90D8E7008CC558 /* TikTokWebRequestAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9202D90D8E7008CC558 /* TikTokWebRequestAdapter.swift */; };
 		77BAE9682D90D8E7008CC558 /* UIApplication+APWebAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE94B2D90D8E7008CC558 /* UIApplication+APWebAuthentication.swift */; };
 		77BAE9692D90D8E7008CC558 /* FiveHundredspxWebUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE8F82D90D8E7008CC558 /* FiveHundredspxWebUser.swift */; };
-		77BAE96A2D90D8E7008CC558 /* TwitterTweet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE92D2D90D8E7008CC558 /* TwitterTweet.swift */; };
 		77BAE96B2D90D8E7008CC558 /* FiveHundredspxWebAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE8F42D90D8E7008CC558 /* FiveHundredspxWebAuthentication.swift */; };
 		77BAE96C2D90D8E7008CC558 /* UINavigationController+Progress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE94C2D90D8E7008CC558 /* UINavigationController+Progress.swift */; };
 		77BAE96D2D90D8E7008CC558 /* TumblrUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9262D90D8E7008CC558 /* TumblrUser.swift */; };
@@ -120,6 +120,7 @@
 /* Begin PBXFileReference section */
 		537EDD0424F49F1E003DC54A /* APWebAuthentication.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = APWebAuthentication.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		537EDD0D24F49F1E003DC54A /* APWebAuthenticationTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = APWebAuthenticationTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		770E13A72DA05A2F005FCBE1 /* TwitterPost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwitterPost.swift; sourceTree = "<group>"; };
 		778D4D322D5E3FE0008738C8 /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
 		77BAE8F22D90D8E7008CC558 /* FiveHundredspxWebAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiveHundredspxWebAPIClient.swift; sourceTree = "<group>"; };
 		77BAE8F32D90D8E7008CC558 /* FiveHundredspxWebAuthController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiveHundredspxWebAuthController.swift; sourceTree = "<group>"; };
@@ -170,7 +171,6 @@
 		77BAE9292D90D8E7008CC558 /* TwitchRequestAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwitchRequestAdapter.swift; sourceTree = "<group>"; };
 		77BAE92A2D90D8E7008CC558 /* TwitchUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwitchUser.swift; sourceTree = "<group>"; };
 		77BAE92C2D90D8E7008CC558 /* TwitterAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwitterAPIClient.swift; sourceTree = "<group>"; };
-		77BAE92D2D90D8E7008CC558 /* TwitterTweet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwitterTweet.swift; sourceTree = "<group>"; };
 		77BAE92E2D90D8E7008CC558 /* TwitterUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwitterUser.swift; sourceTree = "<group>"; };
 		77BAE9302D90D8E7008CC558 /* AccountStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountStore.swift; sourceTree = "<group>"; };
 		77BAE9312D90D8E7008CC558 /* AccountType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountType.swift; sourceTree = "<group>"; };
@@ -379,8 +379,8 @@
 		77BAE92F2D90D8E7008CC558 /* Twitter */ = {
 			isa = PBXGroup;
 			children = (
+				770E13A72DA05A2F005FCBE1 /* TwitterPost.swift */,
 				77BAE92C2D90D8E7008CC558 /* TwitterAPIClient.swift */,
-				77BAE92D2D90D8E7008CC558 /* TwitterTweet.swift */,
 				77BAE92E2D90D8E7008CC558 /* TwitterUser.swift */,
 			);
 			path = Twitter;
@@ -473,6 +473,8 @@
 			dependencies = (
 			);
 			name = APWebAuthentication;
+			packageProductDependencies = (
+			);
 			productName = ProgressToolbar;
 			productReference = 537EDD0424F49F1E003DC54A /* APWebAuthentication.framework */;
 			productType = "com.apple.product-type.framework";
@@ -491,6 +493,8 @@
 				537EDD1024F49F1E003DC54A /* PBXTargetDependency */,
 			);
 			name = APWebAuthenticationTests;
+			packageProductDependencies = (
+			);
 			productName = ProgressToolbarTests;
 			productReference = 537EDD0D24F49F1E003DC54A /* APWebAuthenticationTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -593,7 +597,6 @@
 				77BAE9672D90D8E7008CC558 /* TikTokWebRequestAdapter.swift in Sources */,
 				77BAE9682D90D8E7008CC558 /* UIApplication+APWebAuthentication.swift in Sources */,
 				77BAE9692D90D8E7008CC558 /* FiveHundredspxWebUser.swift in Sources */,
-				77BAE96A2D90D8E7008CC558 /* TwitterTweet.swift in Sources */,
 				77BAE96B2D90D8E7008CC558 /* FiveHundredspxWebAuthentication.swift in Sources */,
 				77BAE96C2D90D8E7008CC558 /* UINavigationController+Progress.swift in Sources */,
 				77BAE96D2D90D8E7008CC558 /* TumblrUser.swift in Sources */,
@@ -638,6 +641,7 @@
 				77BAE9942D90D8E7008CC558 /* PinterestAPIClient.swift in Sources */,
 				77BAE9952D90D8E7008CC558 /* PinterestWebAPIClient.swift in Sources */,
 				77BAE9962D90D8E7008CC558 /* JSON+APWebAuthentication.swift in Sources */,
+				770E13A82DA05A2F005FCBE1 /* TwitterPost.swift in Sources */,
 				77BAE9972D90D8E7008CC558 /* TwitchRequestAdapter.swift in Sources */,
 				77BAE9982D90D8E7008CC558 /* AuthClientRequestRetrier.swift in Sources */,
 				77BAE9992D90D8E7008CC558 /* AuthViewController.swift in Sources */,

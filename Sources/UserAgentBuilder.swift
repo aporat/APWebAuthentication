@@ -35,44 +35,16 @@ struct UserAgentBuilder {
         """
     }
     
-    // These user agents are taken from iOS Safari in desktop mode and hardcoded.
-    // These are not super precise because each iOS version can have slighly different desktop UA.
-    // The only differences are with exact `Version/XX` and `MAC OS X 10_XX` numbers.
     private var desktopUA: String {
-        // Taken from Safari 14.0
-        let iOS14DesktopUA =
+        return
             """
-        Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) \
+        Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) \
         AppleWebKit/605.1.15 (KHTML, like Gecko) \
-        Version/14.0.2 \
+        Version/18.4 \
         Safari/605.1.15
         """
 
-        // Taken from Safari 13.4
-        let iOS13DesktopUA =
-            """
-        Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15) \
-        AppleWebKit/605.1.15 (KHTML, like Gecko) \
-        Version/13.1 \
-        Safari/605.1.15
-        """
         
-        // Taken from Safari 12.4
-        let iOS12DesktopUA =
-            """
-        Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) \
-        AppleWebKit/605.1.15 (KHTML, like Gecko) \
-        Version/12.1.2 \
-        Safari/605.1.15
-        """
-        
-        switch os.majorVersion {
-        case 12: return iOS12DesktopUA
-        case 13: return iOS13DesktopUA
-        case 14: return iOS14DesktopUA
-        // Fallback to iOS13 UA, next desktop UA will be added once iOS 14 is ready.
-        default: return iOS13DesktopUA
-        }
     }
     
     private var cpuInfo: String {
