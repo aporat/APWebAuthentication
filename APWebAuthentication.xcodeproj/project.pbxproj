@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		537EDD0E24F49F1E003DC54A /* APWebAuthentication.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 537EDD0424F49F1E003DC54A /* APWebAuthentication.framework */; };
 		770E13A82DA05A2F005FCBE1 /* TwitterPost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 770E13A72DA05A2F005FCBE1 /* TwitterPost.swift */; };
+		773E99952DA19A560007DB40 /* APWebAuthenticationErrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 773E99942DA19A3B0007DB40 /* APWebAuthenticationErrorTests.swift */; };
 		778D4D372D5E4010008738C8 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 778D4D362D5E4010008738C8 /* Alamofire */; };
 		778D4D3A2D5E4024008738C8 /* SwifterSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 778D4D392D5E4024008738C8 /* SwifterSwift */; };
 		778D4D3D2D5E4034008738C8 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 778D4D3C2D5E4034008738C8 /* SnapKit */; };
@@ -121,6 +122,7 @@
 		537EDD0424F49F1E003DC54A /* APWebAuthentication.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = APWebAuthentication.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		537EDD0D24F49F1E003DC54A /* APWebAuthenticationTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = APWebAuthenticationTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		770E13A72DA05A2F005FCBE1 /* TwitterPost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwitterPost.swift; sourceTree = "<group>"; };
+		773E99942DA19A3B0007DB40 /* APWebAuthenticationErrorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APWebAuthenticationErrorTests.swift; sourceTree = "<group>"; };
 		778D4D322D5E3FE0008738C8 /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
 		77BAE8F22D90D8E7008CC558 /* FiveHundredspxWebAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiveHundredspxWebAPIClient.swift; sourceTree = "<group>"; };
 		77BAE8F32D90D8E7008CC558 /* FiveHundredspxWebAuthController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiveHundredspxWebAuthController.swift; sourceTree = "<group>"; };
@@ -440,6 +442,7 @@
 		77BAE9AA2D90D8F9008CC558 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				773E99942DA19A3B0007DB40 /* APWebAuthenticationErrorTests.swift */,
 				77BAE9A82D90D8F9008CC558 /* APWebAuthenticationTests.swift */,
 			);
 			path = Tests;
@@ -664,6 +667,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				773E99952DA19A560007DB40 /* APWebAuthenticationErrorTests.swift in Sources */,
 				77BAE9AB2D90D8F9008CC558 /* APWebAuthenticationTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
