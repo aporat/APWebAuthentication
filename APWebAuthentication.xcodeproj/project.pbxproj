@@ -93,7 +93,6 @@
 		774305CF2DA1FC2700588966 /* TikTokWebUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305682DA1FC2700588966 /* TikTokWebUser.swift */; };
 		774305D02DA1FC2700588966 /* APWebAuthentication.h in Headers */ = {isa = PBXBuildFile; fileRef = 774305202DA1FC2700588966 /* APWebAuthentication.h */; };
 		774305D32DA1FD0200588966 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 774305D22DA1FD0200588966 /* Alamofire */; };
-		774305D62DA1FD1200588966 /* CryptoSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 774305D52DA1FD1200588966 /* CryptoSwift */; };
 		774305D92DA1FD2300588966 /* HTTPStatusCodes in Frameworks */ = {isa = PBXBuildFile; productRef = 774305D82DA1FD2300588966 /* HTTPStatusCodes */; };
 		774305DC2DA1FD3500588966 /* JGProgressHUD in Frameworks */ = {isa = PBXBuildFile; productRef = 774305DB2DA1FD3500588966 /* JGProgressHUD */; };
 		774305DF2DA1FD4600588966 /* SFSafeSymbols in Frameworks */ = {isa = PBXBuildFile; productRef = 774305DE2DA1FD4600588966 /* SFSafeSymbols */; };
@@ -103,9 +102,9 @@
 		774305EB2DA1FD8E00588966 /* SwiftyJSON in Frameworks */ = {isa = PBXBuildFile; productRef = 774305EA2DA1FD8E00588966 /* SwiftyJSON */; };
 		774305EE2DA1FD9F00588966 /* SwiftyUserDefaults in Frameworks */ = {isa = PBXBuildFile; productRef = 774305ED2DA1FD9F00588966 /* SwiftyUserDefaults */; };
 		774305F12DA1FDB100588966 /* DeviceKit in Frameworks */ = {isa = PBXBuildFile; productRef = 774305F02DA1FDB100588966 /* DeviceKit */; };
-		774305F42DA1FDC200588966 /* SwiftyRSA in Frameworks */ = {isa = PBXBuildFile; productRef = 774305F32DA1FDC200588966 /* SwiftyRSA */; };
 		774305F72DA1FDCE00588966 /* APWebAuthenticationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305F62DA1FDCE00588966 /* APWebAuthenticationTests.swift */; };
 		774305F82DA1FDCE00588966 /* APWebAuthenticationErrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305F52DA1FDCE00588966 /* APWebAuthenticationErrorTests.swift */; };
+		778D18802DA2EEB800101D91 /* CryptoSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 778D187F2DA2EEB800101D91 /* CryptoSwift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -207,6 +206,7 @@
 		7743057C2DA1FC2700588966 /* WebViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewController.swift; sourceTree = "<group>"; };
 		774305F52DA1FDCE00588966 /* APWebAuthenticationErrorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APWebAuthenticationErrorTests.swift; sourceTree = "<group>"; };
 		774305F62DA1FDCE00588966 /* APWebAuthenticationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APWebAuthenticationTests.swift; sourceTree = "<group>"; };
+		778D187C2DA2EAFC00101D91 /* CryptoKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CryptoKit.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.4.sdk/System/Library/Frameworks/CryptoKit.framework; sourceTree = DEVELOPER_DIR; };
 		778D4D322D5E3FE0008738C8 /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -220,12 +220,11 @@
 				774305DC2DA1FD3500588966 /* JGProgressHUD in Frameworks */,
 				774305EE2DA1FD9F00588966 /* SwiftyUserDefaults in Frameworks */,
 				774305F12DA1FDB100588966 /* DeviceKit in Frameworks */,
-				774305F42DA1FDC200588966 /* SwiftyRSA in Frameworks */,
 				774305E52DA1FD6F00588966 /* SwiftyBeaver in Frameworks */,
 				774305D32DA1FD0200588966 /* Alamofire in Frameworks */,
+				778D18802DA2EEB800101D91 /* CryptoSwift in Frameworks */,
 				774305E22DA1FD5800588966 /* SnapKit in Frameworks */,
 				774305E82DA1FD7F00588966 /* SwifterSwift in Frameworks */,
-				774305D62DA1FD1200588966 /* CryptoSwift in Frameworks */,
 				774305D92DA1FD2300588966 /* HTTPStatusCodes in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -247,6 +246,7 @@
 				778D4D322D5E3FE0008738C8 /* Package.swift */,
 				77BAE9522D90D8E7008CC558 /* Sources */,
 				772F412C2DA19D0B00631B1D /* Tests */,
+				778D187B2DA2EAFC00101D91 /* Frameworks */,
 				537EDD0524F49F1E003DC54A /* Products */,
 			);
 			sourceTree = "<group>";
@@ -397,9 +397,33 @@
 			path = Twitter;
 			sourceTree = "<group>";
 		};
+		778D187A2DA2E86000101D91 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				774305572DA1FC2700588966 /* ProgressView.swift */,
+				774305292DA1FC2700588966 /* AuthNavBarView.swift */,
+				7743052A2DA1FC2700588966 /* AuthViewController.swift */,
+				7743052B2DA1FC2700588966 /* BaseAuthViewController.swift */,
+				774305762DA1FC2700588966 /* UIApplication+APWebAuthentication.swift */,
+				774305772DA1FC2700588966 /* UINavigationController+Progress.swift */,
+				7743057B2DA1FC2700588966 /* WebTokensViewController.swift */,
+				7743057C2DA1FC2700588966 /* WebViewController.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		778D187B2DA2EAFC00101D91 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				778D187C2DA2EAFC00101D91 /* CryptoKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		77BAE9522D90D8E7008CC558 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				778D187A2DA2E86000101D91 /* UI */,
 				774305362DA1FC2700588966 /* FiveHundredspxWeb */,
 				7743053A2DA1FC2700588966 /* Foursquare */,
 				7743053E2DA1FC2700588966 /* GitHub */,
@@ -422,9 +446,6 @@
 				774305262DA1FC2700588966 /* AuthClient.swift */,
 				774305272DA1FC2700588966 /* AuthClientRequestRetrier.swift */,
 				774305282DA1FC2700588966 /* Authentication.swift */,
-				774305292DA1FC2700588966 /* AuthNavBarView.swift */,
-				7743052A2DA1FC2700588966 /* AuthViewController.swift */,
-				7743052B2DA1FC2700588966 /* BaseAuthViewController.swift */,
 				7743052C2DA1FC2700588966 /* Data+APWebAuthentication.swift */,
 				7743052D2DA1FC2700588966 /* Error+APWebAuthentication.swift */,
 				7743052E2DA1FC2700588966 /* Extensions.swift */,
@@ -433,17 +454,12 @@
 				774305492DA1FC2700588966 /* OAuth1RequestAdapter.swift */,
 				7743054A2DA1FC2700588966 /* OAuth2Client.swift */,
 				7743054B2DA1FC2700588966 /* OAuth2RequestAdapter.swift */,
-				774305572DA1FC2700588966 /* ProgressView.swift */,
 				774305582DA1FC2700588966 /* ProviderBrowserMode.swift */,
 				7743055C2DA1FC2700588966 /* SessionAuthentication.swift */,
 				7743055D2DA1FC2700588966 /* String+APWebAuthentication.swift */,
-				774305762DA1FC2700588966 /* UIApplication+APWebAuthentication.swift */,
-				774305772DA1FC2700588966 /* UINavigationController+Progress.swift */,
 				774305782DA1FC2700588966 /* URL+APWebAuthentication.swift */,
 				774305792DA1FC2700588966 /* UserAgentBuilder.swift */,
 				7743057A2DA1FC2700588966 /* WebActivitySafari.swift */,
-				7743057B2DA1FC2700588966 /* WebTokensViewController.swift */,
-				7743057C2DA1FC2700588966 /* WebViewController.swift */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -478,7 +494,6 @@
 			name = APWebAuthentication;
 			packageProductDependencies = (
 				774305D22DA1FD0200588966 /* Alamofire */,
-				774305D52DA1FD1200588966 /* CryptoSwift */,
 				774305D82DA1FD2300588966 /* HTTPStatusCodes */,
 				774305DB2DA1FD3500588966 /* JGProgressHUD */,
 				774305DE2DA1FD4600588966 /* SFSafeSymbols */,
@@ -488,7 +503,7 @@
 				774305EA2DA1FD8E00588966 /* SwiftyJSON */,
 				774305ED2DA1FD9F00588966 /* SwiftyUserDefaults */,
 				774305F02DA1FDB100588966 /* DeviceKit */,
-				774305F32DA1FDC200588966 /* SwiftyRSA */,
+				778D187F2DA2EEB800101D91 /* CryptoSwift */,
 			);
 			productName = ProgressToolbar;
 			productReference = 537EDD0424F49F1E003DC54A /* APWebAuthentication.framework */;
@@ -545,7 +560,6 @@
 			mainGroup = 537EDCFA24F49F1E003DC54A;
 			packageReferences = (
 				774305D12DA1FD0200588966 /* XCRemoteSwiftPackageReference "Alamofire" */,
-				774305D42DA1FD1200588966 /* XCRemoteSwiftPackageReference "CryptoSwift" */,
 				774305D72DA1FD2300588966 /* XCRemoteSwiftPackageReference "SwiftHTTPStatusCodes" */,
 				774305DA2DA1FD3500588966 /* XCRemoteSwiftPackageReference "JGProgressHUD" */,
 				774305DD2DA1FD4600588966 /* XCRemoteSwiftPackageReference "SFSafeSymbols" */,
@@ -555,7 +569,7 @@
 				774305E92DA1FD8E00588966 /* XCRemoteSwiftPackageReference "SwiftyJSON" */,
 				774305EC2DA1FD9F00588966 /* XCRemoteSwiftPackageReference "SwiftyUserDefaults" */,
 				774305EF2DA1FDB100588966 /* XCRemoteSwiftPackageReference "DeviceKit" */,
-				774305F22DA1FDC200588966 /* XCRemoteSwiftPackageReference "SwiftyRSA" */,
+				778D187E2DA2EEB800101D91 /* XCRemoteSwiftPackageReference "CryptoSwift" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 537EDD0524F49F1E003DC54A /* Products */;
@@ -957,14 +971,6 @@
 				minimumVersion = 5.10.2;
 			};
 		};
-		774305D42DA1FD1200588966 /* XCRemoteSwiftPackageReference "CryptoSwift" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/krzyzanowskim/CryptoSwift.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.8.4;
-			};
-		};
 		774305D72DA1FD2300588966 /* XCRemoteSwiftPackageReference "SwiftHTTPStatusCodes" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/rhodgkins/SwiftHTTPStatusCodes.git";
@@ -1037,12 +1043,12 @@
 				minimumVersion = 5.6.0;
 			};
 		};
-		774305F22DA1FDC200588966 /* XCRemoteSwiftPackageReference "SwiftyRSA" */ = {
+		778D187E2DA2EEB800101D91 /* XCRemoteSwiftPackageReference "CryptoSwift" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/TakeScoop/SwiftyRSA.git";
+			repositoryURL = "https://github.com/krzyzanowskim/CryptoSwift.git";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 1.8.0;
+				minimumVersion = 1.8.4;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -1052,11 +1058,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 774305D12DA1FD0200588966 /* XCRemoteSwiftPackageReference "Alamofire" */;
 			productName = Alamofire;
-		};
-		774305D52DA1FD1200588966 /* CryptoSwift */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 774305D42DA1FD1200588966 /* XCRemoteSwiftPackageReference "CryptoSwift" */;
-			productName = CryptoSwift;
 		};
 		774305D82DA1FD2300588966 /* HTTPStatusCodes */ = {
 			isa = XCSwiftPackageProductDependency;
@@ -1103,10 +1104,10 @@
 			package = 774305EF2DA1FDB100588966 /* XCRemoteSwiftPackageReference "DeviceKit" */;
 			productName = DeviceKit;
 		};
-		774305F32DA1FDC200588966 /* SwiftyRSA */ = {
+		778D187F2DA2EEB800101D91 /* CryptoSwift */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 774305F22DA1FDC200588966 /* XCRemoteSwiftPackageReference "SwiftyRSA" */;
-			productName = SwiftyRSA;
+			package = 778D187E2DA2EEB800101D91 /* XCRemoteSwiftPackageReference "CryptoSwift" */;
+			productName = CryptoSwift;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -1,6 +1,6 @@
 import Alamofire
-import CryptoSwift
 import UIKit
+import CryptoKit
 
 public enum ProviderAuthMode: String {
     case `private`
@@ -148,20 +148,35 @@ open class AuthClient {
     }
 
     open func decryptToken(_ payload: String?, tag: String?, iv: String?, password: String) -> String? {
-        guard let currentPayload = payload, let payloadData = Data(base64Encoded: currentPayload),
-            let currentIv = iv, let ivData = Data(base64Encoded: currentIv),
-            let currentTag = tag, let tagData = Data(base64Encoded: currentTag)
-        else {
+        // Ensure all inputs are present and valid
+        guard let payload = payload,
+              let tag = tag,
+              let iv = iv,
+              let payloadData = Data(base64Encoded: payload),
+              let tagData = Data(base64Encoded: tag),
+              let ivData = Data(base64Encoded: iv) else {
             return nil
         }
-
+        
         do {
-            let gcm = GCM(iv: ivData.allBytes, authenticationTag: tagData.allBytes)
-            let aes = try AES(key: password.bytes, blockMode: gcm, padding: .noPadding)
-            let hexToken = try aes.decrypt(payloadData.allBytes).toHexString()
-            let token = String(data: Data(hex: hexToken), encoding: .utf8)
-            return token
+            // Derive a 32-byte key from the password using SHA-256
+            let passwordData = Data(password.utf8)
+            let key = SHA256.hash(data: passwordData)
+            let symmetricKey = SymmetricKey(data: key) // 256-bit key
+            
+            // Create the nonce (IV) for AES-GCM
+            let nonce = try AES.GCM.Nonce(data: ivData)
+            
+            // Combine ciphertext and tag into a sealed box
+            let sealedBox = try AES.GCM.SealedBox(nonce: nonce, ciphertext: payloadData, tag: tagData)
+            
+            // Decrypt the data
+            let decryptedData = try AES.GCM.open(sealedBox, using: symmetricKey)
+            
+            // Convert decrypted data to a UTF-8 string
+            return String(data: decryptedData, encoding: .utf8)
         } catch {
+            print("Decryption failed: \(error.localizedDescription)")
             return nil
         }
     }

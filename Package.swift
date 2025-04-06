@@ -7,7 +7,7 @@ let package = Package(
     name: "APWebAuthentication",
     platforms: [
         .iOS(.v16),
-        .macOS(.v10_14)
+        .macOS(.v10_15)
     ],
     products: [
         .library(
@@ -26,8 +26,7 @@ let package = Package(
         .package(url: "https://github.com/SwifterSwift/SwifterSwift.git", from: "7.0.0"),
         .package(url: "https://github.com/SwiftyJSON/SwiftyJSON.git", from: "5.0.0"),
         .package(url: "https://github.com/sunshinejr/SwiftyUserDefaults.git", from: "5.0.0"),
-        .package(url: "https://github.com/devicekit/DeviceKit.git", from: "5.0.0"),
-        .package(url: "https://github.com/TakeScoop/SwiftyRSA.git", from: "1.8.0")
+        .package(url: "https://github.com/devicekit/DeviceKit.git", from: "5.0.0")
 
     ],
     targets: [
@@ -44,8 +43,7 @@ let package = Package(
                 "SwifterSwift",
                 "SwiftyJSON",
                 "SwiftyUserDefaults",
-                "DeviceKit",
-                "SwiftyRSA"
+                "DeviceKit"
             ]
         ),
         .testTarget(

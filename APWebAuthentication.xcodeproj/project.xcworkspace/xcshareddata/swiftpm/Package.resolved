@@ -1,5 +1,5 @@
 {
-  "originHash" : "39c836eced48e165646f8feeff22350d53dec40784bfa7e4442f3bb07cfcbd7c",
+  "originHash" : "27d9b91993f0e6ac77bb4febeadc8b2acaecb9e72fc526beb2c835e828e3fd2a",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -89,15 +89,6 @@
       "state" : {
         "revision" : "af76cf3ef710b6ca5f8c05f3a31307d44a3c5828",
         "version" : "5.0.2"
-      }
-    },
-    {
-      "identity" : "swiftyrsa",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/TakeScoop/SwiftyRSA.git",
-      "state" : {
-        "revision" : "6521919ad0e99dff927685f142d8136479acb452",
-        "version" : "1.8.0"
       }
     },
     {
