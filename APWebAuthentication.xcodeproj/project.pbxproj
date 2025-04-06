@@ -8,104 +8,104 @@
 
 /* Begin PBXBuildFile section */
 		537EDD0E24F49F1E003DC54A /* APWebAuthentication.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 537EDD0424F49F1E003DC54A /* APWebAuthentication.framework */; };
-		770E13A82DA05A2F005FCBE1 /* TwitterPost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 770E13A72DA05A2F005FCBE1 /* TwitterPost.swift */; };
-		773E99952DA19A560007DB40 /* APWebAuthenticationErrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 773E99942DA19A3B0007DB40 /* APWebAuthenticationErrorTests.swift */; };
-		778D4D372D5E4010008738C8 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 778D4D362D5E4010008738C8 /* Alamofire */; };
-		778D4D3A2D5E4024008738C8 /* SwifterSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 778D4D392D5E4024008738C8 /* SwifterSwift */; };
-		778D4D3D2D5E4034008738C8 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 778D4D3C2D5E4034008738C8 /* SnapKit */; };
-		778D4D402D5E4066008738C8 /* SFSafeSymbols in Frameworks */ = {isa = PBXBuildFile; productRef = 778D4D3F2D5E4066008738C8 /* SFSafeSymbols */; };
-		778D4D432D5E4078008738C8 /* JGProgressHUD in Frameworks */ = {isa = PBXBuildFile; productRef = 778D4D422D5E4078008738C8 /* JGProgressHUD */; };
-		778D4D462D5E409D008738C8 /* SwiftyJSON in Frameworks */ = {isa = PBXBuildFile; productRef = 778D4D452D5E409D008738C8 /* SwiftyJSON */; };
-		778D4D492D5E40B5008738C8 /* HTTPStatusCodes in Frameworks */ = {isa = PBXBuildFile; productRef = 778D4D482D5E40B5008738C8 /* HTTPStatusCodes */; };
-		778D4D4C2D5E40C6008738C8 /* CryptoSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 778D4D4B2D5E40C6008738C8 /* CryptoSwift */; };
-		778D4D4F2D5E4109008738C8 /* SwiftyUserDefaults in Frameworks */ = {isa = PBXBuildFile; productRef = 778D4D4E2D5E4109008738C8 /* SwiftyUserDefaults */; };
-		77BAE9532D90D8E7008CC558 /* TikTokWebMediaComment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE91C2D90D8E7008CC558 /* TikTokWebMediaComment.swift */; };
-		77BAE9542D90D8E7008CC558 /* PinterestWebHTMLAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9102D90D8E7008CC558 /* PinterestWebHTMLAPIClient.swift */; };
-		77BAE9552D90D8E7008CC558 /* GitHubUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9002D90D8E7008CC558 /* GitHubUser.swift */; };
-		77BAE9562D90D8E7008CC558 /* ProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9472D90D8E7008CC558 /* ProgressView.swift */; };
-		77BAE9572D90D8E7008CC558 /* URL+APWebAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE94D2D90D8E7008CC558 /* URL+APWebAuthentication.swift */; };
-		77BAE9582D90D8E7008CC558 /* TwitchAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9282D90D8E7008CC558 /* TwitchAPIClient.swift */; };
-		77BAE9592D90D8E7008CC558 /* AccountStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9302D90D8E7008CC558 /* AccountStore.swift */; };
-		77BAE95A2D90D8E7008CC558 /* OAuth2Client.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9452D90D8E7008CC558 /* OAuth2Client.swift */; };
-		77BAE95B2D90D8E7008CC558 /* PinterestUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE90B2D90D8E7008CC558 /* PinterestUser.swift */; };
-		77BAE95C2D90D8E7008CC558 /* AuthNavBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE93B2D90D8E7008CC558 /* AuthNavBarView.swift */; };
-		77BAE95D2D90D8E7008CC558 /* OAuth1Client.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9432D90D8E7008CC558 /* OAuth1Client.swift */; };
-		77BAE95E2D90D8E7008CC558 /* PinterestWebAuthController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE90E2D90D8E7008CC558 /* PinterestWebAuthController.swift */; };
-		77BAE95F2D90D8E7008CC558 /* TwitterUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE92E2D90D8E7008CC558 /* TwitterUser.swift */; };
-		77BAE9602D90D8E7008CC558 /* Error+APWebAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE93F2D90D8E7008CC558 /* Error+APWebAuthentication.swift */; };
-		77BAE9612D90D8E7008CC558 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9082D90D8E7008CC558 /* User.swift */; };
-		77BAE9622D90D8E7008CC558 /* ProviderBrowserMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9482D90D8E7008CC558 /* ProviderBrowserMode.swift */; };
-		77BAE9632D90D8E7008CC558 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9402D90D8E7008CC558 /* Extensions.swift */; };
-		77BAE9642D90D8E7008CC558 /* APWebAuthenticationLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9342D90D8E7008CC558 /* APWebAuthenticationLink.swift */; };
-		77BAE9652D90D8E7008CC558 /* BaseMediaItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9022D90D8E7008CC558 /* BaseMediaItem.swift */; };
-		77BAE9662D90D8E7008CC558 /* RedditUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9162D90D8E7008CC558 /* RedditUser.swift */; };
-		77BAE9672D90D8E7008CC558 /* TikTokWebRequestAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9202D90D8E7008CC558 /* TikTokWebRequestAdapter.swift */; };
-		77BAE9682D90D8E7008CC558 /* UIApplication+APWebAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE94B2D90D8E7008CC558 /* UIApplication+APWebAuthentication.swift */; };
-		77BAE9692D90D8E7008CC558 /* FiveHundredspxWebUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE8F82D90D8E7008CC558 /* FiveHundredspxWebUser.swift */; };
-		77BAE96B2D90D8E7008CC558 /* FiveHundredspxWebAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE8F42D90D8E7008CC558 /* FiveHundredspxWebAuthentication.swift */; };
-		77BAE96C2D90D8E7008CC558 /* UINavigationController+Progress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE94C2D90D8E7008CC558 /* UINavigationController+Progress.swift */; };
-		77BAE96D2D90D8E7008CC558 /* TumblrUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9262D90D8E7008CC558 /* TumblrUser.swift */; };
-		77BAE96E2D90D8E7008CC558 /* WebViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9512D90D8E7008CC558 /* WebViewController.swift */; };
-		77BAE96F2D90D8E7008CC558 /* PinterestWebHTMLRequestAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9112D90D8E7008CC558 /* PinterestWebHTMLRequestAdapter.swift */; };
-		77BAE9702D90D8E7008CC558 /* StoryItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9062D90D8E7008CC558 /* StoryItem.swift */; };
-		77BAE9712D90D8E7008CC558 /* BaseAuthViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE93D2D90D8E7008CC558 /* BaseAuthViewController.swift */; };
-		77BAE9722D90D8E7008CC558 /* TikTokWebMobileRequestAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE91F2D90D8E7008CC558 /* TikTokWebMobileRequestAdapter.swift */; };
-		77BAE9732D90D8E7008CC558 /* TwitterAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE92C2D90D8E7008CC558 /* TwitterAPIClient.swift */; };
-		77BAE9742D90D8E7008CC558 /* TikTokWebSignatureController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9212D90D8E7008CC558 /* TikTokWebSignatureController.swift */; };
-		77BAE9752D90D8E7008CC558 /* SessionAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9492D90D8E7008CC558 /* SessionAuthentication.swift */; };
-		77BAE9762D90D8E7008CC558 /* APWebAuthenticationSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9352D90D8E7008CC558 /* APWebAuthenticationSession.swift */; };
-		77BAE9772D90D8E7008CC558 /* FoursquareRequestAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE8FB2D90D8E7008CC558 /* FoursquareRequestAdapter.swift */; };
-		77BAE9782D90D8E7008CC558 /* UserAgentBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE94E2D90D8E7008CC558 /* UserAgentBuilder.swift */; };
-		77BAE9792D90D8E7008CC558 /* FoursquareUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE8FC2D90D8E7008CC558 /* FoursquareUser.swift */; };
-		77BAE97A2D90D8E7008CC558 /* OAuth1RequestAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9442D90D8E7008CC558 /* OAuth1RequestAdapter.swift */; };
-		77BAE97B2D90D8E7008CC558 /* PinterestWebAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE90F2D90D8E7008CC558 /* PinterestWebAuthentication.swift */; };
-		77BAE97C2D90D8E7008CC558 /* BaseUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9032D90D8E7008CC558 /* BaseUser.swift */; };
-		77BAE97D2D90D8E7008CC558 /* WebTokensViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9502D90D8E7008CC558 /* WebTokensViewController.swift */; };
-		77BAE97E2D90D8E7008CC558 /* Auth1Authentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9362D90D8E7008CC558 /* Auth1Authentication.swift */; };
-		77BAE97F2D90D8E7008CC558 /* FiveHundredspxWebHTMLAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE8F52D90D8E7008CC558 /* FiveHundredspxWebHTMLAPIClient.swift */; };
-		77BAE9802D90D8E7008CC558 /* OAuth2RequestAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9462D90D8E7008CC558 /* OAuth2RequestAdapter.swift */; };
-		77BAE9812D90D8E7008CC558 /* TikTokWebMobileAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE91E2D90D8E7008CC558 /* TikTokWebMobileAPIClient.swift */; };
-		77BAE9822D90D8E7008CC558 /* RedditAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9152D90D8E7008CC558 /* RedditAPIClient.swift */; };
-		77BAE9832D90D8E7008CC558 /* TikTokWebAuthController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE91A2D90D8E7008CC558 /* TikTokWebAuthController.swift */; };
-		77BAE9842D90D8E7008CC558 /* AuthClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9382D90D8E7008CC558 /* AuthClient.swift */; };
-		77BAE9852D90D8E7008CC558 /* TumblrAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9242D90D8E7008CC558 /* TumblrAPIClient.swift */; };
-		77BAE9862D90D8E7008CC558 /* TumblrBlog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9252D90D8E7008CC558 /* TumblrBlog.swift */; };
-		77BAE9872D90D8E7008CC558 /* MediaComment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9042D90D8E7008CC558 /* MediaComment.swift */; };
-		77BAE9882D90D8E7008CC558 /* Data+APWebAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE93E2D90D8E7008CC558 /* Data+APWebAuthentication.swift */; };
-		77BAE9892D90D8E7008CC558 /* PinterestWebUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9132D90D8E7008CC558 /* PinterestWebUser.swift */; };
-		77BAE98A2D90D8E7008CC558 /* Auth2Authentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9372D90D8E7008CC558 /* Auth2Authentication.swift */; };
-		77BAE98B2D90D8E7008CC558 /* TikTokWebUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9222D90D8E7008CC558 /* TikTokWebUser.swift */; };
-		77BAE98C2D90D8E7008CC558 /* MediaItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9052D90D8E7008CC558 /* MediaItem.swift */; };
-		77BAE98D2D90D8E7008CC558 /* TwitchUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE92A2D90D8E7008CC558 /* TwitchUser.swift */; };
-		77BAE98E2D90D8E7008CC558 /* Tag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9072D90D8E7008CC558 /* Tag.swift */; };
-		77BAE98F2D90D8E7008CC558 /* TikTokWebMediaItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE91D2D90D8E7008CC558 /* TikTokWebMediaItem.swift */; };
-		77BAE9902D90D8E7008CC558 /* Authentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE93A2D90D8E7008CC558 /* Authentication.swift */; };
-		77BAE9912D90D8E7008CC558 /* PinterestWebRequestAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9122D90D8E7008CC558 /* PinterestWebRequestAdapter.swift */; };
-		77BAE9922D90D8E7008CC558 /* FiveHundredspxWebAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE8F22D90D8E7008CC558 /* FiveHundredspxWebAPIClient.swift */; };
-		77BAE9932D90D8E7008CC558 /* TikTokWebAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9182D90D8E7008CC558 /* TikTokWebAPIClient.swift */; };
-		77BAE9942D90D8E7008CC558 /* PinterestAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE90A2D90D8E7008CC558 /* PinterestAPIClient.swift */; };
-		77BAE9952D90D8E7008CC558 /* PinterestWebAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE90D2D90D8E7008CC558 /* PinterestWebAPIClient.swift */; };
-		77BAE9962D90D8E7008CC558 /* JSON+APWebAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9422D90D8E7008CC558 /* JSON+APWebAuthentication.swift */; };
-		77BAE9972D90D8E7008CC558 /* TwitchRequestAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9292D90D8E7008CC558 /* TwitchRequestAdapter.swift */; };
-		77BAE9982D90D8E7008CC558 /* AuthClientRequestRetrier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9392D90D8E7008CC558 /* AuthClientRequestRetrier.swift */; };
-		77BAE9992D90D8E7008CC558 /* AuthViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE93C2D90D8E7008CC558 /* AuthViewController.swift */; };
-		77BAE99A2D90D8E7008CC558 /* GitHubRequestAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE8FF2D90D8E7008CC558 /* GitHubRequestAdapter.swift */; };
-		77BAE99B2D90D8E7008CC558 /* String+APWebAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE94A2D90D8E7008CC558 /* String+APWebAuthentication.swift */; };
-		77BAE99C2D90D8E7008CC558 /* FiveHundredspxWebAuthController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE8F32D90D8E7008CC558 /* FiveHundredspxWebAuthController.swift */; };
-		77BAE99D2D90D8E7008CC558 /* FiveHundredspxWebRequestAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE8F72D90D8E7008CC558 /* FiveHundredspxWebRequestAdapter.swift */; };
-		77BAE99E2D90D8E7008CC558 /* FiveHundredspxWebHTMLRequestAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE8F62D90D8E7008CC558 /* FiveHundredspxWebHTMLRequestAdapter.swift */; };
-		77BAE99F2D90D8E7008CC558 /* TikTokWebAuthCheckpointController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9192D90D8E7008CC558 /* TikTokWebAuthCheckpointController.swift */; };
-		77BAE9A02D90D8E7008CC558 /* AccountType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9312D90D8E7008CC558 /* AccountType.swift */; };
-		77BAE9A12D90D8E7008CC558 /* APWebAuthenticationError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9332D90D8E7008CC558 /* APWebAuthenticationError.swift */; };
-		77BAE9A22D90D8E7008CC558 /* FoursquareAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE8FA2D90D8E7008CC558 /* FoursquareAPIClient.swift */; };
-		77BAE9A32D90D8E7008CC558 /* TikTokWebAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE91B2D90D8E7008CC558 /* TikTokWebAuthentication.swift */; };
-		77BAE9A42D90D8E7008CC558 /* WebActivitySafari.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE94F2D90D8E7008CC558 /* WebActivitySafari.swift */; };
-		77BAE9A52D90D8E7008CC558 /* GitHubAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE8FE2D90D8E7008CC558 /* GitHubAPIClient.swift */; };
-		77BAE9A62D90D8E7008CC558 /* APWebAuthentication.h in Headers */ = {isa = PBXBuildFile; fileRef = 77BAE9322D90D8E7008CC558 /* APWebAuthentication.h */; };
-		77BAE9AB2D90D8F9008CC558 /* APWebAuthenticationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BAE9A82D90D8F9008CC558 /* APWebAuthenticationTests.swift */; };
-		77DB3B4A2D5EB3C40025251D /* DeviceKit in Frameworks */ = {isa = PBXBuildFile; productRef = 77DB3B492D5EB3C40025251D /* DeviceKit */; };
-		77DB3B4D2D5EB3CD0025251D /* SwiftyRSA in Frameworks */ = {isa = PBXBuildFile; productRef = 77DB3B4C2D5EB3CD0025251D /* SwiftyRSA */; };
-		77F3DC482D5E504B001CE742 /* HTTPStatusCodes in Frameworks */ = {isa = PBXBuildFile; productRef = 77F3DC472D5E504B001CE742 /* HTTPStatusCodes */; };
+		7743057D2DA1FC2700588966 /* GitHubAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743053B2DA1FC2700588966 /* GitHubAPIClient.swift */; };
+		7743057E2DA1FC2700588966 /* Data+APWebAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743052C2DA1FC2700588966 /* Data+APWebAuthentication.swift */; };
+		7743057F2DA1FC2700588966 /* FiveHundredspxWebRequestAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305342DA1FC2700588966 /* FiveHundredspxWebRequestAdapter.swift */; };
+		774305802DA1FC2700588966 /* MediaComment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305422DA1FC2700588966 /* MediaComment.swift */; };
+		774305812DA1FC2700588966 /* FiveHundredspxWebHTMLAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305322DA1FC2700588966 /* FiveHundredspxWebHTMLAPIClient.swift */; };
+		774305822DA1FC2700588966 /* PinterestWebAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743054F2DA1FC2700588966 /* PinterestWebAPIClient.swift */; };
+		774305832DA1FC2700588966 /* OAuth1RequestAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305492DA1FC2700588966 /* OAuth1RequestAdapter.swift */; };
+		774305842DA1FC2700588966 /* TwitchAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743056E2DA1FC2700588966 /* TwitchAPIClient.swift */; };
+		774305852DA1FC2700588966 /* WebTokensViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743057B2DA1FC2700588966 /* WebTokensViewController.swift */; };
+		774305862DA1FC2700588966 /* Auth1Authentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305242DA1FC2700588966 /* Auth1Authentication.swift */; };
+		774305872DA1FC2700588966 /* TikTokWebRequestAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305662DA1FC2700588966 /* TikTokWebRequestAdapter.swift */; };
+		774305882DA1FC2700588966 /* TikTokWebAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743055E2DA1FC2700588966 /* TikTokWebAPIClient.swift */; };
+		774305892DA1FC2700588966 /* OAuth2Client.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743054A2DA1FC2700588966 /* OAuth2Client.swift */; };
+		7743058A2DA1FC2700588966 /* GitHubRequestAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743053C2DA1FC2700588966 /* GitHubRequestAdapter.swift */; };
+		7743058B2DA1FC2700588966 /* ProviderBrowserMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305582DA1FC2700588966 /* ProviderBrowserMode.swift */; };
+		7743058C2DA1FC2700588966 /* FiveHundredspxWebAuthController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305302DA1FC2700588966 /* FiveHundredspxWebAuthController.swift */; };
+		7743058D2DA1FC2700588966 /* Authentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305282DA1FC2700588966 /* Authentication.swift */; };
+		7743058E2DA1FC2700588966 /* UINavigationController+Progress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305772DA1FC2700588966 /* UINavigationController+Progress.swift */; };
+		7743058F2DA1FC2700588966 /* PinterestWebAuthController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305502DA1FC2700588966 /* PinterestWebAuthController.swift */; };
+		774305902DA1FC2700588966 /* TumblrBlog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743056B2DA1FC2700588966 /* TumblrBlog.swift */; };
+		774305912DA1FC2700588966 /* PinterestWebRequestAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305542DA1FC2700588966 /* PinterestWebRequestAdapter.swift */; };
+		774305922DA1FC2700588966 /* StoryItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305442DA1FC2700588966 /* StoryItem.swift */; };
+		774305932DA1FC2700588966 /* TikTokWebAuthController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305602DA1FC2700588966 /* TikTokWebAuthController.swift */; };
+		774305942DA1FC2700588966 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305462DA1FC2700588966 /* User.swift */; };
+		774305952DA1FC2700588966 /* TumblrAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743056A2DA1FC2700588966 /* TumblrAPIClient.swift */; };
+		774305962DA1FC2700588966 /* Error+APWebAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743052D2DA1FC2700588966 /* Error+APWebAuthentication.swift */; };
+		774305972DA1FC2700588966 /* JSON+APWebAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743053F2DA1FC2700588966 /* JSON+APWebAuthentication.swift */; };
+		774305982DA1FC2700588966 /* FiveHundredspxWebHTMLRequestAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305332DA1FC2700588966 /* FiveHundredspxWebHTMLRequestAdapter.swift */; };
+		774305992DA1FC2700588966 /* FoursquareRequestAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305382DA1FC2700588966 /* FoursquareRequestAdapter.swift */; };
+		7743059A2DA1FC2700588966 /* URL+APWebAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305782DA1FC2700588966 /* URL+APWebAuthentication.swift */; };
+		7743059B2DA1FC2700588966 /* AuthClientRequestRetrier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305272DA1FC2700588966 /* AuthClientRequestRetrier.swift */; };
+		7743059C2DA1FC2700588966 /* String+APWebAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743055D2DA1FC2700588966 /* String+APWebAuthentication.swift */; };
+		7743059D2DA1FC2700588966 /* PinterestWebUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305552DA1FC2700588966 /* PinterestWebUser.swift */; };
+		7743059E2DA1FC2700588966 /* PinterestWebHTMLRequestAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305532DA1FC2700588966 /* PinterestWebHTMLRequestAdapter.swift */; };
+		7743059F2DA1FC2700588966 /* BaseUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305412DA1FC2700588966 /* BaseUser.swift */; };
+		774305A02DA1FC2700588966 /* TikTokWebMediaItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305632DA1FC2700588966 /* TikTokWebMediaItem.swift */; };
+		774305A12DA1FC2700588966 /* Auth2Authentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305252DA1FC2700588966 /* Auth2Authentication.swift */; };
+		774305A22DA1FC2700588966 /* UserAgentBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305792DA1FC2700588966 /* UserAgentBuilder.swift */; };
+		774305A32DA1FC2700588966 /* AccountStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743051E2DA1FC2700588966 /* AccountStore.swift */; };
+		774305A42DA1FC2700588966 /* WebActivitySafari.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743057A2DA1FC2700588966 /* WebActivitySafari.swift */; };
+		774305A52DA1FC2700588966 /* Tag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305452DA1FC2700588966 /* Tag.swift */; };
+		774305A62DA1FC2700588966 /* TumblrUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743056C2DA1FC2700588966 /* TumblrUser.swift */; };
+		774305A72DA1FC2700588966 /* AccountType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743051F2DA1FC2700588966 /* AccountType.swift */; };
+		774305A82DA1FC2700588966 /* ProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305572DA1FC2700588966 /* ProgressView.swift */; };
+		774305A92DA1FC2700588966 /* UIApplication+APWebAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305762DA1FC2700588966 /* UIApplication+APWebAuthentication.swift */; };
+		774305AA2DA1FC2700588966 /* TikTokWebSignatureController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305672DA1FC2700588966 /* TikTokWebSignatureController.swift */; };
+		774305AB2DA1FC2700588966 /* FoursquareAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305372DA1FC2700588966 /* FoursquareAPIClient.swift */; };
+		774305AC2DA1FC2700588966 /* TikTokWebAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305612DA1FC2700588966 /* TikTokWebAuthentication.swift */; };
+		774305AD2DA1FC2700588966 /* FiveHundredspxWebAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743052F2DA1FC2700588966 /* FiveHundredspxWebAPIClient.swift */; };
+		774305AE2DA1FC2700588966 /* TwitterUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305742DA1FC2700588966 /* TwitterUser.swift */; };
+		774305AF2DA1FC2700588966 /* SessionAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743055C2DA1FC2700588966 /* SessionAuthentication.swift */; };
+		774305B02DA1FC2700588966 /* OAuth1Client.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305482DA1FC2700588966 /* OAuth1Client.swift */; };
+		774305B12DA1FC2700588966 /* TwitterAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305722DA1FC2700588966 /* TwitterAPIClient.swift */; };
+		774305B22DA1FC2700588966 /* PinterestWebAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305512DA1FC2700588966 /* PinterestWebAuthentication.swift */; };
+		774305B32DA1FC2700588966 /* AuthClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305262DA1FC2700588966 /* AuthClient.swift */; };
+		774305B42DA1FC2700588966 /* TwitchRequestAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743056F2DA1FC2700588966 /* TwitchRequestAdapter.swift */; };
+		774305B52DA1FC2700588966 /* BaseAuthViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743052B2DA1FC2700588966 /* BaseAuthViewController.swift */; };
+		774305B62DA1FC2700588966 /* TikTokWebAuthCheckpointController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743055F2DA1FC2700588966 /* TikTokWebAuthCheckpointController.swift */; };
+		774305B72DA1FC2700588966 /* TwitchUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305702DA1FC2700588966 /* TwitchUser.swift */; };
+		774305B82DA1FC2700588966 /* PinterestUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743054D2DA1FC2700588966 /* PinterestUser.swift */; };
+		774305B92DA1FC2700588966 /* GitHubUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743053D2DA1FC2700588966 /* GitHubUser.swift */; };
+		774305BA2DA1FC2700588966 /* RedditAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305592DA1FC2700588966 /* RedditAPIClient.swift */; };
+		774305BB2DA1FC2700588966 /* APWebAuthenticationError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305212DA1FC2700588966 /* APWebAuthenticationError.swift */; };
+		774305BC2DA1FC2700588966 /* MediaItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305432DA1FC2700588966 /* MediaItem.swift */; };
+		774305BD2DA1FC2700588966 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743052E2DA1FC2700588966 /* Extensions.swift */; };
+		774305BE2DA1FC2700588966 /* AuthViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743052A2DA1FC2700588966 /* AuthViewController.swift */; };
+		774305BF2DA1FC2700588966 /* WebViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743057C2DA1FC2700588966 /* WebViewController.swift */; };
+		774305C02DA1FC2700588966 /* OAuth2RequestAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743054B2DA1FC2700588966 /* OAuth2RequestAdapter.swift */; };
+		774305C12DA1FC2700588966 /* FiveHundredspxWebAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305312DA1FC2700588966 /* FiveHundredspxWebAuthentication.swift */; };
+		774305C22DA1FC2700588966 /* AuthNavBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305292DA1FC2700588966 /* AuthNavBarView.swift */; };
+		774305C32DA1FC2700588966 /* FiveHundredspxWebUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305352DA1FC2700588966 /* FiveHundredspxWebUser.swift */; };
+		774305C42DA1FC2700588966 /* TwitterPost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305732DA1FC2700588966 /* TwitterPost.swift */; };
+		774305C52DA1FC2700588966 /* TikTokWebMobileRequestAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305652DA1FC2700588966 /* TikTokWebMobileRequestAdapter.swift */; };
+		774305C62DA1FC2700588966 /* RedditUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743055A2DA1FC2700588966 /* RedditUser.swift */; };
+		774305C72DA1FC2700588966 /* PinterestAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743054C2DA1FC2700588966 /* PinterestAPIClient.swift */; };
+		774305C82DA1FC2700588966 /* APWebAuthenticationLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305222DA1FC2700588966 /* APWebAuthenticationLink.swift */; };
+		774305C92DA1FC2700588966 /* TikTokWebMediaComment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305622DA1FC2700588966 /* TikTokWebMediaComment.swift */; };
+		774305CA2DA1FC2700588966 /* TikTokWebMobileAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305642DA1FC2700588966 /* TikTokWebMobileAPIClient.swift */; };
+		774305CB2DA1FC2700588966 /* BaseMediaItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305402DA1FC2700588966 /* BaseMediaItem.swift */; };
+		774305CC2DA1FC2700588966 /* APWebAuthenticationSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305232DA1FC2700588966 /* APWebAuthenticationSession.swift */; };
+		774305CD2DA1FC2700588966 /* FoursquareUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305392DA1FC2700588966 /* FoursquareUser.swift */; };
+		774305CE2DA1FC2700588966 /* PinterestWebHTMLAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305522DA1FC2700588966 /* PinterestWebHTMLAPIClient.swift */; };
+		774305CF2DA1FC2700588966 /* TikTokWebUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305682DA1FC2700588966 /* TikTokWebUser.swift */; };
+		774305D02DA1FC2700588966 /* APWebAuthentication.h in Headers */ = {isa = PBXBuildFile; fileRef = 774305202DA1FC2700588966 /* APWebAuthentication.h */; };
+		774305D32DA1FD0200588966 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 774305D22DA1FD0200588966 /* Alamofire */; };
+		774305D62DA1FD1200588966 /* CryptoSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 774305D52DA1FD1200588966 /* CryptoSwift */; };
+		774305D92DA1FD2300588966 /* HTTPStatusCodes in Frameworks */ = {isa = PBXBuildFile; productRef = 774305D82DA1FD2300588966 /* HTTPStatusCodes */; };
+		774305DC2DA1FD3500588966 /* JGProgressHUD in Frameworks */ = {isa = PBXBuildFile; productRef = 774305DB2DA1FD3500588966 /* JGProgressHUD */; };
+		774305DF2DA1FD4600588966 /* SFSafeSymbols in Frameworks */ = {isa = PBXBuildFile; productRef = 774305DE2DA1FD4600588966 /* SFSafeSymbols */; };
+		774305E22DA1FD5800588966 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 774305E12DA1FD5800588966 /* SnapKit */; };
+		774305E52DA1FD6F00588966 /* SwiftyBeaver in Frameworks */ = {isa = PBXBuildFile; productRef = 774305E42DA1FD6F00588966 /* SwiftyBeaver */; };
+		774305E82DA1FD7F00588966 /* SwifterSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 774305E72DA1FD7F00588966 /* SwifterSwift */; };
+		774305EB2DA1FD8E00588966 /* SwiftyJSON in Frameworks */ = {isa = PBXBuildFile; productRef = 774305EA2DA1FD8E00588966 /* SwiftyJSON */; };
+		774305EE2DA1FD9F00588966 /* SwiftyUserDefaults in Frameworks */ = {isa = PBXBuildFile; productRef = 774305ED2DA1FD9F00588966 /* SwiftyUserDefaults */; };
+		774305F12DA1FDB100588966 /* DeviceKit in Frameworks */ = {isa = PBXBuildFile; productRef = 774305F02DA1FDB100588966 /* DeviceKit */; };
+		774305F42DA1FDC200588966 /* SwiftyRSA in Frameworks */ = {isa = PBXBuildFile; productRef = 774305F32DA1FDC200588966 /* SwiftyRSA */; };
+		774305F72DA1FDCE00588966 /* APWebAuthenticationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305F62DA1FDCE00588966 /* APWebAuthenticationTests.swift */; };
+		774305F82DA1FDCE00588966 /* APWebAuthenticationErrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305F52DA1FDCE00588966 /* APWebAuthenticationErrorTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -121,93 +121,93 @@
 /* Begin PBXFileReference section */
 		537EDD0424F49F1E003DC54A /* APWebAuthentication.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = APWebAuthentication.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		537EDD0D24F49F1E003DC54A /* APWebAuthenticationTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = APWebAuthenticationTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		770E13A72DA05A2F005FCBE1 /* TwitterPost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwitterPost.swift; sourceTree = "<group>"; };
-		773E99942DA19A3B0007DB40 /* APWebAuthenticationErrorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APWebAuthenticationErrorTests.swift; sourceTree = "<group>"; };
+		7743051E2DA1FC2700588966 /* AccountStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountStore.swift; sourceTree = "<group>"; };
+		7743051F2DA1FC2700588966 /* AccountType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountType.swift; sourceTree = "<group>"; };
+		774305202DA1FC2700588966 /* APWebAuthentication.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = APWebAuthentication.h; sourceTree = "<group>"; };
+		774305212DA1FC2700588966 /* APWebAuthenticationError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APWebAuthenticationError.swift; sourceTree = "<group>"; };
+		774305222DA1FC2700588966 /* APWebAuthenticationLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APWebAuthenticationLink.swift; sourceTree = "<group>"; };
+		774305232DA1FC2700588966 /* APWebAuthenticationSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APWebAuthenticationSession.swift; sourceTree = "<group>"; };
+		774305242DA1FC2700588966 /* Auth1Authentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Auth1Authentication.swift; sourceTree = "<group>"; };
+		774305252DA1FC2700588966 /* Auth2Authentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Auth2Authentication.swift; sourceTree = "<group>"; };
+		774305262DA1FC2700588966 /* AuthClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthClient.swift; sourceTree = "<group>"; };
+		774305272DA1FC2700588966 /* AuthClientRequestRetrier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthClientRequestRetrier.swift; sourceTree = "<group>"; };
+		774305282DA1FC2700588966 /* Authentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Authentication.swift; sourceTree = "<group>"; };
+		774305292DA1FC2700588966 /* AuthNavBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthNavBarView.swift; sourceTree = "<group>"; };
+		7743052A2DA1FC2700588966 /* AuthViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewController.swift; sourceTree = "<group>"; };
+		7743052B2DA1FC2700588966 /* BaseAuthViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseAuthViewController.swift; sourceTree = "<group>"; };
+		7743052C2DA1FC2700588966 /* Data+APWebAuthentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data+APWebAuthentication.swift"; sourceTree = "<group>"; };
+		7743052D2DA1FC2700588966 /* Error+APWebAuthentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Error+APWebAuthentication.swift"; sourceTree = "<group>"; };
+		7743052E2DA1FC2700588966 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		7743052F2DA1FC2700588966 /* FiveHundredspxWebAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiveHundredspxWebAPIClient.swift; sourceTree = "<group>"; };
+		774305302DA1FC2700588966 /* FiveHundredspxWebAuthController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiveHundredspxWebAuthController.swift; sourceTree = "<group>"; };
+		774305312DA1FC2700588966 /* FiveHundredspxWebAuthentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiveHundredspxWebAuthentication.swift; sourceTree = "<group>"; };
+		774305322DA1FC2700588966 /* FiveHundredspxWebHTMLAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiveHundredspxWebHTMLAPIClient.swift; sourceTree = "<group>"; };
+		774305332DA1FC2700588966 /* FiveHundredspxWebHTMLRequestAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiveHundredspxWebHTMLRequestAdapter.swift; sourceTree = "<group>"; };
+		774305342DA1FC2700588966 /* FiveHundredspxWebRequestAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiveHundredspxWebRequestAdapter.swift; sourceTree = "<group>"; };
+		774305352DA1FC2700588966 /* FiveHundredspxWebUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiveHundredspxWebUser.swift; sourceTree = "<group>"; };
+		774305372DA1FC2700588966 /* FoursquareAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoursquareAPIClient.swift; sourceTree = "<group>"; };
+		774305382DA1FC2700588966 /* FoursquareRequestAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoursquareRequestAdapter.swift; sourceTree = "<group>"; };
+		774305392DA1FC2700588966 /* FoursquareUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoursquareUser.swift; sourceTree = "<group>"; };
+		7743053B2DA1FC2700588966 /* GitHubAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitHubAPIClient.swift; sourceTree = "<group>"; };
+		7743053C2DA1FC2700588966 /* GitHubRequestAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitHubRequestAdapter.swift; sourceTree = "<group>"; };
+		7743053D2DA1FC2700588966 /* GitHubUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitHubUser.swift; sourceTree = "<group>"; };
+		7743053F2DA1FC2700588966 /* JSON+APWebAuthentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JSON+APWebAuthentication.swift"; sourceTree = "<group>"; };
+		774305402DA1FC2700588966 /* BaseMediaItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseMediaItem.swift; sourceTree = "<group>"; };
+		774305412DA1FC2700588966 /* BaseUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseUser.swift; sourceTree = "<group>"; };
+		774305422DA1FC2700588966 /* MediaComment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaComment.swift; sourceTree = "<group>"; };
+		774305432DA1FC2700588966 /* MediaItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaItem.swift; sourceTree = "<group>"; };
+		774305442DA1FC2700588966 /* StoryItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoryItem.swift; sourceTree = "<group>"; };
+		774305452DA1FC2700588966 /* Tag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tag.swift; sourceTree = "<group>"; };
+		774305462DA1FC2700588966 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
+		774305482DA1FC2700588966 /* OAuth1Client.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuth1Client.swift; sourceTree = "<group>"; };
+		774305492DA1FC2700588966 /* OAuth1RequestAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuth1RequestAdapter.swift; sourceTree = "<group>"; };
+		7743054A2DA1FC2700588966 /* OAuth2Client.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuth2Client.swift; sourceTree = "<group>"; };
+		7743054B2DA1FC2700588966 /* OAuth2RequestAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuth2RequestAdapter.swift; sourceTree = "<group>"; };
+		7743054C2DA1FC2700588966 /* PinterestAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinterestAPIClient.swift; sourceTree = "<group>"; };
+		7743054D2DA1FC2700588966 /* PinterestUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinterestUser.swift; sourceTree = "<group>"; };
+		7743054F2DA1FC2700588966 /* PinterestWebAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinterestWebAPIClient.swift; sourceTree = "<group>"; };
+		774305502DA1FC2700588966 /* PinterestWebAuthController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinterestWebAuthController.swift; sourceTree = "<group>"; };
+		774305512DA1FC2700588966 /* PinterestWebAuthentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinterestWebAuthentication.swift; sourceTree = "<group>"; };
+		774305522DA1FC2700588966 /* PinterestWebHTMLAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinterestWebHTMLAPIClient.swift; sourceTree = "<group>"; };
+		774305532DA1FC2700588966 /* PinterestWebHTMLRequestAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinterestWebHTMLRequestAdapter.swift; sourceTree = "<group>"; };
+		774305542DA1FC2700588966 /* PinterestWebRequestAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinterestWebRequestAdapter.swift; sourceTree = "<group>"; };
+		774305552DA1FC2700588966 /* PinterestWebUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinterestWebUser.swift; sourceTree = "<group>"; };
+		774305572DA1FC2700588966 /* ProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressView.swift; sourceTree = "<group>"; };
+		774305582DA1FC2700588966 /* ProviderBrowserMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderBrowserMode.swift; sourceTree = "<group>"; };
+		774305592DA1FC2700588966 /* RedditAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RedditAPIClient.swift; sourceTree = "<group>"; };
+		7743055A2DA1FC2700588966 /* RedditUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RedditUser.swift; sourceTree = "<group>"; };
+		7743055C2DA1FC2700588966 /* SessionAuthentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionAuthentication.swift; sourceTree = "<group>"; };
+		7743055D2DA1FC2700588966 /* String+APWebAuthentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+APWebAuthentication.swift"; sourceTree = "<group>"; };
+		7743055E2DA1FC2700588966 /* TikTokWebAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TikTokWebAPIClient.swift; sourceTree = "<group>"; };
+		7743055F2DA1FC2700588966 /* TikTokWebAuthCheckpointController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TikTokWebAuthCheckpointController.swift; sourceTree = "<group>"; };
+		774305602DA1FC2700588966 /* TikTokWebAuthController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TikTokWebAuthController.swift; sourceTree = "<group>"; };
+		774305612DA1FC2700588966 /* TikTokWebAuthentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TikTokWebAuthentication.swift; sourceTree = "<group>"; };
+		774305622DA1FC2700588966 /* TikTokWebMediaComment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TikTokWebMediaComment.swift; sourceTree = "<group>"; };
+		774305632DA1FC2700588966 /* TikTokWebMediaItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TikTokWebMediaItem.swift; sourceTree = "<group>"; };
+		774305642DA1FC2700588966 /* TikTokWebMobileAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TikTokWebMobileAPIClient.swift; sourceTree = "<group>"; };
+		774305652DA1FC2700588966 /* TikTokWebMobileRequestAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TikTokWebMobileRequestAdapter.swift; sourceTree = "<group>"; };
+		774305662DA1FC2700588966 /* TikTokWebRequestAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TikTokWebRequestAdapter.swift; sourceTree = "<group>"; };
+		774305672DA1FC2700588966 /* TikTokWebSignatureController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TikTokWebSignatureController.swift; sourceTree = "<group>"; };
+		774305682DA1FC2700588966 /* TikTokWebUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TikTokWebUser.swift; sourceTree = "<group>"; };
+		7743056A2DA1FC2700588966 /* TumblrAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TumblrAPIClient.swift; sourceTree = "<group>"; };
+		7743056B2DA1FC2700588966 /* TumblrBlog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TumblrBlog.swift; sourceTree = "<group>"; };
+		7743056C2DA1FC2700588966 /* TumblrUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TumblrUser.swift; sourceTree = "<group>"; };
+		7743056E2DA1FC2700588966 /* TwitchAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwitchAPIClient.swift; sourceTree = "<group>"; };
+		7743056F2DA1FC2700588966 /* TwitchRequestAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwitchRequestAdapter.swift; sourceTree = "<group>"; };
+		774305702DA1FC2700588966 /* TwitchUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwitchUser.swift; sourceTree = "<group>"; };
+		774305722DA1FC2700588966 /* TwitterAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwitterAPIClient.swift; sourceTree = "<group>"; };
+		774305732DA1FC2700588966 /* TwitterPost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwitterPost.swift; sourceTree = "<group>"; };
+		774305742DA1FC2700588966 /* TwitterUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwitterUser.swift; sourceTree = "<group>"; };
+		774305762DA1FC2700588966 /* UIApplication+APWebAuthentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIApplication+APWebAuthentication.swift"; sourceTree = "<group>"; };
+		774305772DA1FC2700588966 /* UINavigationController+Progress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UINavigationController+Progress.swift"; sourceTree = "<group>"; };
+		774305782DA1FC2700588966 /* URL+APWebAuthentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+APWebAuthentication.swift"; sourceTree = "<group>"; };
+		774305792DA1FC2700588966 /* UserAgentBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAgentBuilder.swift; sourceTree = "<group>"; };
+		7743057A2DA1FC2700588966 /* WebActivitySafari.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebActivitySafari.swift; sourceTree = "<group>"; };
+		7743057B2DA1FC2700588966 /* WebTokensViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebTokensViewController.swift; sourceTree = "<group>"; };
+		7743057C2DA1FC2700588966 /* WebViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewController.swift; sourceTree = "<group>"; };
+		774305F52DA1FDCE00588966 /* APWebAuthenticationErrorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APWebAuthenticationErrorTests.swift; sourceTree = "<group>"; };
+		774305F62DA1FDCE00588966 /* APWebAuthenticationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APWebAuthenticationTests.swift; sourceTree = "<group>"; };
 		778D4D322D5E3FE0008738C8 /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
-		77BAE8F22D90D8E7008CC558 /* FiveHundredspxWebAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiveHundredspxWebAPIClient.swift; sourceTree = "<group>"; };
-		77BAE8F32D90D8E7008CC558 /* FiveHundredspxWebAuthController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiveHundredspxWebAuthController.swift; sourceTree = "<group>"; };
-		77BAE8F42D90D8E7008CC558 /* FiveHundredspxWebAuthentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiveHundredspxWebAuthentication.swift; sourceTree = "<group>"; };
-		77BAE8F52D90D8E7008CC558 /* FiveHundredspxWebHTMLAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiveHundredspxWebHTMLAPIClient.swift; sourceTree = "<group>"; };
-		77BAE8F62D90D8E7008CC558 /* FiveHundredspxWebHTMLRequestAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiveHundredspxWebHTMLRequestAdapter.swift; sourceTree = "<group>"; };
-		77BAE8F72D90D8E7008CC558 /* FiveHundredspxWebRequestAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiveHundredspxWebRequestAdapter.swift; sourceTree = "<group>"; };
-		77BAE8F82D90D8E7008CC558 /* FiveHundredspxWebUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiveHundredspxWebUser.swift; sourceTree = "<group>"; };
-		77BAE8FA2D90D8E7008CC558 /* FoursquareAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoursquareAPIClient.swift; sourceTree = "<group>"; };
-		77BAE8FB2D90D8E7008CC558 /* FoursquareRequestAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoursquareRequestAdapter.swift; sourceTree = "<group>"; };
-		77BAE8FC2D90D8E7008CC558 /* FoursquareUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoursquareUser.swift; sourceTree = "<group>"; };
-		77BAE8FE2D90D8E7008CC558 /* GitHubAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitHubAPIClient.swift; sourceTree = "<group>"; };
-		77BAE8FF2D90D8E7008CC558 /* GitHubRequestAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitHubRequestAdapter.swift; sourceTree = "<group>"; };
-		77BAE9002D90D8E7008CC558 /* GitHubUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitHubUser.swift; sourceTree = "<group>"; };
-		77BAE9022D90D8E7008CC558 /* BaseMediaItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseMediaItem.swift; sourceTree = "<group>"; };
-		77BAE9032D90D8E7008CC558 /* BaseUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseUser.swift; sourceTree = "<group>"; };
-		77BAE9042D90D8E7008CC558 /* MediaComment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaComment.swift; sourceTree = "<group>"; };
-		77BAE9052D90D8E7008CC558 /* MediaItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaItem.swift; sourceTree = "<group>"; };
-		77BAE9062D90D8E7008CC558 /* StoryItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoryItem.swift; sourceTree = "<group>"; };
-		77BAE9072D90D8E7008CC558 /* Tag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tag.swift; sourceTree = "<group>"; };
-		77BAE9082D90D8E7008CC558 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
-		77BAE90A2D90D8E7008CC558 /* PinterestAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinterestAPIClient.swift; sourceTree = "<group>"; };
-		77BAE90B2D90D8E7008CC558 /* PinterestUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinterestUser.swift; sourceTree = "<group>"; };
-		77BAE90D2D90D8E7008CC558 /* PinterestWebAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinterestWebAPIClient.swift; sourceTree = "<group>"; };
-		77BAE90E2D90D8E7008CC558 /* PinterestWebAuthController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinterestWebAuthController.swift; sourceTree = "<group>"; };
-		77BAE90F2D90D8E7008CC558 /* PinterestWebAuthentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinterestWebAuthentication.swift; sourceTree = "<group>"; };
-		77BAE9102D90D8E7008CC558 /* PinterestWebHTMLAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinterestWebHTMLAPIClient.swift; sourceTree = "<group>"; };
-		77BAE9112D90D8E7008CC558 /* PinterestWebHTMLRequestAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinterestWebHTMLRequestAdapter.swift; sourceTree = "<group>"; };
-		77BAE9122D90D8E7008CC558 /* PinterestWebRequestAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinterestWebRequestAdapter.swift; sourceTree = "<group>"; };
-		77BAE9132D90D8E7008CC558 /* PinterestWebUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinterestWebUser.swift; sourceTree = "<group>"; };
-		77BAE9152D90D8E7008CC558 /* RedditAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RedditAPIClient.swift; sourceTree = "<group>"; };
-		77BAE9162D90D8E7008CC558 /* RedditUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RedditUser.swift; sourceTree = "<group>"; };
-		77BAE9182D90D8E7008CC558 /* TikTokWebAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TikTokWebAPIClient.swift; sourceTree = "<group>"; };
-		77BAE9192D90D8E7008CC558 /* TikTokWebAuthCheckpointController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TikTokWebAuthCheckpointController.swift; sourceTree = "<group>"; };
-		77BAE91A2D90D8E7008CC558 /* TikTokWebAuthController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TikTokWebAuthController.swift; sourceTree = "<group>"; };
-		77BAE91B2D90D8E7008CC558 /* TikTokWebAuthentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TikTokWebAuthentication.swift; sourceTree = "<group>"; };
-		77BAE91C2D90D8E7008CC558 /* TikTokWebMediaComment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TikTokWebMediaComment.swift; sourceTree = "<group>"; };
-		77BAE91D2D90D8E7008CC558 /* TikTokWebMediaItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TikTokWebMediaItem.swift; sourceTree = "<group>"; };
-		77BAE91E2D90D8E7008CC558 /* TikTokWebMobileAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TikTokWebMobileAPIClient.swift; sourceTree = "<group>"; };
-		77BAE91F2D90D8E7008CC558 /* TikTokWebMobileRequestAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TikTokWebMobileRequestAdapter.swift; sourceTree = "<group>"; };
-		77BAE9202D90D8E7008CC558 /* TikTokWebRequestAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TikTokWebRequestAdapter.swift; sourceTree = "<group>"; };
-		77BAE9212D90D8E7008CC558 /* TikTokWebSignatureController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TikTokWebSignatureController.swift; sourceTree = "<group>"; };
-		77BAE9222D90D8E7008CC558 /* TikTokWebUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TikTokWebUser.swift; sourceTree = "<group>"; };
-		77BAE9242D90D8E7008CC558 /* TumblrAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TumblrAPIClient.swift; sourceTree = "<group>"; };
-		77BAE9252D90D8E7008CC558 /* TumblrBlog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TumblrBlog.swift; sourceTree = "<group>"; };
-		77BAE9262D90D8E7008CC558 /* TumblrUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TumblrUser.swift; sourceTree = "<group>"; };
-		77BAE9282D90D8E7008CC558 /* TwitchAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwitchAPIClient.swift; sourceTree = "<group>"; };
-		77BAE9292D90D8E7008CC558 /* TwitchRequestAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwitchRequestAdapter.swift; sourceTree = "<group>"; };
-		77BAE92A2D90D8E7008CC558 /* TwitchUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwitchUser.swift; sourceTree = "<group>"; };
-		77BAE92C2D90D8E7008CC558 /* TwitterAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwitterAPIClient.swift; sourceTree = "<group>"; };
-		77BAE92E2D90D8E7008CC558 /* TwitterUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwitterUser.swift; sourceTree = "<group>"; };
-		77BAE9302D90D8E7008CC558 /* AccountStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountStore.swift; sourceTree = "<group>"; };
-		77BAE9312D90D8E7008CC558 /* AccountType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountType.swift; sourceTree = "<group>"; };
-		77BAE9322D90D8E7008CC558 /* APWebAuthentication.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = APWebAuthentication.h; sourceTree = "<group>"; };
-		77BAE9332D90D8E7008CC558 /* APWebAuthenticationError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APWebAuthenticationError.swift; sourceTree = "<group>"; };
-		77BAE9342D90D8E7008CC558 /* APWebAuthenticationLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APWebAuthenticationLink.swift; sourceTree = "<group>"; };
-		77BAE9352D90D8E7008CC558 /* APWebAuthenticationSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APWebAuthenticationSession.swift; sourceTree = "<group>"; };
-		77BAE9362D90D8E7008CC558 /* Auth1Authentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Auth1Authentication.swift; sourceTree = "<group>"; };
-		77BAE9372D90D8E7008CC558 /* Auth2Authentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Auth2Authentication.swift; sourceTree = "<group>"; };
-		77BAE9382D90D8E7008CC558 /* AuthClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthClient.swift; sourceTree = "<group>"; };
-		77BAE9392D90D8E7008CC558 /* AuthClientRequestRetrier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthClientRequestRetrier.swift; sourceTree = "<group>"; };
-		77BAE93A2D90D8E7008CC558 /* Authentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Authentication.swift; sourceTree = "<group>"; };
-		77BAE93B2D90D8E7008CC558 /* AuthNavBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthNavBarView.swift; sourceTree = "<group>"; };
-		77BAE93C2D90D8E7008CC558 /* AuthViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewController.swift; sourceTree = "<group>"; };
-		77BAE93D2D90D8E7008CC558 /* BaseAuthViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseAuthViewController.swift; sourceTree = "<group>"; };
-		77BAE93E2D90D8E7008CC558 /* Data+APWebAuthentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data+APWebAuthentication.swift"; sourceTree = "<group>"; };
-		77BAE93F2D90D8E7008CC558 /* Error+APWebAuthentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Error+APWebAuthentication.swift"; sourceTree = "<group>"; };
-		77BAE9402D90D8E7008CC558 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
-		77BAE9422D90D8E7008CC558 /* JSON+APWebAuthentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JSON+APWebAuthentication.swift"; sourceTree = "<group>"; };
-		77BAE9432D90D8E7008CC558 /* OAuth1Client.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuth1Client.swift; sourceTree = "<group>"; };
-		77BAE9442D90D8E7008CC558 /* OAuth1RequestAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuth1RequestAdapter.swift; sourceTree = "<group>"; };
-		77BAE9452D90D8E7008CC558 /* OAuth2Client.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuth2Client.swift; sourceTree = "<group>"; };
-		77BAE9462D90D8E7008CC558 /* OAuth2RequestAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuth2RequestAdapter.swift; sourceTree = "<group>"; };
-		77BAE9472D90D8E7008CC558 /* ProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressView.swift; sourceTree = "<group>"; };
-		77BAE9482D90D8E7008CC558 /* ProviderBrowserMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderBrowserMode.swift; sourceTree = "<group>"; };
-		77BAE9492D90D8E7008CC558 /* SessionAuthentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionAuthentication.swift; sourceTree = "<group>"; };
-		77BAE94A2D90D8E7008CC558 /* String+APWebAuthentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+APWebAuthentication.swift"; sourceTree = "<group>"; };
-		77BAE94B2D90D8E7008CC558 /* UIApplication+APWebAuthentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIApplication+APWebAuthentication.swift"; sourceTree = "<group>"; };
-		77BAE94C2D90D8E7008CC558 /* UINavigationController+Progress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UINavigationController+Progress.swift"; sourceTree = "<group>"; };
-		77BAE94D2D90D8E7008CC558 /* URL+APWebAuthentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+APWebAuthentication.swift"; sourceTree = "<group>"; };
-		77BAE94E2D90D8E7008CC558 /* UserAgentBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAgentBuilder.swift; sourceTree = "<group>"; };
-		77BAE94F2D90D8E7008CC558 /* WebActivitySafari.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebActivitySafari.swift; sourceTree = "<group>"; };
-		77BAE9502D90D8E7008CC558 /* WebTokensViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebTokensViewController.swift; sourceTree = "<group>"; };
-		77BAE9512D90D8E7008CC558 /* WebViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewController.swift; sourceTree = "<group>"; };
-		77BAE9A82D90D8F9008CC558 /* APWebAuthenticationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APWebAuthenticationTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -215,18 +215,18 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				778D4D462D5E409D008738C8 /* SwiftyJSON in Frameworks */,
-				778D4D4C2D5E40C6008738C8 /* CryptoSwift in Frameworks */,
-				778D4D3D2D5E4034008738C8 /* SnapKit in Frameworks */,
-				778D4D372D5E4010008738C8 /* Alamofire in Frameworks */,
-				77DB3B4A2D5EB3C40025251D /* DeviceKit in Frameworks */,
-				77DB3B4D2D5EB3CD0025251D /* SwiftyRSA in Frameworks */,
-				778D4D4F2D5E4109008738C8 /* SwiftyUserDefaults in Frameworks */,
-				77F3DC482D5E504B001CE742 /* HTTPStatusCodes in Frameworks */,
-				778D4D402D5E4066008738C8 /* SFSafeSymbols in Frameworks */,
-				778D4D3A2D5E4024008738C8 /* SwifterSwift in Frameworks */,
-				778D4D432D5E4078008738C8 /* JGProgressHUD in Frameworks */,
-				778D4D492D5E40B5008738C8 /* HTTPStatusCodes in Frameworks */,
+				774305EB2DA1FD8E00588966 /* SwiftyJSON in Frameworks */,
+				774305DF2DA1FD4600588966 /* SFSafeSymbols in Frameworks */,
+				774305DC2DA1FD3500588966 /* JGProgressHUD in Frameworks */,
+				774305EE2DA1FD9F00588966 /* SwiftyUserDefaults in Frameworks */,
+				774305F12DA1FDB100588966 /* DeviceKit in Frameworks */,
+				774305F42DA1FDC200588966 /* SwiftyRSA in Frameworks */,
+				774305E52DA1FD6F00588966 /* SwiftyBeaver in Frameworks */,
+				774305D32DA1FD0200588966 /* Alamofire in Frameworks */,
+				774305E22DA1FD5800588966 /* SnapKit in Frameworks */,
+				774305E82DA1FD7F00588966 /* SwifterSwift in Frameworks */,
+				774305D62DA1FD1200588966 /* CryptoSwift in Frameworks */,
+				774305D92DA1FD2300588966 /* HTTPStatusCodes in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -246,7 +246,7 @@
 			children = (
 				778D4D322D5E3FE0008738C8 /* Package.swift */,
 				77BAE9522D90D8E7008CC558 /* Sources */,
-				77BAE9AA2D90D8F9008CC558 /* Tests */,
+				772F412C2DA19D0B00631B1D /* Tests */,
 				537EDD0524F49F1E003DC54A /* Products */,
 			);
 			sourceTree = "<group>";
@@ -260,130 +260,139 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		77BAE8F92D90D8E7008CC558 /* FiveHundredspxWeb */ = {
+		772F412C2DA19D0B00631B1D /* Tests */ = {
 			isa = PBXGroup;
 			children = (
-				77BAE8F22D90D8E7008CC558 /* FiveHundredspxWebAPIClient.swift */,
-				77BAE8F32D90D8E7008CC558 /* FiveHundredspxWebAuthController.swift */,
-				77BAE8F42D90D8E7008CC558 /* FiveHundredspxWebAuthentication.swift */,
-				77BAE8F52D90D8E7008CC558 /* FiveHundredspxWebHTMLAPIClient.swift */,
-				77BAE8F62D90D8E7008CC558 /* FiveHundredspxWebHTMLRequestAdapter.swift */,
-				77BAE8F72D90D8E7008CC558 /* FiveHundredspxWebRequestAdapter.swift */,
-				77BAE8F82D90D8E7008CC558 /* FiveHundredspxWebUser.swift */,
+				774305F52DA1FDCE00588966 /* APWebAuthenticationErrorTests.swift */,
+				774305F62DA1FDCE00588966 /* APWebAuthenticationTests.swift */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		774305362DA1FC2700588966 /* FiveHundredspxWeb */ = {
+			isa = PBXGroup;
+			children = (
+				7743052F2DA1FC2700588966 /* FiveHundredspxWebAPIClient.swift */,
+				774305302DA1FC2700588966 /* FiveHundredspxWebAuthController.swift */,
+				774305312DA1FC2700588966 /* FiveHundredspxWebAuthentication.swift */,
+				774305322DA1FC2700588966 /* FiveHundredspxWebHTMLAPIClient.swift */,
+				774305332DA1FC2700588966 /* FiveHundredspxWebHTMLRequestAdapter.swift */,
+				774305342DA1FC2700588966 /* FiveHundredspxWebRequestAdapter.swift */,
+				774305352DA1FC2700588966 /* FiveHundredspxWebUser.swift */,
 			);
 			path = FiveHundredspxWeb;
 			sourceTree = "<group>";
 		};
-		77BAE8FD2D90D8E7008CC558 /* Foursquare */ = {
+		7743053A2DA1FC2700588966 /* Foursquare */ = {
 			isa = PBXGroup;
 			children = (
-				77BAE8FA2D90D8E7008CC558 /* FoursquareAPIClient.swift */,
-				77BAE8FB2D90D8E7008CC558 /* FoursquareRequestAdapter.swift */,
-				77BAE8FC2D90D8E7008CC558 /* FoursquareUser.swift */,
+				774305372DA1FC2700588966 /* FoursquareAPIClient.swift */,
+				774305382DA1FC2700588966 /* FoursquareRequestAdapter.swift */,
+				774305392DA1FC2700588966 /* FoursquareUser.swift */,
 			);
 			path = Foursquare;
 			sourceTree = "<group>";
 		};
-		77BAE9012D90D8E7008CC558 /* GitHub */ = {
+		7743053E2DA1FC2700588966 /* GitHub */ = {
 			isa = PBXGroup;
 			children = (
-				77BAE8FE2D90D8E7008CC558 /* GitHubAPIClient.swift */,
-				77BAE8FF2D90D8E7008CC558 /* GitHubRequestAdapter.swift */,
-				77BAE9002D90D8E7008CC558 /* GitHubUser.swift */,
+				7743053B2DA1FC2700588966 /* GitHubAPIClient.swift */,
+				7743053C2DA1FC2700588966 /* GitHubRequestAdapter.swift */,
+				7743053D2DA1FC2700588966 /* GitHubUser.swift */,
 			);
 			path = GitHub;
 			sourceTree = "<group>";
 		};
-		77BAE9092D90D8E7008CC558 /* Models */ = {
+		774305472DA1FC2700588966 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				77BAE9022D90D8E7008CC558 /* BaseMediaItem.swift */,
-				77BAE9032D90D8E7008CC558 /* BaseUser.swift */,
-				77BAE9042D90D8E7008CC558 /* MediaComment.swift */,
-				77BAE9052D90D8E7008CC558 /* MediaItem.swift */,
-				77BAE9062D90D8E7008CC558 /* StoryItem.swift */,
-				77BAE9072D90D8E7008CC558 /* Tag.swift */,
-				77BAE9082D90D8E7008CC558 /* User.swift */,
+				774305402DA1FC2700588966 /* BaseMediaItem.swift */,
+				774305412DA1FC2700588966 /* BaseUser.swift */,
+				774305422DA1FC2700588966 /* MediaComment.swift */,
+				774305432DA1FC2700588966 /* MediaItem.swift */,
+				774305442DA1FC2700588966 /* StoryItem.swift */,
+				774305452DA1FC2700588966 /* Tag.swift */,
+				774305462DA1FC2700588966 /* User.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
 		};
-		77BAE90C2D90D8E7008CC558 /* Pinterest */ = {
+		7743054E2DA1FC2700588966 /* Pinterest */ = {
 			isa = PBXGroup;
 			children = (
-				77BAE90A2D90D8E7008CC558 /* PinterestAPIClient.swift */,
-				77BAE90B2D90D8E7008CC558 /* PinterestUser.swift */,
+				7743054C2DA1FC2700588966 /* PinterestAPIClient.swift */,
+				7743054D2DA1FC2700588966 /* PinterestUser.swift */,
 			);
 			path = Pinterest;
 			sourceTree = "<group>";
 		};
-		77BAE9142D90D8E7008CC558 /* PinterestWeb */ = {
+		774305562DA1FC2700588966 /* PinterestWeb */ = {
 			isa = PBXGroup;
 			children = (
-				77BAE90D2D90D8E7008CC558 /* PinterestWebAPIClient.swift */,
-				77BAE90E2D90D8E7008CC558 /* PinterestWebAuthController.swift */,
-				77BAE90F2D90D8E7008CC558 /* PinterestWebAuthentication.swift */,
-				77BAE9102D90D8E7008CC558 /* PinterestWebHTMLAPIClient.swift */,
-				77BAE9112D90D8E7008CC558 /* PinterestWebHTMLRequestAdapter.swift */,
-				77BAE9122D90D8E7008CC558 /* PinterestWebRequestAdapter.swift */,
-				77BAE9132D90D8E7008CC558 /* PinterestWebUser.swift */,
+				7743054F2DA1FC2700588966 /* PinterestWebAPIClient.swift */,
+				774305502DA1FC2700588966 /* PinterestWebAuthController.swift */,
+				774305512DA1FC2700588966 /* PinterestWebAuthentication.swift */,
+				774305522DA1FC2700588966 /* PinterestWebHTMLAPIClient.swift */,
+				774305532DA1FC2700588966 /* PinterestWebHTMLRequestAdapter.swift */,
+				774305542DA1FC2700588966 /* PinterestWebRequestAdapter.swift */,
+				774305552DA1FC2700588966 /* PinterestWebUser.swift */,
 			);
 			path = PinterestWeb;
 			sourceTree = "<group>";
 		};
-		77BAE9172D90D8E7008CC558 /* Reddit */ = {
+		7743055B2DA1FC2700588966 /* Reddit */ = {
 			isa = PBXGroup;
 			children = (
-				77BAE9152D90D8E7008CC558 /* RedditAPIClient.swift */,
-				77BAE9162D90D8E7008CC558 /* RedditUser.swift */,
+				774305592DA1FC2700588966 /* RedditAPIClient.swift */,
+				7743055A2DA1FC2700588966 /* RedditUser.swift */,
 			);
 			path = Reddit;
 			sourceTree = "<group>";
 		};
-		77BAE9232D90D8E7008CC558 /* TikTokWeb */ = {
+		774305692DA1FC2700588966 /* TikTokWeb */ = {
 			isa = PBXGroup;
 			children = (
-				77BAE9182D90D8E7008CC558 /* TikTokWebAPIClient.swift */,
-				77BAE9192D90D8E7008CC558 /* TikTokWebAuthCheckpointController.swift */,
-				77BAE91A2D90D8E7008CC558 /* TikTokWebAuthController.swift */,
-				77BAE91B2D90D8E7008CC558 /* TikTokWebAuthentication.swift */,
-				77BAE91C2D90D8E7008CC558 /* TikTokWebMediaComment.swift */,
-				77BAE91D2D90D8E7008CC558 /* TikTokWebMediaItem.swift */,
-				77BAE91E2D90D8E7008CC558 /* TikTokWebMobileAPIClient.swift */,
-				77BAE91F2D90D8E7008CC558 /* TikTokWebMobileRequestAdapter.swift */,
-				77BAE9202D90D8E7008CC558 /* TikTokWebRequestAdapter.swift */,
-				77BAE9212D90D8E7008CC558 /* TikTokWebSignatureController.swift */,
-				77BAE9222D90D8E7008CC558 /* TikTokWebUser.swift */,
+				7743055E2DA1FC2700588966 /* TikTokWebAPIClient.swift */,
+				7743055F2DA1FC2700588966 /* TikTokWebAuthCheckpointController.swift */,
+				774305602DA1FC2700588966 /* TikTokWebAuthController.swift */,
+				774305612DA1FC2700588966 /* TikTokWebAuthentication.swift */,
+				774305622DA1FC2700588966 /* TikTokWebMediaComment.swift */,
+				774305632DA1FC2700588966 /* TikTokWebMediaItem.swift */,
+				774305642DA1FC2700588966 /* TikTokWebMobileAPIClient.swift */,
+				774305652DA1FC2700588966 /* TikTokWebMobileRequestAdapter.swift */,
+				774305662DA1FC2700588966 /* TikTokWebRequestAdapter.swift */,
+				774305672DA1FC2700588966 /* TikTokWebSignatureController.swift */,
+				774305682DA1FC2700588966 /* TikTokWebUser.swift */,
 			);
 			path = TikTokWeb;
 			sourceTree = "<group>";
 		};
-		77BAE9272D90D8E7008CC558 /* Tumblr */ = {
+		7743056D2DA1FC2700588966 /* Tumblr */ = {
 			isa = PBXGroup;
 			children = (
-				77BAE9242D90D8E7008CC558 /* TumblrAPIClient.swift */,
-				77BAE9252D90D8E7008CC558 /* TumblrBlog.swift */,
-				77BAE9262D90D8E7008CC558 /* TumblrUser.swift */,
+				7743056A2DA1FC2700588966 /* TumblrAPIClient.swift */,
+				7743056B2DA1FC2700588966 /* TumblrBlog.swift */,
+				7743056C2DA1FC2700588966 /* TumblrUser.swift */,
 			);
 			path = Tumblr;
 			sourceTree = "<group>";
 		};
-		77BAE92B2D90D8E7008CC558 /* Twitch */ = {
+		774305712DA1FC2700588966 /* Twitch */ = {
 			isa = PBXGroup;
 			children = (
-				77BAE9282D90D8E7008CC558 /* TwitchAPIClient.swift */,
-				77BAE9292D90D8E7008CC558 /* TwitchRequestAdapter.swift */,
-				77BAE92A2D90D8E7008CC558 /* TwitchUser.swift */,
+				7743056E2DA1FC2700588966 /* TwitchAPIClient.swift */,
+				7743056F2DA1FC2700588966 /* TwitchRequestAdapter.swift */,
+				774305702DA1FC2700588966 /* TwitchUser.swift */,
 			);
 			path = Twitch;
 			sourceTree = "<group>";
 		};
-		77BAE92F2D90D8E7008CC558 /* Twitter */ = {
+		774305752DA1FC2700588966 /* Twitter */ = {
 			isa = PBXGroup;
 			children = (
-				770E13A72DA05A2F005FCBE1 /* TwitterPost.swift */,
-				77BAE92C2D90D8E7008CC558 /* TwitterAPIClient.swift */,
-				77BAE92E2D90D8E7008CC558 /* TwitterUser.swift */,
+				774305722DA1FC2700588966 /* TwitterAPIClient.swift */,
+				774305732DA1FC2700588966 /* TwitterPost.swift */,
+				774305742DA1FC2700588966 /* TwitterUser.swift */,
 			);
 			path = Twitter;
 			sourceTree = "<group>";
@@ -391,61 +400,52 @@
 		77BAE9522D90D8E7008CC558 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				77BAE8F92D90D8E7008CC558 /* FiveHundredspxWeb */,
-				77BAE8FD2D90D8E7008CC558 /* Foursquare */,
-				77BAE9012D90D8E7008CC558 /* GitHub */,
-				77BAE9092D90D8E7008CC558 /* Models */,
-				77BAE90C2D90D8E7008CC558 /* Pinterest */,
-				77BAE9142D90D8E7008CC558 /* PinterestWeb */,
-				77BAE9172D90D8E7008CC558 /* Reddit */,
-				77BAE9232D90D8E7008CC558 /* TikTokWeb */,
-				77BAE9272D90D8E7008CC558 /* Tumblr */,
-				77BAE92B2D90D8E7008CC558 /* Twitch */,
-				77BAE92F2D90D8E7008CC558 /* Twitter */,
-				77BAE9302D90D8E7008CC558 /* AccountStore.swift */,
-				77BAE9312D90D8E7008CC558 /* AccountType.swift */,
-				77BAE9322D90D8E7008CC558 /* APWebAuthentication.h */,
-				77BAE9332D90D8E7008CC558 /* APWebAuthenticationError.swift */,
-				77BAE9342D90D8E7008CC558 /* APWebAuthenticationLink.swift */,
-				77BAE9352D90D8E7008CC558 /* APWebAuthenticationSession.swift */,
-				77BAE9362D90D8E7008CC558 /* Auth1Authentication.swift */,
-				77BAE9372D90D8E7008CC558 /* Auth2Authentication.swift */,
-				77BAE9382D90D8E7008CC558 /* AuthClient.swift */,
-				77BAE9392D90D8E7008CC558 /* AuthClientRequestRetrier.swift */,
-				77BAE93A2D90D8E7008CC558 /* Authentication.swift */,
-				77BAE93B2D90D8E7008CC558 /* AuthNavBarView.swift */,
-				77BAE93C2D90D8E7008CC558 /* AuthViewController.swift */,
-				77BAE93D2D90D8E7008CC558 /* BaseAuthViewController.swift */,
-				77BAE93E2D90D8E7008CC558 /* Data+APWebAuthentication.swift */,
-				77BAE93F2D90D8E7008CC558 /* Error+APWebAuthentication.swift */,
-				77BAE9402D90D8E7008CC558 /* Extensions.swift */,
-				77BAE9422D90D8E7008CC558 /* JSON+APWebAuthentication.swift */,
-				77BAE9432D90D8E7008CC558 /* OAuth1Client.swift */,
-				77BAE9442D90D8E7008CC558 /* OAuth1RequestAdapter.swift */,
-				77BAE9452D90D8E7008CC558 /* OAuth2Client.swift */,
-				77BAE9462D90D8E7008CC558 /* OAuth2RequestAdapter.swift */,
-				77BAE9472D90D8E7008CC558 /* ProgressView.swift */,
-				77BAE9482D90D8E7008CC558 /* ProviderBrowserMode.swift */,
-				77BAE9492D90D8E7008CC558 /* SessionAuthentication.swift */,
-				77BAE94A2D90D8E7008CC558 /* String+APWebAuthentication.swift */,
-				77BAE94B2D90D8E7008CC558 /* UIApplication+APWebAuthentication.swift */,
-				77BAE94C2D90D8E7008CC558 /* UINavigationController+Progress.swift */,
-				77BAE94D2D90D8E7008CC558 /* URL+APWebAuthentication.swift */,
-				77BAE94E2D90D8E7008CC558 /* UserAgentBuilder.swift */,
-				77BAE94F2D90D8E7008CC558 /* WebActivitySafari.swift */,
-				77BAE9502D90D8E7008CC558 /* WebTokensViewController.swift */,
-				77BAE9512D90D8E7008CC558 /* WebViewController.swift */,
+				774305362DA1FC2700588966 /* FiveHundredspxWeb */,
+				7743053A2DA1FC2700588966 /* Foursquare */,
+				7743053E2DA1FC2700588966 /* GitHub */,
+				774305472DA1FC2700588966 /* Models */,
+				7743054E2DA1FC2700588966 /* Pinterest */,
+				774305562DA1FC2700588966 /* PinterestWeb */,
+				7743055B2DA1FC2700588966 /* Reddit */,
+				774305692DA1FC2700588966 /* TikTokWeb */,
+				7743056D2DA1FC2700588966 /* Tumblr */,
+				774305712DA1FC2700588966 /* Twitch */,
+				774305752DA1FC2700588966 /* Twitter */,
+				7743051E2DA1FC2700588966 /* AccountStore.swift */,
+				7743051F2DA1FC2700588966 /* AccountType.swift */,
+				774305202DA1FC2700588966 /* APWebAuthentication.h */,
+				774305212DA1FC2700588966 /* APWebAuthenticationError.swift */,
+				774305222DA1FC2700588966 /* APWebAuthenticationLink.swift */,
+				774305232DA1FC2700588966 /* APWebAuthenticationSession.swift */,
+				774305242DA1FC2700588966 /* Auth1Authentication.swift */,
+				774305252DA1FC2700588966 /* Auth2Authentication.swift */,
+				774305262DA1FC2700588966 /* AuthClient.swift */,
+				774305272DA1FC2700588966 /* AuthClientRequestRetrier.swift */,
+				774305282DA1FC2700588966 /* Authentication.swift */,
+				774305292DA1FC2700588966 /* AuthNavBarView.swift */,
+				7743052A2DA1FC2700588966 /* AuthViewController.swift */,
+				7743052B2DA1FC2700588966 /* BaseAuthViewController.swift */,
+				7743052C2DA1FC2700588966 /* Data+APWebAuthentication.swift */,
+				7743052D2DA1FC2700588966 /* Error+APWebAuthentication.swift */,
+				7743052E2DA1FC2700588966 /* Extensions.swift */,
+				7743053F2DA1FC2700588966 /* JSON+APWebAuthentication.swift */,
+				774305482DA1FC2700588966 /* OAuth1Client.swift */,
+				774305492DA1FC2700588966 /* OAuth1RequestAdapter.swift */,
+				7743054A2DA1FC2700588966 /* OAuth2Client.swift */,
+				7743054B2DA1FC2700588966 /* OAuth2RequestAdapter.swift */,
+				774305572DA1FC2700588966 /* ProgressView.swift */,
+				774305582DA1FC2700588966 /* ProviderBrowserMode.swift */,
+				7743055C2DA1FC2700588966 /* SessionAuthentication.swift */,
+				7743055D2DA1FC2700588966 /* String+APWebAuthentication.swift */,
+				774305762DA1FC2700588966 /* UIApplication+APWebAuthentication.swift */,
+				774305772DA1FC2700588966 /* UINavigationController+Progress.swift */,
+				774305782DA1FC2700588966 /* URL+APWebAuthentication.swift */,
+				774305792DA1FC2700588966 /* UserAgentBuilder.swift */,
+				7743057A2DA1FC2700588966 /* WebActivitySafari.swift */,
+				7743057B2DA1FC2700588966 /* WebTokensViewController.swift */,
+				7743057C2DA1FC2700588966 /* WebViewController.swift */,
 			);
 			path = Sources;
-			sourceTree = "<group>";
-		};
-		77BAE9AA2D90D8F9008CC558 /* Tests */ = {
-			isa = PBXGroup;
-			children = (
-				773E99942DA19A3B0007DB40 /* APWebAuthenticationErrorTests.swift */,
-				77BAE9A82D90D8F9008CC558 /* APWebAuthenticationTests.swift */,
-			);
-			path = Tests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -455,7 +455,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				77BAE9A62D90D8E7008CC558 /* APWebAuthentication.h in Headers */,
+				774305D02DA1FC2700588966 /* APWebAuthentication.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -477,6 +477,18 @@
 			);
 			name = APWebAuthentication;
 			packageProductDependencies = (
+				774305D22DA1FD0200588966 /* Alamofire */,
+				774305D52DA1FD1200588966 /* CryptoSwift */,
+				774305D82DA1FD2300588966 /* HTTPStatusCodes */,
+				774305DB2DA1FD3500588966 /* JGProgressHUD */,
+				774305DE2DA1FD4600588966 /* SFSafeSymbols */,
+				774305E12DA1FD5800588966 /* SnapKit */,
+				774305E42DA1FD6F00588966 /* SwiftyBeaver */,
+				774305E72DA1FD7F00588966 /* SwifterSwift */,
+				774305EA2DA1FD8E00588966 /* SwiftyJSON */,
+				774305ED2DA1FD9F00588966 /* SwiftyUserDefaults */,
+				774305F02DA1FDB100588966 /* DeviceKit */,
+				774305F32DA1FDC200588966 /* SwiftyRSA */,
 			);
 			productName = ProgressToolbar;
 			productReference = 537EDD0424F49F1E003DC54A /* APWebAuthentication.framework */;
@@ -515,11 +527,11 @@
 				TargetAttributes = {
 					537EDD0324F49F1E003DC54A = {
 						CreatedOnToolsVersion = 11.6;
-						LastSwiftMigration = 1170;
+						LastSwiftMigration = 1630;
 					};
 					537EDD0C24F49F1E003DC54A = {
 						CreatedOnToolsVersion = 11.6;
-						LastSwiftMigration = 1160;
+						LastSwiftMigration = 1630;
 					};
 				};
 			};
@@ -532,17 +544,18 @@
 			);
 			mainGroup = 537EDCFA24F49F1E003DC54A;
 			packageReferences = (
-				778D4D352D5E4010008738C8 /* XCRemoteSwiftPackageReference "Alamofire" */,
-				778D4D382D5E4024008738C8 /* XCRemoteSwiftPackageReference "SwifterSwift" */,
-				778D4D3B2D5E4034008738C8 /* XCRemoteSwiftPackageReference "SnapKit" */,
-				778D4D3E2D5E4066008738C8 /* XCRemoteSwiftPackageReference "SFSafeSymbols" */,
-				778D4D412D5E4078008738C8 /* XCRemoteSwiftPackageReference "JGProgressHUD" */,
-				778D4D442D5E409D008738C8 /* XCRemoteSwiftPackageReference "SwiftyJSON" */,
-				778D4D4A2D5E40C6008738C8 /* XCRemoteSwiftPackageReference "CryptoSwift" */,
-				778D4D4D2D5E4109008738C8 /* XCRemoteSwiftPackageReference "SwiftyUserDefaults" */,
-				77F3DC462D5E504B001CE742 /* XCRemoteSwiftPackageReference "SwiftHTTPStatusCodes" */,
-				77DB3B482D5EB3C40025251D /* XCRemoteSwiftPackageReference "DeviceKit" */,
-				77DB3B4B2D5EB3CD0025251D /* XCRemoteSwiftPackageReference "SwiftyRSA" */,
+				774305D12DA1FD0200588966 /* XCRemoteSwiftPackageReference "Alamofire" */,
+				774305D42DA1FD1200588966 /* XCRemoteSwiftPackageReference "CryptoSwift" */,
+				774305D72DA1FD2300588966 /* XCRemoteSwiftPackageReference "SwiftHTTPStatusCodes" */,
+				774305DA2DA1FD3500588966 /* XCRemoteSwiftPackageReference "JGProgressHUD" */,
+				774305DD2DA1FD4600588966 /* XCRemoteSwiftPackageReference "SFSafeSymbols" */,
+				774305E02DA1FD5800588966 /* XCRemoteSwiftPackageReference "SnapKit" */,
+				774305E32DA1FD6F00588966 /* XCRemoteSwiftPackageReference "SwiftyBeaver" */,
+				774305E62DA1FD7F00588966 /* XCRemoteSwiftPackageReference "SwifterSwift" */,
+				774305E92DA1FD8E00588966 /* XCRemoteSwiftPackageReference "SwiftyJSON" */,
+				774305EC2DA1FD9F00588966 /* XCRemoteSwiftPackageReference "SwiftyUserDefaults" */,
+				774305EF2DA1FDB100588966 /* XCRemoteSwiftPackageReference "DeviceKit" */,
+				774305F22DA1FDC200588966 /* XCRemoteSwiftPackageReference "SwiftyRSA" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 537EDD0524F49F1E003DC54A /* Products */;
@@ -577,89 +590,89 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				77BAE9532D90D8E7008CC558 /* TikTokWebMediaComment.swift in Sources */,
-				77BAE9542D90D8E7008CC558 /* PinterestWebHTMLAPIClient.swift in Sources */,
-				77BAE9552D90D8E7008CC558 /* GitHubUser.swift in Sources */,
-				77BAE9562D90D8E7008CC558 /* ProgressView.swift in Sources */,
-				77BAE9572D90D8E7008CC558 /* URL+APWebAuthentication.swift in Sources */,
-				77BAE9582D90D8E7008CC558 /* TwitchAPIClient.swift in Sources */,
-				77BAE9592D90D8E7008CC558 /* AccountStore.swift in Sources */,
-				77BAE95A2D90D8E7008CC558 /* OAuth2Client.swift in Sources */,
-				77BAE95B2D90D8E7008CC558 /* PinterestUser.swift in Sources */,
-				77BAE95C2D90D8E7008CC558 /* AuthNavBarView.swift in Sources */,
-				77BAE95D2D90D8E7008CC558 /* OAuth1Client.swift in Sources */,
-				77BAE95E2D90D8E7008CC558 /* PinterestWebAuthController.swift in Sources */,
-				77BAE95F2D90D8E7008CC558 /* TwitterUser.swift in Sources */,
-				77BAE9602D90D8E7008CC558 /* Error+APWebAuthentication.swift in Sources */,
-				77BAE9612D90D8E7008CC558 /* User.swift in Sources */,
-				77BAE9622D90D8E7008CC558 /* ProviderBrowserMode.swift in Sources */,
-				77BAE9632D90D8E7008CC558 /* Extensions.swift in Sources */,
-				77BAE9642D90D8E7008CC558 /* APWebAuthenticationLink.swift in Sources */,
-				77BAE9652D90D8E7008CC558 /* BaseMediaItem.swift in Sources */,
-				77BAE9662D90D8E7008CC558 /* RedditUser.swift in Sources */,
-				77BAE9672D90D8E7008CC558 /* TikTokWebRequestAdapter.swift in Sources */,
-				77BAE9682D90D8E7008CC558 /* UIApplication+APWebAuthentication.swift in Sources */,
-				77BAE9692D90D8E7008CC558 /* FiveHundredspxWebUser.swift in Sources */,
-				77BAE96B2D90D8E7008CC558 /* FiveHundredspxWebAuthentication.swift in Sources */,
-				77BAE96C2D90D8E7008CC558 /* UINavigationController+Progress.swift in Sources */,
-				77BAE96D2D90D8E7008CC558 /* TumblrUser.swift in Sources */,
-				77BAE96E2D90D8E7008CC558 /* WebViewController.swift in Sources */,
-				77BAE96F2D90D8E7008CC558 /* PinterestWebHTMLRequestAdapter.swift in Sources */,
-				77BAE9702D90D8E7008CC558 /* StoryItem.swift in Sources */,
-				77BAE9712D90D8E7008CC558 /* BaseAuthViewController.swift in Sources */,
-				77BAE9722D90D8E7008CC558 /* TikTokWebMobileRequestAdapter.swift in Sources */,
-				77BAE9732D90D8E7008CC558 /* TwitterAPIClient.swift in Sources */,
-				77BAE9742D90D8E7008CC558 /* TikTokWebSignatureController.swift in Sources */,
-				77BAE9752D90D8E7008CC558 /* SessionAuthentication.swift in Sources */,
-				77BAE9762D90D8E7008CC558 /* APWebAuthenticationSession.swift in Sources */,
-				77BAE9772D90D8E7008CC558 /* FoursquareRequestAdapter.swift in Sources */,
-				77BAE9782D90D8E7008CC558 /* UserAgentBuilder.swift in Sources */,
-				77BAE9792D90D8E7008CC558 /* FoursquareUser.swift in Sources */,
-				77BAE97A2D90D8E7008CC558 /* OAuth1RequestAdapter.swift in Sources */,
-				77BAE97B2D90D8E7008CC558 /* PinterestWebAuthentication.swift in Sources */,
-				77BAE97C2D90D8E7008CC558 /* BaseUser.swift in Sources */,
-				77BAE97D2D90D8E7008CC558 /* WebTokensViewController.swift in Sources */,
-				77BAE97E2D90D8E7008CC558 /* Auth1Authentication.swift in Sources */,
-				77BAE97F2D90D8E7008CC558 /* FiveHundredspxWebHTMLAPIClient.swift in Sources */,
-				77BAE9802D90D8E7008CC558 /* OAuth2RequestAdapter.swift in Sources */,
-				77BAE9812D90D8E7008CC558 /* TikTokWebMobileAPIClient.swift in Sources */,
-				77BAE9822D90D8E7008CC558 /* RedditAPIClient.swift in Sources */,
-				77BAE9832D90D8E7008CC558 /* TikTokWebAuthController.swift in Sources */,
-				77BAE9842D90D8E7008CC558 /* AuthClient.swift in Sources */,
-				77BAE9852D90D8E7008CC558 /* TumblrAPIClient.swift in Sources */,
-				77BAE9862D90D8E7008CC558 /* TumblrBlog.swift in Sources */,
-				77BAE9872D90D8E7008CC558 /* MediaComment.swift in Sources */,
-				77BAE9882D90D8E7008CC558 /* Data+APWebAuthentication.swift in Sources */,
-				77BAE9892D90D8E7008CC558 /* PinterestWebUser.swift in Sources */,
-				77BAE98A2D90D8E7008CC558 /* Auth2Authentication.swift in Sources */,
-				77BAE98B2D90D8E7008CC558 /* TikTokWebUser.swift in Sources */,
-				77BAE98C2D90D8E7008CC558 /* MediaItem.swift in Sources */,
-				77BAE98D2D90D8E7008CC558 /* TwitchUser.swift in Sources */,
-				77BAE98E2D90D8E7008CC558 /* Tag.swift in Sources */,
-				77BAE98F2D90D8E7008CC558 /* TikTokWebMediaItem.swift in Sources */,
-				77BAE9902D90D8E7008CC558 /* Authentication.swift in Sources */,
-				77BAE9912D90D8E7008CC558 /* PinterestWebRequestAdapter.swift in Sources */,
-				77BAE9922D90D8E7008CC558 /* FiveHundredspxWebAPIClient.swift in Sources */,
-				77BAE9932D90D8E7008CC558 /* TikTokWebAPIClient.swift in Sources */,
-				77BAE9942D90D8E7008CC558 /* PinterestAPIClient.swift in Sources */,
-				77BAE9952D90D8E7008CC558 /* PinterestWebAPIClient.swift in Sources */,
-				77BAE9962D90D8E7008CC558 /* JSON+APWebAuthentication.swift in Sources */,
-				770E13A82DA05A2F005FCBE1 /* TwitterPost.swift in Sources */,
-				77BAE9972D90D8E7008CC558 /* TwitchRequestAdapter.swift in Sources */,
-				77BAE9982D90D8E7008CC558 /* AuthClientRequestRetrier.swift in Sources */,
-				77BAE9992D90D8E7008CC558 /* AuthViewController.swift in Sources */,
-				77BAE99A2D90D8E7008CC558 /* GitHubRequestAdapter.swift in Sources */,
-				77BAE99B2D90D8E7008CC558 /* String+APWebAuthentication.swift in Sources */,
-				77BAE99C2D90D8E7008CC558 /* FiveHundredspxWebAuthController.swift in Sources */,
-				77BAE99D2D90D8E7008CC558 /* FiveHundredspxWebRequestAdapter.swift in Sources */,
-				77BAE99E2D90D8E7008CC558 /* FiveHundredspxWebHTMLRequestAdapter.swift in Sources */,
-				77BAE99F2D90D8E7008CC558 /* TikTokWebAuthCheckpointController.swift in Sources */,
-				77BAE9A02D90D8E7008CC558 /* AccountType.swift in Sources */,
-				77BAE9A12D90D8E7008CC558 /* APWebAuthenticationError.swift in Sources */,
-				77BAE9A22D90D8E7008CC558 /* FoursquareAPIClient.swift in Sources */,
-				77BAE9A32D90D8E7008CC558 /* TikTokWebAuthentication.swift in Sources */,
-				77BAE9A42D90D8E7008CC558 /* WebActivitySafari.swift in Sources */,
-				77BAE9A52D90D8E7008CC558 /* GitHubAPIClient.swift in Sources */,
+				7743057D2DA1FC2700588966 /* GitHubAPIClient.swift in Sources */,
+				7743057E2DA1FC2700588966 /* Data+APWebAuthentication.swift in Sources */,
+				7743057F2DA1FC2700588966 /* FiveHundredspxWebRequestAdapter.swift in Sources */,
+				774305802DA1FC2700588966 /* MediaComment.swift in Sources */,
+				774305812DA1FC2700588966 /* FiveHundredspxWebHTMLAPIClient.swift in Sources */,
+				774305822DA1FC2700588966 /* PinterestWebAPIClient.swift in Sources */,
+				774305832DA1FC2700588966 /* OAuth1RequestAdapter.swift in Sources */,
+				774305842DA1FC2700588966 /* TwitchAPIClient.swift in Sources */,
+				774305852DA1FC2700588966 /* WebTokensViewController.swift in Sources */,
+				774305862DA1FC2700588966 /* Auth1Authentication.swift in Sources */,
+				774305872DA1FC2700588966 /* TikTokWebRequestAdapter.swift in Sources */,
+				774305882DA1FC2700588966 /* TikTokWebAPIClient.swift in Sources */,
+				774305892DA1FC2700588966 /* OAuth2Client.swift in Sources */,
+				7743058A2DA1FC2700588966 /* GitHubRequestAdapter.swift in Sources */,
+				7743058B2DA1FC2700588966 /* ProviderBrowserMode.swift in Sources */,
+				7743058C2DA1FC2700588966 /* FiveHundredspxWebAuthController.swift in Sources */,
+				7743058D2DA1FC2700588966 /* Authentication.swift in Sources */,
+				7743058E2DA1FC2700588966 /* UINavigationController+Progress.swift in Sources */,
+				7743058F2DA1FC2700588966 /* PinterestWebAuthController.swift in Sources */,
+				774305902DA1FC2700588966 /* TumblrBlog.swift in Sources */,
+				774305912DA1FC2700588966 /* PinterestWebRequestAdapter.swift in Sources */,
+				774305922DA1FC2700588966 /* StoryItem.swift in Sources */,
+				774305932DA1FC2700588966 /* TikTokWebAuthController.swift in Sources */,
+				774305942DA1FC2700588966 /* User.swift in Sources */,
+				774305952DA1FC2700588966 /* TumblrAPIClient.swift in Sources */,
+				774305962DA1FC2700588966 /* Error+APWebAuthentication.swift in Sources */,
+				774305972DA1FC2700588966 /* JSON+APWebAuthentication.swift in Sources */,
+				774305982DA1FC2700588966 /* FiveHundredspxWebHTMLRequestAdapter.swift in Sources */,
+				774305992DA1FC2700588966 /* FoursquareRequestAdapter.swift in Sources */,
+				7743059A2DA1FC2700588966 /* URL+APWebAuthentication.swift in Sources */,
+				7743059B2DA1FC2700588966 /* AuthClientRequestRetrier.swift in Sources */,
+				7743059C2DA1FC2700588966 /* String+APWebAuthentication.swift in Sources */,
+				7743059D2DA1FC2700588966 /* PinterestWebUser.swift in Sources */,
+				7743059E2DA1FC2700588966 /* PinterestWebHTMLRequestAdapter.swift in Sources */,
+				7743059F2DA1FC2700588966 /* BaseUser.swift in Sources */,
+				774305A02DA1FC2700588966 /* TikTokWebMediaItem.swift in Sources */,
+				774305A12DA1FC2700588966 /* Auth2Authentication.swift in Sources */,
+				774305A22DA1FC2700588966 /* UserAgentBuilder.swift in Sources */,
+				774305A32DA1FC2700588966 /* AccountStore.swift in Sources */,
+				774305A42DA1FC2700588966 /* WebActivitySafari.swift in Sources */,
+				774305A52DA1FC2700588966 /* Tag.swift in Sources */,
+				774305A62DA1FC2700588966 /* TumblrUser.swift in Sources */,
+				774305A72DA1FC2700588966 /* AccountType.swift in Sources */,
+				774305A82DA1FC2700588966 /* ProgressView.swift in Sources */,
+				774305A92DA1FC2700588966 /* UIApplication+APWebAuthentication.swift in Sources */,
+				774305AA2DA1FC2700588966 /* TikTokWebSignatureController.swift in Sources */,
+				774305AB2DA1FC2700588966 /* FoursquareAPIClient.swift in Sources */,
+				774305AC2DA1FC2700588966 /* TikTokWebAuthentication.swift in Sources */,
+				774305AD2DA1FC2700588966 /* FiveHundredspxWebAPIClient.swift in Sources */,
+				774305AE2DA1FC2700588966 /* TwitterUser.swift in Sources */,
+				774305AF2DA1FC2700588966 /* SessionAuthentication.swift in Sources */,
+				774305B02DA1FC2700588966 /* OAuth1Client.swift in Sources */,
+				774305B12DA1FC2700588966 /* TwitterAPIClient.swift in Sources */,
+				774305B22DA1FC2700588966 /* PinterestWebAuthentication.swift in Sources */,
+				774305B32DA1FC2700588966 /* AuthClient.swift in Sources */,
+				774305B42DA1FC2700588966 /* TwitchRequestAdapter.swift in Sources */,
+				774305B52DA1FC2700588966 /* BaseAuthViewController.swift in Sources */,
+				774305B62DA1FC2700588966 /* TikTokWebAuthCheckpointController.swift in Sources */,
+				774305B72DA1FC2700588966 /* TwitchUser.swift in Sources */,
+				774305B82DA1FC2700588966 /* PinterestUser.swift in Sources */,
+				774305B92DA1FC2700588966 /* GitHubUser.swift in Sources */,
+				774305BA2DA1FC2700588966 /* RedditAPIClient.swift in Sources */,
+				774305BB2DA1FC2700588966 /* APWebAuthenticationError.swift in Sources */,
+				774305BC2DA1FC2700588966 /* MediaItem.swift in Sources */,
+				774305BD2DA1FC2700588966 /* Extensions.swift in Sources */,
+				774305BE2DA1FC2700588966 /* AuthViewController.swift in Sources */,
+				774305BF2DA1FC2700588966 /* WebViewController.swift in Sources */,
+				774305C02DA1FC2700588966 /* OAuth2RequestAdapter.swift in Sources */,
+				774305C12DA1FC2700588966 /* FiveHundredspxWebAuthentication.swift in Sources */,
+				774305C22DA1FC2700588966 /* AuthNavBarView.swift in Sources */,
+				774305C32DA1FC2700588966 /* FiveHundredspxWebUser.swift in Sources */,
+				774305C42DA1FC2700588966 /* TwitterPost.swift in Sources */,
+				774305C52DA1FC2700588966 /* TikTokWebMobileRequestAdapter.swift in Sources */,
+				774305C62DA1FC2700588966 /* RedditUser.swift in Sources */,
+				774305C72DA1FC2700588966 /* PinterestAPIClient.swift in Sources */,
+				774305C82DA1FC2700588966 /* APWebAuthenticationLink.swift in Sources */,
+				774305C92DA1FC2700588966 /* TikTokWebMediaComment.swift in Sources */,
+				774305CA2DA1FC2700588966 /* TikTokWebMobileAPIClient.swift in Sources */,
+				774305CB2DA1FC2700588966 /* BaseMediaItem.swift in Sources */,
+				774305CC2DA1FC2700588966 /* APWebAuthenticationSession.swift in Sources */,
+				774305CD2DA1FC2700588966 /* FoursquareUser.swift in Sources */,
+				774305CE2DA1FC2700588966 /* PinterestWebHTMLAPIClient.swift in Sources */,
+				774305CF2DA1FC2700588966 /* TikTokWebUser.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -667,8 +680,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				773E99952DA19A560007DB40 /* APWebAuthenticationErrorTests.swift in Sources */,
-				77BAE9AB2D90D8F9008CC558 /* APWebAuthenticationTests.swift in Sources */,
+				774305F72DA1FDCE00588966 /* APWebAuthenticationTests.swift in Sources */,
+				774305F82DA1FDCE00588966 /* APWebAuthenticationErrorTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -829,7 +842,7 @@
 					"@loader_path/Frameworks",
 				);
 				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu11 gnu++14";
-				PRODUCT_BUNDLE_IDENTIFIER = APWebAuthentication;
+				PRODUCT_BUNDLE_IDENTIFIER = APStorePersistence;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -858,7 +871,7 @@
 					"@loader_path/Frameworks",
 				);
 				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu11 gnu++14";
-				PRODUCT_BUNDLE_IDENTIFIER = APWebAuthentication;
+				PRODUCT_BUNDLE_IDENTIFIER = APStorePersistence;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 5.0;
@@ -877,7 +890,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = APWebAuthenticationTests;
+				PRODUCT_BUNDLE_IDENTIFIER = APStorePersistenceTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -896,7 +909,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = APWebAuthenticationTests;
+				PRODUCT_BUNDLE_IDENTIFIER = APStorePersistenceTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -936,7 +949,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		778D4D352D5E4010008738C8 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
+		774305D12DA1FD0200588966 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Alamofire/Alamofire.git";
 			requirement = {
@@ -944,7 +957,55 @@
 				minimumVersion = 5.10.2;
 			};
 		};
-		778D4D382D5E4024008738C8 /* XCRemoteSwiftPackageReference "SwifterSwift" */ = {
+		774305D42DA1FD1200588966 /* XCRemoteSwiftPackageReference "CryptoSwift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/krzyzanowskim/CryptoSwift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.8.4;
+			};
+		};
+		774305D72DA1FD2300588966 /* XCRemoteSwiftPackageReference "SwiftHTTPStatusCodes" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/rhodgkins/SwiftHTTPStatusCodes.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.3.2;
+			};
+		};
+		774305DA2DA1FD3500588966 /* XCRemoteSwiftPackageReference "JGProgressHUD" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/JonasGessner/JGProgressHUD.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.2.0;
+			};
+		};
+		774305DD2DA1FD4600588966 /* XCRemoteSwiftPackageReference "SFSafeSymbols" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SFSafeSymbols/SFSafeSymbols.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 6.2.0;
+			};
+		};
+		774305E02DA1FD5800588966 /* XCRemoteSwiftPackageReference "SnapKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SnapKit/SnapKit.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.7.1;
+			};
+		};
+		774305E32DA1FD6F00588966 /* XCRemoteSwiftPackageReference "SwiftyBeaver" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SwiftyBeaver/SwiftyBeaver.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.1.1;
+			};
+		};
+		774305E62DA1FD7F00588966 /* XCRemoteSwiftPackageReference "SwifterSwift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/SwifterSwift/SwifterSwift.git";
 			requirement = {
@@ -952,148 +1013,100 @@
 				minimumVersion = 7.0.0;
 			};
 		};
-		778D4D3B2D5E4034008738C8 /* XCRemoteSwiftPackageReference "SnapKit" */ = {
+		774305E92DA1FD8E00588966 /* XCRemoteSwiftPackageReference "SwiftyJSON" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/SnapKit/SnapKit";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 5.7.1;
-			};
-		};
-		778D4D3E2D5E4066008738C8 /* XCRemoteSwiftPackageReference "SFSafeSymbols" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/SFSafeSymbols/SFSafeSymbols";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 5.3.0;
-			};
-		};
-		778D4D412D5E4078008738C8 /* XCRemoteSwiftPackageReference "JGProgressHUD" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/JonasGessner/JGProgressHUD";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 2.2.0;
-			};
-		};
-		778D4D442D5E409D008738C8 /* XCRemoteSwiftPackageReference "SwiftyJSON" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/SwiftyJSON/SwiftyJSON";
+			repositoryURL = "https://github.com/SwiftyJSON/SwiftyJSON.git";
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 5.0.2;
 			};
 		};
-		778D4D472D5E40B5008738C8 /* XCRemoteSwiftPackageReference "SwiftHTTPStatusCodes" */ = {
+		774305EC2DA1FD9F00588966 /* XCRemoteSwiftPackageReference "SwiftyUserDefaults" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/rhodgkins/SwiftHTTPStatusCodes";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 3.3.2;
-			};
-		};
-		778D4D4A2D5E40C6008738C8 /* XCRemoteSwiftPackageReference "CryptoSwift" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/krzyzanowskim/CryptoSwift";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.8.4;
-			};
-		};
-		778D4D4D2D5E4109008738C8 /* XCRemoteSwiftPackageReference "SwiftyUserDefaults" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/sunshinejr/SwiftyUserDefaults";
+			repositoryURL = "https://github.com/sunshinejr/SwiftyUserDefaults.git";
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 5.3.0;
 			};
 		};
-		77DB3B482D5EB3C40025251D /* XCRemoteSwiftPackageReference "DeviceKit" */ = {
+		774305EF2DA1FDB100588966 /* XCRemoteSwiftPackageReference "DeviceKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/devicekit/DeviceKit.git";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 5.5.0;
+				minimumVersion = 5.6.0;
 			};
 		};
-		77DB3B4B2D5EB3CD0025251D /* XCRemoteSwiftPackageReference "SwiftyRSA" */ = {
+		774305F22DA1FDC200588966 /* XCRemoteSwiftPackageReference "SwiftyRSA" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/TakeScoop/SwiftyRSA";
+			repositoryURL = "https://github.com/TakeScoop/SwiftyRSA.git";
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 1.8.0;
 			};
 		};
-		77F3DC462D5E504B001CE742 /* XCRemoteSwiftPackageReference "SwiftHTTPStatusCodes" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/rhodgkins/SwiftHTTPStatusCodes";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 3.3.2;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		778D4D362D5E4010008738C8 /* Alamofire */ = {
+		774305D22DA1FD0200588966 /* Alamofire */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 778D4D352D5E4010008738C8 /* XCRemoteSwiftPackageReference "Alamofire" */;
+			package = 774305D12DA1FD0200588966 /* XCRemoteSwiftPackageReference "Alamofire" */;
 			productName = Alamofire;
 		};
-		778D4D392D5E4024008738C8 /* SwifterSwift */ = {
+		774305D52DA1FD1200588966 /* CryptoSwift */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 778D4D382D5E4024008738C8 /* XCRemoteSwiftPackageReference "SwifterSwift" */;
-			productName = SwifterSwift;
-		};
-		778D4D3C2D5E4034008738C8 /* SnapKit */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 778D4D3B2D5E4034008738C8 /* XCRemoteSwiftPackageReference "SnapKit" */;
-			productName = SnapKit;
-		};
-		778D4D3F2D5E4066008738C8 /* SFSafeSymbols */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 778D4D3E2D5E4066008738C8 /* XCRemoteSwiftPackageReference "SFSafeSymbols" */;
-			productName = SFSafeSymbols;
-		};
-		778D4D422D5E4078008738C8 /* JGProgressHUD */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 778D4D412D5E4078008738C8 /* XCRemoteSwiftPackageReference "JGProgressHUD" */;
-			productName = JGProgressHUD;
-		};
-		778D4D452D5E409D008738C8 /* SwiftyJSON */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 778D4D442D5E409D008738C8 /* XCRemoteSwiftPackageReference "SwiftyJSON" */;
-			productName = SwiftyJSON;
-		};
-		778D4D482D5E40B5008738C8 /* HTTPStatusCodes */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 778D4D472D5E40B5008738C8 /* XCRemoteSwiftPackageReference "SwiftHTTPStatusCodes" */;
-			productName = HTTPStatusCodes;
-		};
-		778D4D4B2D5E40C6008738C8 /* CryptoSwift */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 778D4D4A2D5E40C6008738C8 /* XCRemoteSwiftPackageReference "CryptoSwift" */;
+			package = 774305D42DA1FD1200588966 /* XCRemoteSwiftPackageReference "CryptoSwift" */;
 			productName = CryptoSwift;
 		};
-		778D4D4E2D5E4109008738C8 /* SwiftyUserDefaults */ = {
+		774305D82DA1FD2300588966 /* HTTPStatusCodes */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 778D4D4D2D5E4109008738C8 /* XCRemoteSwiftPackageReference "SwiftyUserDefaults" */;
+			package = 774305D72DA1FD2300588966 /* XCRemoteSwiftPackageReference "SwiftHTTPStatusCodes" */;
+			productName = HTTPStatusCodes;
+		};
+		774305DB2DA1FD3500588966 /* JGProgressHUD */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 774305DA2DA1FD3500588966 /* XCRemoteSwiftPackageReference "JGProgressHUD" */;
+			productName = JGProgressHUD;
+		};
+		774305DE2DA1FD4600588966 /* SFSafeSymbols */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 774305DD2DA1FD4600588966 /* XCRemoteSwiftPackageReference "SFSafeSymbols" */;
+			productName = SFSafeSymbols;
+		};
+		774305E12DA1FD5800588966 /* SnapKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 774305E02DA1FD5800588966 /* XCRemoteSwiftPackageReference "SnapKit" */;
+			productName = SnapKit;
+		};
+		774305E42DA1FD6F00588966 /* SwiftyBeaver */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 774305E32DA1FD6F00588966 /* XCRemoteSwiftPackageReference "SwiftyBeaver" */;
+			productName = SwiftyBeaver;
+		};
+		774305E72DA1FD7F00588966 /* SwifterSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 774305E62DA1FD7F00588966 /* XCRemoteSwiftPackageReference "SwifterSwift" */;
+			productName = SwifterSwift;
+		};
+		774305EA2DA1FD8E00588966 /* SwiftyJSON */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 774305E92DA1FD8E00588966 /* XCRemoteSwiftPackageReference "SwiftyJSON" */;
+			productName = SwiftyJSON;
+		};
+		774305ED2DA1FD9F00588966 /* SwiftyUserDefaults */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 774305EC2DA1FD9F00588966 /* XCRemoteSwiftPackageReference "SwiftyUserDefaults" */;
 			productName = SwiftyUserDefaults;
 		};
-		77DB3B492D5EB3C40025251D /* DeviceKit */ = {
+		774305F02DA1FDB100588966 /* DeviceKit */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 77DB3B482D5EB3C40025251D /* XCRemoteSwiftPackageReference "DeviceKit" */;
+			package = 774305EF2DA1FDB100588966 /* XCRemoteSwiftPackageReference "DeviceKit" */;
 			productName = DeviceKit;
 		};
-		77DB3B4C2D5EB3CD0025251D /* SwiftyRSA */ = {
+		774305F32DA1FDC200588966 /* SwiftyRSA */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 77DB3B4B2D5EB3CD0025251D /* XCRemoteSwiftPackageReference "SwiftyRSA" */;
+			package = 774305F22DA1FDC200588966 /* XCRemoteSwiftPackageReference "SwiftyRSA" */;
 			productName = SwiftyRSA;
-		};
-		77F3DC472D5E504B001CE742 /* HTTPStatusCodes */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 77F3DC462D5E504B001CE742 /* XCRemoteSwiftPackageReference "SwiftHTTPStatusCodes" */;
-			productName = HTTPStatusCodes;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

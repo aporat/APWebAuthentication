@@ -1,4 +1,4 @@
-name: Build
+name: CI
 
 on:
   push:
@@ -9,18 +9,20 @@ on:
 jobs:
   build:
     name: ${{ matrix.platform }} on ${{ matrix.os }}
-    runs-on: macos-15
+    runs-on: macos-latest
     env:
       scheme: APWebAuthentication
     strategy:
       fail-fast: false
       matrix:
         include:
-          - platform: iPhone 15 Pro
-            os: 17.5
           - platform: iPhone 16 Pro
             os: 18.2
     steps:
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -29,7 +31,7 @@ jobs:
       - name: Run test on ${{ matrix.platform }} (iOS ${{ matrix.os }})
         run: |
           xcodebuild test \
-            -scheme $scheme \
+            -scheme ${{ env.scheme }} \
             -destination 'platform=iOS Simulator,name=${{ matrix.platform }},OS=${{ matrix.os }}' \
             -enableCodeCoverage YES \
             -derivedDataPath ./DerivedData \
@@ -47,11 +49,11 @@ jobs:
       - name: Generate Coverage Report
         run: |
           slather coverage \
-            --scheme $scheme \
+            --scheme ${{ env.scheme }} \
             --output-directory ./coverage \
             --cobertura-xml \
             --build-directory ./DerivedData \
-            ./APWebAuthentication.xcodeproj
+            ./${{ env.scheme }}.xcodeproj
 
       # Convert .xcresult to JUnit XML for test results
       - name: Convert Test Results to JUnit
@@ -64,7 +66,7 @@ jobs:
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          slug: aporat/APWebAuthentication
+          slug: ${{ github.repository }}
           files: ./coverage/cobertura.xml
 
       - name: Upload test results to Codecov
@@ -72,5 +74,5 @@ jobs:
         uses: codecov/test-results-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          slug: aporat/APWebAuthentication
+          slug: ${{ github.repository }}
           files: ./test-results.xml

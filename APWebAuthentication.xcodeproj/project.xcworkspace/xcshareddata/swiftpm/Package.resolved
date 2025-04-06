@@ -1,5 +1,5 @@
 {
-  "originHash" : "0dd0a6d162babaaf976a60ccfcff7da41874cc3b7930456d11b6c7dcbd584248",
+  "originHash" : "39c836eced48e165646f8feeff22350d53dec40784bfa7e4442f3bb07cfcbd7c",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -24,8 +24,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/devicekit/DeviceKit.git",
       "state" : {
-        "revision" : "7ff5331960151aec74fb422e1d45f54ef6cc086d",
-        "version" : "5.5.0"
+        "revision" : "513b9d7e7a1bd46504a1009bbab943b75ce2f195",
+        "version" : "5.6.0"
       }
     },
     {
@@ -42,14 +42,14 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/SFSafeSymbols/SFSafeSymbols",
       "state" : {
-        "revision" : "e2e28f4e56e1769c2ec3c61c9355fc64eb7a535a",
-        "version" : "5.3.0"
+        "revision" : "3dd282d3269b061853a3b3bcd23a509d2aa166ce",
+        "version" : "6.2.0"
       }
     },
     {
       "identity" : "snapkit",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/SnapKit/SnapKit",
+      "location" : "https://github.com/SnapKit/SnapKit.git",
       "state" : {
         "revision" : "2842e6e84e82eb9a8dac0100ca90d9444b0307f4",
         "version" : "5.7.1"
@@ -74,9 +74,18 @@
       }
     },
     {
+      "identity" : "swiftybeaver",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/SwiftyBeaver/SwiftyBeaver.git",
+      "state" : {
+        "revision" : "8cba041db09596183331d123f337d0eb2e6e8e91",
+        "version" : "2.1.1"
+      }
+    },
+    {
       "identity" : "swiftyjson",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/SwiftyJSON/SwiftyJSON",
+      "location" : "https://github.com/SwiftyJSON/SwiftyJSON.git",
       "state" : {
         "revision" : "af76cf3ef710b6ca5f8c05f3a31307d44a3c5828",
         "version" : "5.0.2"
@@ -85,7 +94,7 @@
     {
       "identity" : "swiftyrsa",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/TakeScoop/SwiftyRSA",
+      "location" : "https://github.com/TakeScoop/SwiftyRSA.git",
       "state" : {
         "revision" : "6521919ad0e99dff927685f142d8136479acb452",
         "version" : "1.8.0"
@@ -94,7 +103,7 @@
     {
       "identity" : "swiftyuserdefaults",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/sunshinejr/SwiftyUserDefaults",
+      "location" : "https://github.com/sunshinejr/SwiftyUserDefaults.git",
       "state" : {
         "revision" : "f66bcd04088582c8fbb5cb8554d577e303bae396",
         "version" : "5.3.0"
