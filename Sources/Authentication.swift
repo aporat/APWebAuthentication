@@ -1,4 +1,5 @@
 import UIKit
+import APUserAgentGenerator
 
 open class Authentication {
     public var accountIdentifier: String?
@@ -16,33 +17,19 @@ open class Authentication {
     open var browserMode: ProviderBrowserMode?
     open var customUserAgent: String?
 
-    var webiPhoneUserAgent: String {
-        "Mozilla/5.0 (iPhone; CPU iPhone OS 13_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1 Mobile/15E148 Safari/604.1"
-    }
-
-    var webAndroidUserAgent: String {
-        "Mozilla/5.0 (Linux; Android 10; Pixel 2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.136 Mobile Safari/537.36"
-    }
-
-    var webDesktopFirefoxUserAgent: String {
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:75.0) Gecko/20100101 Firefox/75.0"
-    }
-
     open var userAgent: String? {
         if let currentUserAgent = customUserAgent, !currentUserAgent.isEmpty {
             return currentUserAgent
-        } else if browserMode == .default || browserMode == .ios {
-            return UserAgentBuilder().build(desktopMode: false)
+        } else if browserMode == .default || browserMode == .ios || browserMode == .iphone {
+            return APWebBrowserAgentBuilder.builder().generate()
         } else if browserMode == .webView {
             return nil
-        } else if browserMode == .iphone {
-            return webiPhoneUserAgent
         } else if browserMode == .android {
-            return webAndroidUserAgent
+            return APWebBrowserAgentBuilder.builder().withDevice(AndroidDevice(deviceModel: "Pixel 7")).withBrowser(ChromeBrowser(version: "123.0.6312.86")).generate()
         } else if browserMode == .desktop {
-            return UserAgentBuilder().build(desktopMode: true)
+            return APWebBrowserAgentBuilder.builder().withDevice(MacDevice()).withBrowser(ChromeBrowser(version: "123.0.6312.86")).generate()
         } else if browserMode == .desktopFirefox {
-            return webDesktopFirefoxUserAgent
+            return APWebBrowserAgentBuilder.builder().withDevice(MacDevice()).withBrowser(FirefoxBrowser(version: "137.0")).generate()
         }
 
         return nil

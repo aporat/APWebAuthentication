@@ -26,7 +26,8 @@ let package = Package(
         .package(url: "https://github.com/SwifterSwift/SwifterSwift.git", from: "7.0.0"),
         .package(url: "https://github.com/SwiftyJSON/SwiftyJSON.git", from: "5.0.0"),
         .package(url: "https://github.com/sunshinejr/SwiftyUserDefaults.git", from: "5.0.0"),
-        .package(url: "https://github.com/devicekit/DeviceKit.git", from: "5.0.0")
+        .package(url: "https://github.com/devicekit/DeviceKit.git", from: "5.0.0"),
+        .package(path: "../APUserAgentGenerator")
 
     ],
     targets: [
@@ -43,7 +44,8 @@ let package = Package(
                 "SwifterSwift",
                 "SwiftyJSON",
                 "SwiftyUserDefaults",
-                "DeviceKit"
+                "DeviceKit",
+                "APUserAgentGenerator"
             ]
         ),
         .testTarget(
