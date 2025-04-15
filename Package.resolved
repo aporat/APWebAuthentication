@@ -10,6 +10,15 @@
       }
     },
     {
+      "identity" : "apuseragentgenerator",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/aporat/APUserAgentGenerator",
+      "state" : {
+        "revision" : "dbadec5371076e6e83a61e11b17775aedd8e1ada",
+        "version" : "1.3.0"
+      }
+    },
+    {
       "identity" : "cryptoswift",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/krzyzanowskim/CryptoSwift.git",
@@ -88,15 +97,6 @@
       "state" : {
         "revision" : "af76cf3ef710b6ca5f8c05f3a31307d44a3c5828",
         "version" : "5.0.2"
-      }
-    },
-    {
-      "identity" : "swiftyrsa",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/TakeScoop/SwiftyRSA.git",
-      "state" : {
-        "revision" : "6521919ad0e99dff927685f142d8136479acb452",
-        "version" : "1.8.0"
       }
     },
     {

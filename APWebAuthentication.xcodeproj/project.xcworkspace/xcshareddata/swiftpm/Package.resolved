@@ -1,5 +1,5 @@
 {
-  "originHash" : "9799e5083a8f8cc59f47e6f9868d7c32e3047a77c0e0cbe1ae698a14170d1c16",
+  "originHash" : "4e4b9be43457c45b369a3339fa4348a81a96003c472977380ae3e94ebecb3bb6",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -8,6 +8,15 @@
       "state" : {
         "revision" : "513364f870f6bfc468f9d2ff0a95caccc10044c5",
         "version" : "5.10.2"
+      }
+    },
+    {
+      "identity" : "apuseragentgenerator",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/aporat/APUserAgentGenerator.git",
+      "state" : {
+        "revision" : "dbadec5371076e6e83a61e11b17775aedd8e1ada",
+        "version" : "1.3.0"
       }
     },
     {

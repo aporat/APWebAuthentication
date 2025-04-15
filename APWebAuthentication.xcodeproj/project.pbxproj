@@ -45,7 +45,6 @@
 		7743059F2DA1FC2700588966 /* BaseUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305412DA1FC2700588966 /* BaseUser.swift */; };
 		774305A02DA1FC2700588966 /* TikTokWebMediaItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305632DA1FC2700588966 /* TikTokWebMediaItem.swift */; };
 		774305A12DA1FC2700588966 /* Auth2Authentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305252DA1FC2700588966 /* Auth2Authentication.swift */; };
-		774305A22DA1FC2700588966 /* UserAgentBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305792DA1FC2700588966 /* UserAgentBuilder.swift */; };
 		774305A32DA1FC2700588966 /* AccountStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743051E2DA1FC2700588966 /* AccountStore.swift */; };
 		774305A42DA1FC2700588966 /* WebActivitySafari.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743057A2DA1FC2700588966 /* WebActivitySafari.swift */; };
 		774305A52DA1FC2700588966 /* Tag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305452DA1FC2700588966 /* Tag.swift */; };
@@ -104,6 +103,7 @@
 		774305F12DA1FDB100588966 /* DeviceKit in Frameworks */ = {isa = PBXBuildFile; productRef = 774305F02DA1FDB100588966 /* DeviceKit */; };
 		774305F72DA1FDCE00588966 /* APWebAuthenticationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305F62DA1FDCE00588966 /* APWebAuthenticationTests.swift */; };
 		774305F82DA1FDCE00588966 /* APWebAuthenticationErrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305F52DA1FDCE00588966 /* APWebAuthenticationErrorTests.swift */; };
+		777A84712DAEA39700872AB4 /* APUserAgentGenerator in Frameworks */ = {isa = PBXBuildFile; productRef = 777A84702DAEA39700872AB4 /* APUserAgentGenerator */; };
 		778D18802DA2EEB800101D91 /* CryptoSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 778D187F2DA2EEB800101D91 /* CryptoSwift */; };
 /* End PBXBuildFile section */
 
@@ -200,12 +200,16 @@
 		774305762DA1FC2700588966 /* UIApplication+APWebAuthentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIApplication+APWebAuthentication.swift"; sourceTree = "<group>"; };
 		774305772DA1FC2700588966 /* UINavigationController+Progress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UINavigationController+Progress.swift"; sourceTree = "<group>"; };
 		774305782DA1FC2700588966 /* URL+APWebAuthentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+APWebAuthentication.swift"; sourceTree = "<group>"; };
-		774305792DA1FC2700588966 /* UserAgentBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAgentBuilder.swift; sourceTree = "<group>"; };
 		7743057A2DA1FC2700588966 /* WebActivitySafari.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebActivitySafari.swift; sourceTree = "<group>"; };
 		7743057B2DA1FC2700588966 /* WebTokensViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebTokensViewController.swift; sourceTree = "<group>"; };
 		7743057C2DA1FC2700588966 /* WebViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewController.swift; sourceTree = "<group>"; };
 		774305F52DA1FDCE00588966 /* APWebAuthenticationErrorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APWebAuthenticationErrorTests.swift; sourceTree = "<group>"; };
 		774305F62DA1FDCE00588966 /* APWebAuthenticationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APWebAuthenticationTests.swift; sourceTree = "<group>"; };
+		777A84722DAEA3CD00872AB4 /* ci.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = ci.yml; sourceTree = "<group>"; };
+		777A84742DAEA3CD00872AB4 /* dependabot.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = dependabot.yml; sourceTree = "<group>"; };
+		777A84762DAEA3CD00872AB4 /* Gemfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Gemfile; sourceTree = "<group>"; };
+		777A84772DAEA3CD00872AB4 /* Gemfile.lock */ = {isa = PBXFileReference; lastKnownFileType = text; path = Gemfile.lock; sourceTree = "<group>"; };
+		777A84782DAEA3CD00872AB4 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		778D187C2DA2EAFC00101D91 /* CryptoKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CryptoKit.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.4.sdk/System/Library/Frameworks/CryptoKit.framework; sourceTree = DEVELOPER_DIR; };
 		778D4D322D5E3FE0008738C8 /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -225,6 +229,7 @@
 				778D18802DA2EEB800101D91 /* CryptoSwift in Frameworks */,
 				774305E22DA1FD5800588966 /* SnapKit in Frameworks */,
 				774305E82DA1FD7F00588966 /* SwifterSwift in Frameworks */,
+				777A84712DAEA39700872AB4 /* APUserAgentGenerator in Frameworks */,
 				774305D92DA1FD2300588966 /* HTTPStatusCodes in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -244,6 +249,10 @@
 			isa = PBXGroup;
 			children = (
 				778D4D322D5E3FE0008738C8 /* Package.swift */,
+				777A84752DAEA3CD00872AB4 /* .github */,
+				777A84762DAEA3CD00872AB4 /* Gemfile */,
+				777A84772DAEA3CD00872AB4 /* Gemfile.lock */,
+				777A84782DAEA3CD00872AB4 /* README.md */,
 				77BAE9522D90D8E7008CC558 /* Sources */,
 				772F412C2DA19D0B00631B1D /* Tests */,
 				778D187B2DA2EAFC00101D91 /* Frameworks */,
@@ -397,6 +406,23 @@
 			path = Twitter;
 			sourceTree = "<group>";
 		};
+		777A84732DAEA3CD00872AB4 /* workflows */ = {
+			isa = PBXGroup;
+			children = (
+				777A84722DAEA3CD00872AB4 /* ci.yml */,
+			);
+			path = workflows;
+			sourceTree = "<group>";
+		};
+		777A84752DAEA3CD00872AB4 /* .github */ = {
+			isa = PBXGroup;
+			children = (
+				777A84732DAEA3CD00872AB4 /* workflows */,
+				777A84742DAEA3CD00872AB4 /* dependabot.yml */,
+			);
+			path = .github;
+			sourceTree = "<group>";
+		};
 		778D187A2DA2E86000101D91 /* UI */ = {
 			isa = PBXGroup;
 			children = (
@@ -458,7 +484,6 @@
 				7743055C2DA1FC2700588966 /* SessionAuthentication.swift */,
 				7743055D2DA1FC2700588966 /* String+APWebAuthentication.swift */,
 				774305782DA1FC2700588966 /* URL+APWebAuthentication.swift */,
-				774305792DA1FC2700588966 /* UserAgentBuilder.swift */,
 				7743057A2DA1FC2700588966 /* WebActivitySafari.swift */,
 			);
 			path = Sources;
@@ -504,6 +529,7 @@
 				774305ED2DA1FD9F00588966 /* SwiftyUserDefaults */,
 				774305F02DA1FDB100588966 /* DeviceKit */,
 				778D187F2DA2EEB800101D91 /* CryptoSwift */,
+				777A84702DAEA39700872AB4 /* APUserAgentGenerator */,
 			);
 			productName = ProgressToolbar;
 			productReference = 537EDD0424F49F1E003DC54A /* APWebAuthentication.framework */;
@@ -570,6 +596,7 @@
 				774305EC2DA1FD9F00588966 /* XCRemoteSwiftPackageReference "SwiftyUserDefaults" */,
 				774305EF2DA1FDB100588966 /* XCRemoteSwiftPackageReference "DeviceKit" */,
 				778D187E2DA2EEB800101D91 /* XCRemoteSwiftPackageReference "CryptoSwift" */,
+				777A846F2DAEA39700872AB4 /* XCRemoteSwiftPackageReference "APUserAgentGenerator" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 537EDD0524F49F1E003DC54A /* Products */;
@@ -641,7 +668,6 @@
 				7743059F2DA1FC2700588966 /* BaseUser.swift in Sources */,
 				774305A02DA1FC2700588966 /* TikTokWebMediaItem.swift in Sources */,
 				774305A12DA1FC2700588966 /* Auth2Authentication.swift in Sources */,
-				774305A22DA1FC2700588966 /* UserAgentBuilder.swift in Sources */,
 				774305A32DA1FC2700588966 /* AccountStore.swift in Sources */,
 				774305A42DA1FC2700588966 /* WebActivitySafari.swift in Sources */,
 				774305A52DA1FC2700588966 /* Tag.swift in Sources */,
@@ -1043,6 +1069,14 @@
 				minimumVersion = 5.6.0;
 			};
 		};
+		777A846F2DAEA39700872AB4 /* XCRemoteSwiftPackageReference "APUserAgentGenerator" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/aporat/APUserAgentGenerator.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.3.0;
+			};
+		};
 		778D187E2DA2EEB800101D91 /* XCRemoteSwiftPackageReference "CryptoSwift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/krzyzanowskim/CryptoSwift.git";
@@ -1103,6 +1137,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 774305EF2DA1FDB100588966 /* XCRemoteSwiftPackageReference "DeviceKit" */;
 			productName = DeviceKit;
+		};
+		777A84702DAEA39700872AB4 /* APUserAgentGenerator */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 777A846F2DAEA39700872AB4 /* XCRemoteSwiftPackageReference "APUserAgentGenerator" */;
+			productName = APUserAgentGenerator;
 		};
 		778D187F2DA2EEB800101D91 /* CryptoSwift */ = {
 			isa = XCSwiftPackageProductDependency;
