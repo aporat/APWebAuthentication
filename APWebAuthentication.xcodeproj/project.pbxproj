@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 56;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -577,6 +577,7 @@
 				};
 			};
 			buildConfigurationList = 537EDCFE24F49F1E003DC54A /* Build configuration list for PBXProject "APWebAuthentication" */;
+			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -598,7 +599,6 @@
 				778D187E2DA2EEB800101D91 /* XCRemoteSwiftPackageReference "CryptoSwift" */,
 				777A846F2DAEA39700872AB4 /* XCRemoteSwiftPackageReference "APUserAgentGenerator" */,
 			);
-			preferredProjectObjectVersion = 77;
 			productRefGroup = 537EDD0524F49F1E003DC54A /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -923,6 +923,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -942,6 +943,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
