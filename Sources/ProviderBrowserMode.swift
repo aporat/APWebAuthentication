@@ -3,6 +3,7 @@ public enum ProviderBrowserMode: String {
     case `default`
     case webView = "webview"
     case ios
+    case iosChrome = "ios-chrome"
     case iphone
     case android
     case desktop

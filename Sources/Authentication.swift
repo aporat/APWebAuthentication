@@ -22,14 +22,16 @@ open class Authentication {
             return currentUserAgent
         } else if browserMode == .default || browserMode == .ios || browserMode == .iphone {
             return APWebBrowserAgentBuilder.builder().generate()
+        } else if browserMode == .iosChrome {
+            return APWebBrowserAgentBuilder.builder().withDevice(iOSDevice()).withBrowser(ChromeBrowser()).generate()
         } else if browserMode == .webView {
             return nil
         } else if browserMode == .android {
             return APWebBrowserAgentBuilder.builder().withDevice(AndroidDevice(deviceModel: "Pixel 7")).withBrowser(ChromeBrowser(version: "123.0.6312.86")).generate()
         } else if browserMode == .desktop {
-            return APWebBrowserAgentBuilder.builder().withDevice(MacDevice()).withBrowser(ChromeBrowser(version: "123.0.6312.86")).generate()
+            return APWebBrowserAgentBuilder.builder().withDevice(MacDevice()).withBrowser(ChromeBrowser()).generate()
         } else if browserMode == .desktopFirefox {
-            return APWebBrowserAgentBuilder.builder().withDevice(MacDevice()).withBrowser(FirefoxBrowser(version: "137.0")).generate()
+            return APWebBrowserAgentBuilder.builder().withDevice(MacDevice()).withBrowser(FirefoxBrowser()).generate()
         }
 
         return nil
