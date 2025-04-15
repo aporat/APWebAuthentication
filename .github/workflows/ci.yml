@@ -44,8 +44,8 @@ jobs:
           set -o pipefail && \
           xcodebuild \
             -scheme "${{ env.scheme }}" \
-            -destination "${{ matrix.platform == 'macOS' && 'platform=macOS,arch=x86_64' || format('platform={0},name={1},OS={2}', matrix.platform, matrix.device, matrix.os) }}" \
-            -enableCodeCoverage YES \
+            -destination 'platform=${{ matrix.platform }},name=${{ matrix.device }},OS=${{ matrix.os }}' \
+             -enableCodeCoverage YES \
             -derivedDataPath ./DerivedData \
             -resultBundlePath ./TestResults.xcresult \
             test
