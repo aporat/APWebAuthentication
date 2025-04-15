@@ -44,11 +44,13 @@ let package = Package(
                 "SwiftyUserDefaults",
                 "DeviceKit",
                 "APUserAgentGenerator"
-            ]
+            ],
+            path: "Sources"
         ),
         .testTarget(
             name: "APWebAuthenticationTests",
-            dependencies: ["APWebAuthentication"]
+            dependencies: ["APWebAuthentication"],
+            path: "Tests"
         )
     ],
     swiftLanguageVersions: [.v5]
