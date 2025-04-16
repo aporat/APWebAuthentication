@@ -1,5 +1,5 @@
-import SwiftyJSON
 import Foundation
+import SwiftyJSON
 
 public final class TwitterUser: BaseUser {
     public required init?(info: JSON) {

@@ -1,3 +1,4 @@
+import Foundation
 
 public enum ProviderBrowserMode: String {
     case `default`

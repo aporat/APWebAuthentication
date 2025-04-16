@@ -1,4 +1,4 @@
-import UIKit
+import Foundation
 import WebKit
 
 public final class FiveHundredspxWebAuthViewController: AuthViewController {

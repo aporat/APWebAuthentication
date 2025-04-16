@@ -1,6 +1,6 @@
+import Foundation
 import Alamofire
 import SwiftyJSON
-import Foundation
 
 public final class RedditAPIClient: AuthClient {
     fileprivate var requestAdapter: OAuth2RequestAdapter

@@ -1,5 +1,5 @@
+import Foundation
 import Alamofire
-import UIKit
 
 internal enum SCTokenLocation: Int {
     case authorizationHeader, params

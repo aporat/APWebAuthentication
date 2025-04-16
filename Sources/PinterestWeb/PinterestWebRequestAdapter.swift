@@ -1,5 +1,5 @@
+import Foundation
 import Alamofire
-import UIKit
 
 final class PinterestWebRequestAdapter: RequestAdapter {
     var auth: PinterestWebAuthentication

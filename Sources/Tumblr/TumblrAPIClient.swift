@@ -1,3 +1,4 @@
+import Foundation
 import Alamofire
 
 public final class TumblrAPIClient: OAuth1Client {

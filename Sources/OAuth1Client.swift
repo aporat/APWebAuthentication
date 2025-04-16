@@ -1,6 +1,6 @@
+import Foundation
 import Alamofire
 import SwiftyJSON
-import Foundation
 
 open class OAuth1Client: AuthClient {
     fileprivate var requestAdapter: OAuth1RequestAdapter

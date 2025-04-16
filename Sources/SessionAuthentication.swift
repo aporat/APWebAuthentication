@@ -1,5 +1,5 @@
+import Foundation
 import SwifterSwift
-import UIKit
 
 open class SessionAuthentication: Authentication {
     public var keepDeviceSettings = true

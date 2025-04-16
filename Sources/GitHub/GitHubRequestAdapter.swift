@@ -1,5 +1,5 @@
+import Foundation
 import Alamofire
-import UIKit
 
 final class GitHubRequestAdapter: OAuth2RequestAdapter {
     override init(auth: Auth2Authentication) {

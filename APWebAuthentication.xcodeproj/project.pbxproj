@@ -51,7 +51,6 @@
 		774305A62DA1FC2700588966 /* TumblrUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743056C2DA1FC2700588966 /* TumblrUser.swift */; };
 		774305A72DA1FC2700588966 /* AccountType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743051F2DA1FC2700588966 /* AccountType.swift */; };
 		774305A82DA1FC2700588966 /* ProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305572DA1FC2700588966 /* ProgressView.swift */; };
-		774305A92DA1FC2700588966 /* UIApplication+APWebAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305762DA1FC2700588966 /* UIApplication+APWebAuthentication.swift */; };
 		774305AA2DA1FC2700588966 /* TikTokWebSignatureController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305672DA1FC2700588966 /* TikTokWebSignatureController.swift */; };
 		774305AB2DA1FC2700588966 /* FoursquareAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305372DA1FC2700588966 /* FoursquareAPIClient.swift */; };
 		774305AC2DA1FC2700588966 /* TikTokWebAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305612DA1FC2700588966 /* TikTokWebAuthentication.swift */; };
@@ -71,7 +70,6 @@
 		774305BA2DA1FC2700588966 /* RedditAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305592DA1FC2700588966 /* RedditAPIClient.swift */; };
 		774305BB2DA1FC2700588966 /* APWebAuthenticationError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305212DA1FC2700588966 /* APWebAuthenticationError.swift */; };
 		774305BC2DA1FC2700588966 /* MediaItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305432DA1FC2700588966 /* MediaItem.swift */; };
-		774305BD2DA1FC2700588966 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743052E2DA1FC2700588966 /* Extensions.swift */; };
 		774305BE2DA1FC2700588966 /* AuthViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743052A2DA1FC2700588966 /* AuthViewController.swift */; };
 		774305BF2DA1FC2700588966 /* WebViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743057C2DA1FC2700588966 /* WebViewController.swift */; };
 		774305C02DA1FC2700588966 /* OAuth2RequestAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743054B2DA1FC2700588966 /* OAuth2RequestAdapter.swift */; };
@@ -105,6 +103,7 @@
 		774305F82DA1FDCE00588966 /* APWebAuthenticationErrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305F52DA1FDCE00588966 /* APWebAuthenticationErrorTests.swift */; };
 		777A84712DAEA39700872AB4 /* APUserAgentGenerator in Frameworks */ = {isa = PBXBuildFile; productRef = 777A84702DAEA39700872AB4 /* APUserAgentGenerator */; };
 		778D18802DA2EEB800101D91 /* CryptoSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 778D187F2DA2EEB800101D91 /* CryptoSwift */; };
+		77E253152DB03F1000B73036 /* UIApplication+APWebAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77E253142DB03F1000B73036 /* UIApplication+APWebAuthentication.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -136,7 +135,6 @@
 		7743052B2DA1FC2700588966 /* BaseAuthViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseAuthViewController.swift; sourceTree = "<group>"; };
 		7743052C2DA1FC2700588966 /* Data+APWebAuthentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data+APWebAuthentication.swift"; sourceTree = "<group>"; };
 		7743052D2DA1FC2700588966 /* Error+APWebAuthentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Error+APWebAuthentication.swift"; sourceTree = "<group>"; };
-		7743052E2DA1FC2700588966 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		7743052F2DA1FC2700588966 /* FiveHundredspxWebAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiveHundredspxWebAPIClient.swift; sourceTree = "<group>"; };
 		774305302DA1FC2700588966 /* FiveHundredspxWebAuthController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiveHundredspxWebAuthController.swift; sourceTree = "<group>"; };
 		774305312DA1FC2700588966 /* FiveHundredspxWebAuthentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiveHundredspxWebAuthentication.swift; sourceTree = "<group>"; };
@@ -197,7 +195,6 @@
 		774305722DA1FC2700588966 /* TwitterAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwitterAPIClient.swift; sourceTree = "<group>"; };
 		774305732DA1FC2700588966 /* TwitterPost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwitterPost.swift; sourceTree = "<group>"; };
 		774305742DA1FC2700588966 /* TwitterUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwitterUser.swift; sourceTree = "<group>"; };
-		774305762DA1FC2700588966 /* UIApplication+APWebAuthentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIApplication+APWebAuthentication.swift"; sourceTree = "<group>"; };
 		774305772DA1FC2700588966 /* UINavigationController+Progress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UINavigationController+Progress.swift"; sourceTree = "<group>"; };
 		774305782DA1FC2700588966 /* URL+APWebAuthentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+APWebAuthentication.swift"; sourceTree = "<group>"; };
 		7743057A2DA1FC2700588966 /* WebActivitySafari.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebActivitySafari.swift; sourceTree = "<group>"; };
@@ -212,6 +209,7 @@
 		777A84782DAEA3CD00872AB4 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		778D187C2DA2EAFC00101D91 /* CryptoKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CryptoKit.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.4.sdk/System/Library/Frameworks/CryptoKit.framework; sourceTree = DEVELOPER_DIR; };
 		778D4D322D5E3FE0008738C8 /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
+		77E253142DB03F1000B73036 /* UIApplication+APWebAuthentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIApplication+APWebAuthentication.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -430,7 +428,6 @@
 				774305292DA1FC2700588966 /* AuthNavBarView.swift */,
 				7743052A2DA1FC2700588966 /* AuthViewController.swift */,
 				7743052B2DA1FC2700588966 /* BaseAuthViewController.swift */,
-				774305762DA1FC2700588966 /* UIApplication+APWebAuthentication.swift */,
 				774305772DA1FC2700588966 /* UINavigationController+Progress.swift */,
 				7743057B2DA1FC2700588966 /* WebTokensViewController.swift */,
 				7743057C2DA1FC2700588966 /* WebViewController.swift */,
@@ -464,6 +461,7 @@
 				7743051E2DA1FC2700588966 /* AccountStore.swift */,
 				7743051F2DA1FC2700588966 /* AccountType.swift */,
 				774305202DA1FC2700588966 /* APWebAuthentication.h */,
+				77E253142DB03F1000B73036 /* UIApplication+APWebAuthentication.swift */,
 				774305212DA1FC2700588966 /* APWebAuthenticationError.swift */,
 				774305222DA1FC2700588966 /* APWebAuthenticationLink.swift */,
 				774305232DA1FC2700588966 /* APWebAuthenticationSession.swift */,
@@ -474,7 +472,6 @@
 				774305282DA1FC2700588966 /* Authentication.swift */,
 				7743052C2DA1FC2700588966 /* Data+APWebAuthentication.swift */,
 				7743052D2DA1FC2700588966 /* Error+APWebAuthentication.swift */,
-				7743052E2DA1FC2700588966 /* Extensions.swift */,
 				7743053F2DA1FC2700588966 /* JSON+APWebAuthentication.swift */,
 				774305482DA1FC2700588966 /* OAuth1Client.swift */,
 				774305492DA1FC2700588966 /* OAuth1RequestAdapter.swift */,
@@ -674,7 +671,6 @@
 				774305A62DA1FC2700588966 /* TumblrUser.swift in Sources */,
 				774305A72DA1FC2700588966 /* AccountType.swift in Sources */,
 				774305A82DA1FC2700588966 /* ProgressView.swift in Sources */,
-				774305A92DA1FC2700588966 /* UIApplication+APWebAuthentication.swift in Sources */,
 				774305AA2DA1FC2700588966 /* TikTokWebSignatureController.swift in Sources */,
 				774305AB2DA1FC2700588966 /* FoursquareAPIClient.swift in Sources */,
 				774305AC2DA1FC2700588966 /* TikTokWebAuthentication.swift in Sources */,
@@ -694,10 +690,10 @@
 				774305BA2DA1FC2700588966 /* RedditAPIClient.swift in Sources */,
 				774305BB2DA1FC2700588966 /* APWebAuthenticationError.swift in Sources */,
 				774305BC2DA1FC2700588966 /* MediaItem.swift in Sources */,
-				774305BD2DA1FC2700588966 /* Extensions.swift in Sources */,
 				774305BE2DA1FC2700588966 /* AuthViewController.swift in Sources */,
 				774305BF2DA1FC2700588966 /* WebViewController.swift in Sources */,
 				774305C02DA1FC2700588966 /* OAuth2RequestAdapter.swift in Sources */,
+				77E253152DB03F1000B73036 /* UIApplication+APWebAuthentication.swift in Sources */,
 				774305C12DA1FC2700588966 /* FiveHundredspxWebAuthentication.swift in Sources */,
 				774305C22DA1FC2700588966 /* AuthNavBarView.swift in Sources */,
 				774305C32DA1FC2700588966 /* FiveHundredspxWebUser.swift in Sources */,

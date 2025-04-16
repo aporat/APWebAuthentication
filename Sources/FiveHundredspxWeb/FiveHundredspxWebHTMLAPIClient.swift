@@ -1,5 +1,5 @@
+import Foundation
 import Alamofire
-import UIKit
 
 public final class FiveHundredspxWebHTMLAPIClient: AuthClient {
     fileprivate var requestAdapter: FiveHundredspxWebHTMLRequestAdapter

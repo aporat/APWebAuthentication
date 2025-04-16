@@ -1,5 +1,5 @@
+import Foundation
 import SwiftyJSON
-import UIKit
 
 public final class TikTokWebMediaComment: MediaComment {
     public var commentId: String

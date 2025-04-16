@@ -1,5 +1,5 @@
+import Foundation
 import Alamofire
-import UIKit
 
 final class TikTokWebRequestAdapter: RequestAdapter {
     var auth: TikTokWebAuthentication

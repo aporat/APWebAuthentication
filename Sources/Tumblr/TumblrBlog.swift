@@ -1,5 +1,5 @@
-import SwiftyJSON
 import Foundation
+import SwiftyJSON
 
 public final class TumblrBlog: BaseUser {
     public var name: String?

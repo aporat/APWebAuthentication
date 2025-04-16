@@ -1,5 +1,5 @@
-import Alamofire
 import Foundation
+import Alamofire
 
 public extension Error {
     var isConnectionError: Bool {

@@ -1,5 +1,5 @@
-import SwiftyJSON
 import Foundation
+import SwiftyJSON
 
 public final class FoursquareUser: BaseUser {
     public required init?(info: JSON) {

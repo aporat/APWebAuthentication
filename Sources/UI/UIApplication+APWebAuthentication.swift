@@ -1,5 +1,0 @@
-import UIKit
-
-extension UIApplication {
-
-}

@@ -1,4 +1,4 @@
-import UIKit
+import Foundation
 
 public final class Auth2Authentication: Authentication {
     enum Keys {

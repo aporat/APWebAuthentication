@@ -1,5 +1,5 @@
-import SwiftyJSON
 import Foundation
+import SwiftyJSON
 
 public final class TikTokWebMediaItem: MediaItem, Hashable {
     public var type = MediaItemType.video

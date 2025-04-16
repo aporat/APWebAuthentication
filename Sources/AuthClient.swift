@@ -1,5 +1,5 @@
+import Foundation
 import Alamofire
-import UIKit
 import CryptoKit
 
 public enum ProviderAuthMode: String {

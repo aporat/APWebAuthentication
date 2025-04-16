@@ -1,4 +1,4 @@
-import UIKit
+import Foundation
 
 public final class PinterestWebAuthentication: SessionAuthentication {
     enum Keys {

@@ -1,7 +1,7 @@
+import Foundation
 import Alamofire
 import CryptoSwift
 import SwifterSwift
-import Foundation
 
 open class OAuth1RequestAdapter: RequestAdapter {
     var dataEncoding: String.Encoding = .utf8

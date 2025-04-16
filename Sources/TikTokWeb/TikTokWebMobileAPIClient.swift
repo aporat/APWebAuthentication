@@ -1,5 +1,5 @@
+import Foundation
 import Alamofire
-import UIKit
 
 public final class TikTokWebMobileAPIClient: AuthClient {
     fileprivate var requestAdapter: TikTokWebMobileRequestAdapter

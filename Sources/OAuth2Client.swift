@@ -1,5 +1,5 @@
+import Foundation
 import Alamofire
-import UIKit
 
 open class OAuth2Client: AuthClient {
     var requestAdapter: OAuth2RequestAdapter

@@ -1,5 +1,5 @@
+import Foundation
 import Alamofire
-import UIKit
 
 final class FoursquareRequestAdapter: OAuth2RequestAdapter {
     override func adapt(_ urlRequest: URLRequest, for session: Session, completion: @escaping (Result<URLRequest, Error>) -> Void) {

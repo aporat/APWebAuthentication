@@ -1,5 +1,5 @@
-import SwiftyJSON
 import Foundation
+import SwiftyJSON
 
 public enum MediaItemType: Int16 {
     case photo = 1

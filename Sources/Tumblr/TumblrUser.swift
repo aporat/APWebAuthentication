@@ -1,5 +1,5 @@
-import SwiftyJSON
 import Foundation
+import SwiftyJSON
 
 public final class TumblrUser: BaseUser {
     public var blogs = [TumblrBlog]()

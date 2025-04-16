@@ -1,5 +1,5 @@
-import SwiftyJSON
 import Foundation
+import SwiftyJSON
 
 public final class TwitterPost: MediaItem, Hashable {
     public var type = MediaItemType.post

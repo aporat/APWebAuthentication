@@ -1,7 +1,6 @@
+import Foundation
 import Alamofire
 import SwiftyJSON
-import UIKit
-
 
 public final class FiveHundredspxWebAPIClient: AuthClient {
     fileprivate var requestAdapter: FiveHundredspxWebRequestAdapter

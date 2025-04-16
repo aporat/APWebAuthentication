@@ -1,4 +1,4 @@
-import UIKit
+import Foundation
 
 public final class TikTokWebAuthentication: SessionAuthentication {
     enum Keys {

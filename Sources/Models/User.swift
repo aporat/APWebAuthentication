@@ -1,4 +1,4 @@
-import CoreData
+import Foundation
 
 public protocol User {
     var userId: String { get set }

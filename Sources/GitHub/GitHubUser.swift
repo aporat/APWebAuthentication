@@ -1,3 +1,4 @@
+import Foundation
 import SwiftyJSON
 
 public final class GitHubUser: BaseUser {

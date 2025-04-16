@@ -1,6 +1,6 @@
+import Foundation
 import Alamofire
 import SwiftyJSON
-import Foundation
 
 public final class TwitchAPIClient: AuthClient {
     fileprivate var requestAdapter: TwitchRequestAdapter
