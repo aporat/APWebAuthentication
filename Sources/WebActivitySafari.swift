@@ -1,5 +1,6 @@
 import UIKit
 
+@MainActor
 class WebActivitySafari: UIActivity {
     override class var activityCategory: UIActivity.Category {
         .action

@@ -5,7 +5,7 @@ internal enum SCTokenLocation: Int {
     case authorizationHeader, params
 }
 
-open class OAuth2RequestAdapter: RequestAdapter {
+open class OAuth2RequestAdapter: RequestAdapter, @unchecked Sendable {
     var tokenParamName = "access_token"
     var tokenHeaderParamName = "Bearer"
     var tokenLocation: SCTokenLocation = .params

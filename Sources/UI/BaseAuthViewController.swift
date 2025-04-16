@@ -209,11 +209,7 @@ open class BaseAuthViewController: UIViewController, WKNavigationDelegate {
             setupToolbarItems()
         }
         
-        if statusBarStyle == .lightContent {
-            activityIndicator.style = .white
-        } else {
-            activityIndicator.style = .gray
-        }
+        activityIndicator.style = .medium
         
         view.setNeedsUpdateConstraints()
     }

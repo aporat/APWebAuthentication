@@ -1,7 +1,7 @@
 import Foundation
 import Alamofire
 
-final class TikTokWebRequestAdapter: RequestAdapter {
+final class TikTokWebRequestAdapter: RequestAdapter, @unchecked Sendable {
     var auth: TikTokWebAuthentication
 
     init(auth: TikTokWebAuthentication) {

@@ -3,7 +3,7 @@ import Alamofire
 import CryptoSwift
 import SwifterSwift
 
-open class OAuth1RequestAdapter: RequestAdapter {
+open class OAuth1RequestAdapter: RequestAdapter, @unchecked Sendable {
     var dataEncoding: String.Encoding = .utf8
     var auth: Auth1Authentication
     var consumerKey: String

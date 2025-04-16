@@ -1,7 +1,7 @@
 import Foundation
 import Alamofire
 
-final class PinterestWebHTMLRequestAdapter: RequestAdapter {
+final class PinterestWebHTMLRequestAdapter: RequestAdapter, @unchecked Sendable {
     var auth: PinterestWebAuthentication
 
     init(auth: PinterestWebAuthentication) {

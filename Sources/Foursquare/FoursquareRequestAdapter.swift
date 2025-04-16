@@ -1,7 +1,7 @@
 import Foundation
 import Alamofire
 
-final class FoursquareRequestAdapter: OAuth2RequestAdapter {
+final class FoursquareRequestAdapter: OAuth2RequestAdapter, @unchecked Sendable {
     override func adapt(_ urlRequest: URLRequest, for session: Session, completion: @escaping (Result<URLRequest, Error>) -> Void) {
         var urlRequest = urlRequest
 

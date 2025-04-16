@@ -1,7 +1,7 @@
 import Foundation
 import Alamofire
 
-final class FiveHundredspxWebRequestAdapter: RequestAdapter {
+final class FiveHundredspxWebRequestAdapter: RequestAdapter, @unchecked Sendable {
     var auth: FiveHundredspxWebAuthentication
 
     init(auth: FiveHundredspxWebAuthentication) {
