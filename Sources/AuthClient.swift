@@ -27,8 +27,8 @@ public extension AuthClient {
 open class AuthClient {
     public var baseURLString: String
     open var sessionManager: Session!
-    open var requestRetrier: AuthClientRequestRetrier
-    open var requestInterceptor: RequestInterceptor
+    open var requestRetrier = AuthClientRequestRetrier()
+    open var requestInterceptor: RequestInterceptor!
 
     open func makeSessionManager(configuration: URLSessionConfiguration) -> Session {
         Session(configuration: configuration, delegate: SessionDelegate(), interceptor: requestInterceptor)
@@ -54,8 +54,6 @@ open class AuthClient {
 
     public init(baseURLString: String) {
         self.baseURLString = baseURLString
-        requestRetrier = AuthClientRequestRetrier()
-        requestInterceptor = Interceptor(adapters: [], retriers: [requestRetrier])
     }
 
     @discardableResult

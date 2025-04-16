@@ -15,7 +15,7 @@ public final class TikTokWebAPIClient: AuthClient {
 
         requestInterceptor = Interceptor(adapters: [requestAdapter], retriers: [requestRetrier])
 
-        let configuration = URLSessionConfiguration.default
+        let configuration = URLSessionConfiguration.ephemeral
         configuration.httpCookieStorage = auth.cookieStorage
         sessionManager = makeSessionManager(configuration: configuration)
     }

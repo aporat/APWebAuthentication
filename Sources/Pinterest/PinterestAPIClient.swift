@@ -1,6 +1,6 @@
+import Foundation
 import Alamofire
 import SwiftyJSON
-import Foundation
 
 public final class PinterestAPIClient: AuthClient {
     fileprivate var requestAdapter: OAuth2RequestAdapter
@@ -13,7 +13,6 @@ public final class PinterestAPIClient: AuthClient {
         requestAdapter = OAuth2RequestAdapter(auth: auth)
         requestAdapter.tokenLocation = .authorizationHeader
         super.init(baseURLString: baseURLString)
-
         requestInterceptor = Interceptor(adapters: [requestAdapter], retriers: [requestRetrier])
 
         let configuration = URLSessionConfiguration.ephemeral

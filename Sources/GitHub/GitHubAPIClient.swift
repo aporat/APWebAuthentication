@@ -1,6 +1,6 @@
+import Foundation
 import Alamofire
 import SwiftyJSON
-import Foundation
 
 public class GitHubAPIClient: AuthClient {
     fileprivate var requestAdapter: GitHubRequestAdapter
@@ -12,7 +12,6 @@ public class GitHubAPIClient: AuthClient {
     public init(baseURLString: String, auth: Auth2Authentication) {
         requestAdapter = GitHubRequestAdapter(auth: auth)
         super.init(baseURLString: baseURLString)
-
         requestInterceptor = Interceptor(adapters: [requestAdapter], retriers: [requestRetrier])
 
         let configuration = URLSessionConfiguration.ephemeral

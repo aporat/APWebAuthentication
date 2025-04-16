@@ -45,7 +45,6 @@ public final class PinterestWebAuthentication: SessionAuthentication {
             Keys.appId: appId,
             Keys.browserMode: browserMode?.rawValue,
             Keys.customUserAgent: customUserAgent,
-
             Keys.sessionId: sessionId,
             Keys.csrfToken: csrfToken,
             Keys.username: username,

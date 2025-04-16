@@ -1,5 +1,5 @@
+import Foundation
 import Alamofire
-import UIKit
 
 public final class PinterestWebHTMLAPIClient: AuthClient {
     fileprivate var requestAdapter: PinterestWebHTMLRequestAdapter
@@ -11,8 +11,9 @@ public final class PinterestWebHTMLAPIClient: AuthClient {
     public init(baseURLString: String, auth: PinterestWebAuthentication) {
         requestAdapter = PinterestWebHTMLRequestAdapter(auth: auth)
         super.init(baseURLString: baseURLString)
+        requestInterceptor = Interceptor(adapters: [requestAdapter], retriers: [requestRetrier])
 
-        let configuration = URLSessionConfiguration.default
+        let configuration = URLSessionConfiguration.ephemeral
         configuration.httpCookieStorage = auth.cookieStorage
         sessionManager = makeSessionManager(configuration: configuration)
     }
