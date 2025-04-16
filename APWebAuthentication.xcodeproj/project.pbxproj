@@ -115,6 +115,12 @@
 		77E2532C2DB045E000B73036 /* AuthClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77E2532B2DB045DE00B73036 /* AuthClientTests.swift */; };
 		77E2532E2DB0462B00B73036 /* OAuth1ClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77E2532D2DB0462A00B73036 /* OAuth1ClientTests.swift */; };
 		77E253302DB0465700B73036 /* OAuth2ClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77E2532F2DB0465600B73036 /* OAuth2ClientTests.swift */; };
+		77E253432DB04CCA00B73036 /* PinterestWebUserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77E253402DB04CCA00B73036 /* PinterestWebUserTests.swift */; };
+		77E253442DB04CCA00B73036 /* RedditUserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77E253412DB04CCA00B73036 /* RedditUserTests.swift */; };
+		77E253452DB04CCA00B73036 /* PinterestUserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77E2533F2DB04CCA00B73036 /* PinterestUserTests.swift */; };
+		77E253462DB04CCA00B73036 /* FoursquareUserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77E2533D2DB04CCA00B73036 /* FoursquareUserTests.swift */; };
+		77E253472DB04CCA00B73036 /* TumblrUserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77E253422DB04CCA00B73036 /* TumblrUserTests.swift */; };
+		77E253482DB04CCA00B73036 /* GitHubUserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77E2533E2DB04CCA00B73036 /* GitHubUserTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -232,6 +238,12 @@
 		77E2532B2DB045DE00B73036 /* AuthClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthClientTests.swift; sourceTree = "<group>"; };
 		77E2532D2DB0462A00B73036 /* OAuth1ClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuth1ClientTests.swift; sourceTree = "<group>"; };
 		77E2532F2DB0465600B73036 /* OAuth2ClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuth2ClientTests.swift; sourceTree = "<group>"; };
+		77E2533D2DB04CCA00B73036 /* FoursquareUserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoursquareUserTests.swift; sourceTree = "<group>"; };
+		77E2533E2DB04CCA00B73036 /* GitHubUserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitHubUserTests.swift; sourceTree = "<group>"; };
+		77E2533F2DB04CCA00B73036 /* PinterestUserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinterestUserTests.swift; sourceTree = "<group>"; };
+		77E253402DB04CCA00B73036 /* PinterestWebUserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinterestWebUserTests.swift; sourceTree = "<group>"; };
+		77E253412DB04CCA00B73036 /* RedditUserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RedditUserTests.swift; sourceTree = "<group>"; };
+		77E253422DB04CCA00B73036 /* TumblrUserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TumblrUserTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -292,6 +304,12 @@
 		772F412C2DA19D0B00631B1D /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				77E2533D2DB04CCA00B73036 /* FoursquareUserTests.swift */,
+				77E2533E2DB04CCA00B73036 /* GitHubUserTests.swift */,
+				77E2533F2DB04CCA00B73036 /* PinterestUserTests.swift */,
+				77E253402DB04CCA00B73036 /* PinterestWebUserTests.swift */,
+				77E253412DB04CCA00B73036 /* RedditUserTests.swift */,
+				77E253422DB04CCA00B73036 /* TumblrUserTests.swift */,
 				77E2532F2DB0465600B73036 /* OAuth2ClientTests.swift */,
 				77E2532D2DB0462A00B73036 /* OAuth1ClientTests.swift */,
 				77E2532B2DB045DE00B73036 /* AuthClientTests.swift */,
@@ -758,6 +776,12 @@
 				77E2532A2DB0458000B73036 /* ErrorExtensionTests.swift in Sources */,
 				77E253242DB0449D00B73036 /* JSONExtensionTests.swift in Sources */,
 				774305F82DA1FDCE00588966 /* APWebAuthenticationErrorTests.swift in Sources */,
+				77E253432DB04CCA00B73036 /* PinterestWebUserTests.swift in Sources */,
+				77E253442DB04CCA00B73036 /* RedditUserTests.swift in Sources */,
+				77E253452DB04CCA00B73036 /* PinterestUserTests.swift in Sources */,
+				77E253462DB04CCA00B73036 /* FoursquareUserTests.swift in Sources */,
+				77E253472DB04CCA00B73036 /* TumblrUserTests.swift in Sources */,
+				77E253482DB04CCA00B73036 /* GitHubUserTests.swift in Sources */,
 				77E253302DB0465700B73036 /* OAuth2ClientTests.swift in Sources */,
 				77E253202DB0442600B73036 /* ProviderBrowserModeTests.swift in Sources */,
 				77E253262DB044FF00B73036 /* Auth1AuthenticationTests.swift in Sources */,
