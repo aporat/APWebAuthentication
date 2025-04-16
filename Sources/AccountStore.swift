@@ -14,7 +14,7 @@ public extension DefaultsKeys {
     var FiveHunderdsPx: DefaultsKey<Bool> { .init("kService500px", defaultValue: false) }
     var Twitch: DefaultsKey<Bool> { .init("kServiceTwitch", defaultValue: false) }
     var TikTok: DefaultsKey<Bool> { .init("kServiceTikTok", defaultValue: false) }
-    var Parler: DefaultsKey<Bool> { .init("kServiceParler", defaultValue: true) }
+    var Parler: DefaultsKey<Bool> { .init("kServiceParler", defaultValue: false) }
 }
 
 public final class AccountStore {

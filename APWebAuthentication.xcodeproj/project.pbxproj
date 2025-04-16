@@ -104,6 +104,7 @@
 		777A84712DAEA39700872AB4 /* APUserAgentGenerator in Frameworks */ = {isa = PBXBuildFile; productRef = 777A84702DAEA39700872AB4 /* APUserAgentGenerator */; };
 		778D18802DA2EEB800101D91 /* CryptoSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 778D187F2DA2EEB800101D91 /* CryptoSwift */; };
 		77E253152DB03F1000B73036 /* UIApplication+APWebAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77E253142DB03F1000B73036 /* UIApplication+APWebAuthentication.swift */; };
+		77E2531A2DB0408F00B73036 /* AccountStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77E253192DB0408D00B73036 /* AccountStoreTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -210,6 +211,7 @@
 		778D187C2DA2EAFC00101D91 /* CryptoKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CryptoKit.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.4.sdk/System/Library/Frameworks/CryptoKit.framework; sourceTree = DEVELOPER_DIR; };
 		778D4D322D5E3FE0008738C8 /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
 		77E253142DB03F1000B73036 /* UIApplication+APWebAuthentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIApplication+APWebAuthentication.swift"; sourceTree = "<group>"; };
+		77E253192DB0408D00B73036 /* AccountStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountStoreTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -271,6 +273,7 @@
 			isa = PBXGroup;
 			children = (
 				774305F52DA1FDCE00588966 /* APWebAuthenticationErrorTests.swift */,
+				77E253192DB0408D00B73036 /* AccountStoreTests.swift */,
 				774305F62DA1FDCE00588966 /* APWebAuthenticationTests.swift */,
 			);
 			path = Tests;
@@ -716,6 +719,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				77E2531A2DB0408F00B73036 /* AccountStoreTests.swift in Sources */,
 				774305F72DA1FDCE00588966 /* APWebAuthenticationTests.swift in Sources */,
 				774305F82DA1FDCE00588966 /* APWebAuthenticationErrorTests.swift in Sources */,
 			);
