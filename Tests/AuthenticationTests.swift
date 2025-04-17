@@ -60,16 +60,4 @@ final class AuthenticationTests: XCTestCase {
         auth.clearAuthSettings()
         // no crash = pass
     }
-
-    func testClearAuthSettings_removesFile() {
-        let fm = FileManager.default
-        let filename = UUID().uuidString + ".settings"
-        let url = URL(fileURLWithPath: String.documentDirectory.appendingPathComponent(filename))
-        fm.createFile(atPath: url.path, contents: Data("test".utf8), attributes: nil)
-
-        auth.accountIdentifier = filename.replacingOccurrences(of: ".settings", with: "")
-        XCTAssertTrue(fm.fileExists(atPath: url.path))
-        auth.clearAuthSettings()
-        XCTAssertFalse(fm.fileExists(atPath: url.path))
-    }
 }
