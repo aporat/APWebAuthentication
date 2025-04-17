@@ -10,9 +10,7 @@
 		537EDD0E24F49F1E003DC54A /* APWebAuthentication.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 537EDD0424F49F1E003DC54A /* APWebAuthentication.framework */; };
 		7743057D2DA1FC2700588966 /* GitHubAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743053B2DA1FC2700588966 /* GitHubAPIClient.swift */; };
 		7743057E2DA1FC2700588966 /* Data+APWebAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743052C2DA1FC2700588966 /* Data+APWebAuthentication.swift */; };
-		7743057F2DA1FC2700588966 /* FiveHundredspxWebRequestAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305342DA1FC2700588966 /* FiveHundredspxWebRequestAdapter.swift */; };
 		774305802DA1FC2700588966 /* MediaComment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305422DA1FC2700588966 /* MediaComment.swift */; };
-		774305812DA1FC2700588966 /* FiveHundredspxWebHTMLAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305322DA1FC2700588966 /* FiveHundredspxWebHTMLAPIClient.swift */; };
 		774305822DA1FC2700588966 /* PinterestWebAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743054F2DA1FC2700588966 /* PinterestWebAPIClient.swift */; };
 		774305832DA1FC2700588966 /* OAuth1RequestAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305492DA1FC2700588966 /* OAuth1RequestAdapter.swift */; };
 		774305842DA1FC2700588966 /* TwitchAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743056E2DA1FC2700588966 /* TwitchAPIClient.swift */; };
@@ -23,7 +21,6 @@
 		774305892DA1FC2700588966 /* OAuth2Client.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743054A2DA1FC2700588966 /* OAuth2Client.swift */; };
 		7743058A2DA1FC2700588966 /* GitHubRequestAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743053C2DA1FC2700588966 /* GitHubRequestAdapter.swift */; };
 		7743058B2DA1FC2700588966 /* ProviderBrowserMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305582DA1FC2700588966 /* ProviderBrowserMode.swift */; };
-		7743058C2DA1FC2700588966 /* FiveHundredspxWebAuthController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305302DA1FC2700588966 /* FiveHundredspxWebAuthController.swift */; };
 		7743058D2DA1FC2700588966 /* Authentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305282DA1FC2700588966 /* Authentication.swift */; };
 		7743058E2DA1FC2700588966 /* UINavigationController+Progress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305772DA1FC2700588966 /* UINavigationController+Progress.swift */; };
 		7743058F2DA1FC2700588966 /* PinterestWebAuthController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305502DA1FC2700588966 /* PinterestWebAuthController.swift */; };
@@ -35,7 +32,6 @@
 		774305952DA1FC2700588966 /* TumblrAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743056A2DA1FC2700588966 /* TumblrAPIClient.swift */; };
 		774305962DA1FC2700588966 /* Error+APWebAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743052D2DA1FC2700588966 /* Error+APWebAuthentication.swift */; };
 		774305972DA1FC2700588966 /* JSON+APWebAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743053F2DA1FC2700588966 /* JSON+APWebAuthentication.swift */; };
-		774305982DA1FC2700588966 /* FiveHundredspxWebHTMLRequestAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305332DA1FC2700588966 /* FiveHundredspxWebHTMLRequestAdapter.swift */; };
 		774305992DA1FC2700588966 /* FoursquareRequestAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305382DA1FC2700588966 /* FoursquareRequestAdapter.swift */; };
 		7743059A2DA1FC2700588966 /* URL+APWebAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305782DA1FC2700588966 /* URL+APWebAuthentication.swift */; };
 		7743059B2DA1FC2700588966 /* AuthClientRequestRetrier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305272DA1FC2700588966 /* AuthClientRequestRetrier.swift */; };
@@ -54,7 +50,6 @@
 		774305AA2DA1FC2700588966 /* TikTokWebSignatureController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305672DA1FC2700588966 /* TikTokWebSignatureController.swift */; };
 		774305AB2DA1FC2700588966 /* FoursquareAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305372DA1FC2700588966 /* FoursquareAPIClient.swift */; };
 		774305AC2DA1FC2700588966 /* TikTokWebAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305612DA1FC2700588966 /* TikTokWebAuthentication.swift */; };
-		774305AD2DA1FC2700588966 /* FiveHundredspxWebAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743052F2DA1FC2700588966 /* FiveHundredspxWebAPIClient.swift */; };
 		774305AE2DA1FC2700588966 /* TwitterUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305742DA1FC2700588966 /* TwitterUser.swift */; };
 		774305AF2DA1FC2700588966 /* SessionAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743055C2DA1FC2700588966 /* SessionAuthentication.swift */; };
 		774305B02DA1FC2700588966 /* OAuth1Client.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305482DA1FC2700588966 /* OAuth1Client.swift */; };
@@ -73,9 +68,7 @@
 		774305BE2DA1FC2700588966 /* AuthViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743052A2DA1FC2700588966 /* AuthViewController.swift */; };
 		774305BF2DA1FC2700588966 /* WebViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743057C2DA1FC2700588966 /* WebViewController.swift */; };
 		774305C02DA1FC2700588966 /* OAuth2RequestAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743054B2DA1FC2700588966 /* OAuth2RequestAdapter.swift */; };
-		774305C12DA1FC2700588966 /* FiveHundredspxWebAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305312DA1FC2700588966 /* FiveHundredspxWebAuthentication.swift */; };
 		774305C22DA1FC2700588966 /* AuthNavBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305292DA1FC2700588966 /* AuthNavBarView.swift */; };
-		774305C32DA1FC2700588966 /* FiveHundredspxWebUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305352DA1FC2700588966 /* FiveHundredspxWebUser.swift */; };
 		774305C42DA1FC2700588966 /* TwitterPost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305732DA1FC2700588966 /* TwitterPost.swift */; };
 		774305C52DA1FC2700588966 /* TikTokWebMobileRequestAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774305652DA1FC2700588966 /* TikTokWebMobileRequestAdapter.swift */; };
 		774305C62DA1FC2700588966 /* RedditUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7743055A2DA1FC2700588966 /* RedditUser.swift */; };
@@ -151,13 +144,6 @@
 		7743052B2DA1FC2700588966 /* BaseAuthViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseAuthViewController.swift; sourceTree = "<group>"; };
 		7743052C2DA1FC2700588966 /* Data+APWebAuthentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data+APWebAuthentication.swift"; sourceTree = "<group>"; };
 		7743052D2DA1FC2700588966 /* Error+APWebAuthentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Error+APWebAuthentication.swift"; sourceTree = "<group>"; };
-		7743052F2DA1FC2700588966 /* FiveHundredspxWebAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiveHundredspxWebAPIClient.swift; sourceTree = "<group>"; };
-		774305302DA1FC2700588966 /* FiveHundredspxWebAuthController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiveHundredspxWebAuthController.swift; sourceTree = "<group>"; };
-		774305312DA1FC2700588966 /* FiveHundredspxWebAuthentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiveHundredspxWebAuthentication.swift; sourceTree = "<group>"; };
-		774305322DA1FC2700588966 /* FiveHundredspxWebHTMLAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiveHundredspxWebHTMLAPIClient.swift; sourceTree = "<group>"; };
-		774305332DA1FC2700588966 /* FiveHundredspxWebHTMLRequestAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiveHundredspxWebHTMLRequestAdapter.swift; sourceTree = "<group>"; };
-		774305342DA1FC2700588966 /* FiveHundredspxWebRequestAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiveHundredspxWebRequestAdapter.swift; sourceTree = "<group>"; };
-		774305352DA1FC2700588966 /* FiveHundredspxWebUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiveHundredspxWebUser.swift; sourceTree = "<group>"; };
 		774305372DA1FC2700588966 /* FoursquareAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoursquareAPIClient.swift; sourceTree = "<group>"; };
 		774305382DA1FC2700588966 /* FoursquareRequestAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoursquareRequestAdapter.swift; sourceTree = "<group>"; };
 		774305392DA1FC2700588966 /* FoursquareUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoursquareUser.swift; sourceTree = "<group>"; };
@@ -324,20 +310,6 @@
 			path = Tests;
 			sourceTree = "<group>";
 		};
-		774305362DA1FC2700588966 /* FiveHundredspxWeb */ = {
-			isa = PBXGroup;
-			children = (
-				7743052F2DA1FC2700588966 /* FiveHundredspxWebAPIClient.swift */,
-				774305302DA1FC2700588966 /* FiveHundredspxWebAuthController.swift */,
-				774305312DA1FC2700588966 /* FiveHundredspxWebAuthentication.swift */,
-				774305322DA1FC2700588966 /* FiveHundredspxWebHTMLAPIClient.swift */,
-				774305332DA1FC2700588966 /* FiveHundredspxWebHTMLRequestAdapter.swift */,
-				774305342DA1FC2700588966 /* FiveHundredspxWebRequestAdapter.swift */,
-				774305352DA1FC2700588966 /* FiveHundredspxWebUser.swift */,
-			);
-			path = FiveHundredspxWeb;
-			sourceTree = "<group>";
-		};
 		7743053A2DA1FC2700588966 /* Foursquare */ = {
 			isa = PBXGroup;
 			children = (
@@ -495,7 +467,6 @@
 			isa = PBXGroup;
 			children = (
 				778D187A2DA2E86000101D91 /* UI */,
-				774305362DA1FC2700588966 /* FiveHundredspxWeb */,
 				7743053A2DA1FC2700588966 /* Foursquare */,
 				7743053E2DA1FC2700588966 /* GitHub */,
 				774305472DA1FC2700588966 /* Models */,
@@ -678,9 +649,7 @@
 			files = (
 				7743057D2DA1FC2700588966 /* GitHubAPIClient.swift in Sources */,
 				7743057E2DA1FC2700588966 /* Data+APWebAuthentication.swift in Sources */,
-				7743057F2DA1FC2700588966 /* FiveHundredspxWebRequestAdapter.swift in Sources */,
 				774305802DA1FC2700588966 /* MediaComment.swift in Sources */,
-				774305812DA1FC2700588966 /* FiveHundredspxWebHTMLAPIClient.swift in Sources */,
 				774305822DA1FC2700588966 /* PinterestWebAPIClient.swift in Sources */,
 				774305832DA1FC2700588966 /* OAuth1RequestAdapter.swift in Sources */,
 				774305842DA1FC2700588966 /* TwitchAPIClient.swift in Sources */,
@@ -691,7 +660,6 @@
 				774305892DA1FC2700588966 /* OAuth2Client.swift in Sources */,
 				7743058A2DA1FC2700588966 /* GitHubRequestAdapter.swift in Sources */,
 				7743058B2DA1FC2700588966 /* ProviderBrowserMode.swift in Sources */,
-				7743058C2DA1FC2700588966 /* FiveHundredspxWebAuthController.swift in Sources */,
 				7743058D2DA1FC2700588966 /* Authentication.swift in Sources */,
 				7743058E2DA1FC2700588966 /* UINavigationController+Progress.swift in Sources */,
 				7743058F2DA1FC2700588966 /* PinterestWebAuthController.swift in Sources */,
@@ -703,7 +671,6 @@
 				774305952DA1FC2700588966 /* TumblrAPIClient.swift in Sources */,
 				774305962DA1FC2700588966 /* Error+APWebAuthentication.swift in Sources */,
 				774305972DA1FC2700588966 /* JSON+APWebAuthentication.swift in Sources */,
-				774305982DA1FC2700588966 /* FiveHundredspxWebHTMLRequestAdapter.swift in Sources */,
 				774305992DA1FC2700588966 /* FoursquareRequestAdapter.swift in Sources */,
 				7743059A2DA1FC2700588966 /* URL+APWebAuthentication.swift in Sources */,
 				7743059B2DA1FC2700588966 /* AuthClientRequestRetrier.swift in Sources */,
@@ -722,7 +689,6 @@
 				774305AA2DA1FC2700588966 /* TikTokWebSignatureController.swift in Sources */,
 				774305AB2DA1FC2700588966 /* FoursquareAPIClient.swift in Sources */,
 				774305AC2DA1FC2700588966 /* TikTokWebAuthentication.swift in Sources */,
-				774305AD2DA1FC2700588966 /* FiveHundredspxWebAPIClient.swift in Sources */,
 				774305AE2DA1FC2700588966 /* TwitterUser.swift in Sources */,
 				774305AF2DA1FC2700588966 /* SessionAuthentication.swift in Sources */,
 				774305B02DA1FC2700588966 /* OAuth1Client.swift in Sources */,
@@ -742,9 +708,7 @@
 				774305BF2DA1FC2700588966 /* WebViewController.swift in Sources */,
 				774305C02DA1FC2700588966 /* OAuth2RequestAdapter.swift in Sources */,
 				77E253152DB03F1000B73036 /* UIApplication+APWebAuthentication.swift in Sources */,
-				774305C12DA1FC2700588966 /* FiveHundredspxWebAuthentication.swift in Sources */,
 				774305C22DA1FC2700588966 /* AuthNavBarView.swift in Sources */,
-				774305C32DA1FC2700588966 /* FiveHundredspxWebUser.swift in Sources */,
 				774305C42DA1FC2700588966 /* TwitterPost.swift in Sources */,
 				774305C52DA1FC2700588966 /* TikTokWebMobileRequestAdapter.swift in Sources */,
 				774305C62DA1FC2700588966 /* RedditUser.swift in Sources */,
