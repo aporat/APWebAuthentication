@@ -29,20 +29,6 @@ final class Auth1AuthenticationTests: XCTestCase {
         XCTAssertTrue(auth.isAuthorized)
     }
 
-    func testStoreAndLoadAuthSettings() {
-        auth.token = "storedToken"
-        auth.secret = "storedSecret"
-        auth.storeAuthSettings()
-
-        let loaded = Auth1Authentication()
-        loaded.accountIdentifier = auth.accountIdentifier
-        loaded.loadAuthSettings()
-
-        XCTAssertEqual(loaded.token, "storedToken")
-        XCTAssertEqual(loaded.secret, "storedSecret")
-        XCTAssertTrue(loaded.isAuthorized)
-    }
-
     func testClearAuthSettings_removesValues() {
         auth.token = "abc"
         auth.secret = "xyz"

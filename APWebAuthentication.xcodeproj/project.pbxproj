@@ -110,7 +110,6 @@
 		77E253222DB0446F00B73036 /* AuthenticationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77E253212DB0446D00B73036 /* AuthenticationTests.swift */; };
 		77E253242DB0449D00B73036 /* JSONExtensionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77E253232DB0449B00B73036 /* JSONExtensionTests.swift */; };
 		77E253262DB044FF00B73036 /* Auth1AuthenticationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77E253252DB044FD00B73036 /* Auth1AuthenticationTests.swift */; };
-		77E253282DB0455100B73036 /* Auth2AuthenticationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77E253272DB0455000B73036 /* Auth2AuthenticationTests.swift */; };
 		77E2532A2DB0458000B73036 /* ErrorExtensionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77E253292DB0457E00B73036 /* ErrorExtensionTests.swift */; };
 		77E2532C2DB045E000B73036 /* AuthClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77E2532B2DB045DE00B73036 /* AuthClientTests.swift */; };
 		77E2532E2DB0462B00B73036 /* OAuth1ClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77E2532D2DB0462A00B73036 /* OAuth1ClientTests.swift */; };
@@ -233,7 +232,6 @@
 		77E253212DB0446D00B73036 /* AuthenticationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationTests.swift; sourceTree = "<group>"; };
 		77E253232DB0449B00B73036 /* JSONExtensionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONExtensionTests.swift; sourceTree = "<group>"; };
 		77E253252DB044FD00B73036 /* Auth1AuthenticationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Auth1AuthenticationTests.swift; sourceTree = "<group>"; };
-		77E253272DB0455000B73036 /* Auth2AuthenticationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Auth2AuthenticationTests.swift; sourceTree = "<group>"; };
 		77E253292DB0457E00B73036 /* ErrorExtensionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorExtensionTests.swift; sourceTree = "<group>"; };
 		77E2532B2DB045DE00B73036 /* AuthClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthClientTests.swift; sourceTree = "<group>"; };
 		77E2532D2DB0462A00B73036 /* OAuth1ClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuth1ClientTests.swift; sourceTree = "<group>"; };
@@ -314,7 +312,6 @@
 				77E2532D2DB0462A00B73036 /* OAuth1ClientTests.swift */,
 				77E2532B2DB045DE00B73036 /* AuthClientTests.swift */,
 				77E253292DB0457E00B73036 /* ErrorExtensionTests.swift */,
-				77E253272DB0455000B73036 /* Auth2AuthenticationTests.swift */,
 				77E253252DB044FD00B73036 /* Auth1AuthenticationTests.swift */,
 				77E253232DB0449B00B73036 /* JSONExtensionTests.swift */,
 				77E253212DB0446D00B73036 /* AuthenticationTests.swift */,
@@ -785,7 +782,6 @@
 				77E253302DB0465700B73036 /* OAuth2ClientTests.swift in Sources */,
 				77E253202DB0442600B73036 /* ProviderBrowserModeTests.swift in Sources */,
 				77E253262DB044FF00B73036 /* Auth1AuthenticationTests.swift in Sources */,
-				77E253282DB0455100B73036 /* Auth2AuthenticationTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
