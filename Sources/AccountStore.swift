@@ -11,9 +11,7 @@ public extension DefaultsKeys {
     var Foursquare: DefaultsKey<Bool> { .init("kServiceFoursquare", defaultValue: false) }
     var Reddit: DefaultsKey<Bool> { .init("kServiceReddit", defaultValue: false) }
     var Github: DefaultsKey<Bool> { .init("kServiceGithub", defaultValue: false) }
-    var FiveHunderdsPx: DefaultsKey<Bool> { .init("kService500px", defaultValue: false) }
     var Twitch: DefaultsKey<Bool> { .init("kServiceTwitch", defaultValue: false) }
-    var TikTok: DefaultsKey<Bool> { .init("kServiceTikTok", defaultValue: false) }
 }
 
 public final class AccountStore {
@@ -44,10 +42,6 @@ public final class AccountStore {
             types.append(AccountStore.pinterest)
         }
 
-        if Defaults.TikTok {
-            types.append(AccountStore.tiktok)
-        }
-
         if Defaults.Tumblr {
             types.append(AccountStore.tumblr)
         }
@@ -66,10 +60,6 @@ public final class AccountStore {
 
         if Defaults.Github {
             types.append(AccountStore.github)
-        }
-
-        if Defaults.FiveHunderdsPx {
-            types.append(AccountStore.fiveHundredpx)
         }
 
         return types
