@@ -19,9 +19,9 @@ public enum ProviderAuthMode: String {
 }
 
 public extension AuthClient {
-    static let didRateLimitReached = Notification.Name(rawValue: "socialcore.client.ratelimit")
-    static let didRateLimitSessionExpired = Notification.Name(rawValue: "socialcore.client.sessionexpired")
-    static let didRateLimitCancelled = Notification.Name(rawValue: "socialcore.client.ratelimit.cancelled")
+    static let didRateLimitReached = Notification.Name(rawValue: "apwebauthentication.client.ratelimit")
+    static let didRateLimitSessionExpired = Notification.Name(rawValue: "apwebauthentication.client.sessionexpired")
+    static let didRateLimitCancelled = Notification.Name(rawValue: "apwebauthentication.client.ratelimit.cancelled")
 }
 
 open class AuthClient {
