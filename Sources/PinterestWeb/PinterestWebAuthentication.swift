@@ -58,31 +58,41 @@ public final class PinterestWebAuthentication: SessionAuthentication {
     }
 
     override public func loadAuthSettings() {
-        if let authSettingsURL = authSettingsURL,
-            let data = try? Data(contentsOf: authSettingsURL),
-            let settings = try? NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(data) as? [String: Any?]
-        {
-            for (key, value) in settings {
-                if key == Keys.cookiesDomain, let currentValue = value as? String {
-                    cookiesDomain = currentValue
-                } else if key == Keys.cookieSessionIdField, let currentValue = value as? String {
-                    cookieSessionIdField = currentValue
-                } else if key == Keys.appId, let currentValue = value as? String {
-                    appId = currentValue
-                } else if key == Keys.browserMode, let currentValue = value as? String, let mode = ProviderBrowserMode(rawValue: currentValue) {
-                    browserMode = mode
-                } else if key == Keys.customUserAgent, let currentValue = value as? String {
-                    customUserAgent = currentValue
-                } else if key == Keys.sessionId, let currentValue = value as? String {
-                    sessionId = currentValue
-                } else if key == Keys.csrfToken, let currentValue = value as? String {
-                    csrfToken = currentValue
-                } else if key == Keys.username, let currentValue = value as? String {
-                    username = currentValue
+        guard
+            let authSettingsURL = authSettingsURL,
+            let data = try? Data(contentsOf: authSettingsURL)
+        else {
+            loadCookiesSettings()
+            return
+        }
+
+        do {
+            if let settings = try NSKeyedUnarchiver.unarchivedObject(
+                ofClass: NSDictionary.self,
+                from: data
+            ) as? [String: Any?] {
+                
+                for (key, value) in settings {
+                    switch key {
+                    case Keys.cookiesDomain:       cookiesDomain       = value as? String ?? cookiesDomain
+                    case Keys.cookieSessionIdField: cookieSessionIdField = value as? String ?? cookieSessionIdField
+                    case Keys.appId:               appId               = value as? String ?? appId
+                    case Keys.browserMode:
+                        if let currentValue = value as? String,
+                           let mode = ProviderBrowserMode(rawValue: currentValue) {
+                            browserMode = mode
+                        }
+                    case Keys.customUserAgent:     customUserAgent     = value as? String
+                    case Keys.sessionId:           sessionId           = value as? String
+                    case Keys.csrfToken:           csrfToken           = value as? String
+                    case Keys.username:            username            = value as? String
+                    default: break
+                    }
                 }
             }
+        } catch {
+            print("⚠️ Failed to unarchive auth settings:", error)
         }
 
         loadCookiesSettings()
-    }
-}
+    }}

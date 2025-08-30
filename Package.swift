@@ -1,4 +1,4 @@
-// swift-tools-version:5.7
+// swift-tools-version:6.0
 
 import PackageDescription
 
@@ -26,7 +26,6 @@ let package = Package(
         .package(url: "https://github.com/sunshinejr/SwiftyUserDefaults.git", from: "5.0.0"),
         .package(url: "https://github.com/devicekit/DeviceKit.git", from: "5.0.0"),
         .package(path: "../APUserAgentGenerator")
-
     ],
     targets: [
         .target(
@@ -53,5 +52,5 @@ let package = Package(
             path: "Tests"
         )
     ],
-    swiftLanguageVersions: [.v5]
+    swiftLanguageVersions: [.v5, .v6]
 )

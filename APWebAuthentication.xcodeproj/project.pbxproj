@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 90;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -233,7 +233,6 @@
 /* Begin PBXFrameworksBuildPhase section */
 		537EDD0124F49F1E003DC54A /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 				774305EB2DA1FD8E00588966 /* SwiftyJSON in Frameworks */,
 				774305DF2DA1FD4600588966 /* SFSafeSymbols in Frameworks */,
@@ -248,15 +247,12 @@
 				777A84712DAEA39700872AB4 /* APUserAgentGenerator in Frameworks */,
 				774305D92DA1FD2300588966 /* HTTPStatusCodes in Frameworks */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		537EDD0A24F49F1E003DC54A /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 				537EDD0E24F49F1E003DC54A /* APWebAuthentication.framework in Frameworks */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
@@ -510,11 +506,9 @@
 /* Begin PBXHeadersBuildPhase section */
 		537EDCFF24F49F1E003DC54A /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 				774305D02DA1FC2700588966 /* APWebAuthentication.h in Headers */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXHeadersBuildPhase section */
 
@@ -529,8 +523,6 @@
 				537EDD0224F49F1E003DC54A /* Resources */,
 			);
 			buildRules = (
-			);
-			dependencies = (
 			);
 			name = APWebAuthentication;
 			packageProductDependencies = (
@@ -565,8 +557,6 @@
 				537EDD1024F49F1E003DC54A /* PBXTargetDependency */,
 			);
 			name = APWebAuthenticationTests;
-			packageProductDependencies = (
-			);
 			productName = ProgressToolbarTests;
 			productReference = 537EDD0D24F49F1E003DC54A /* APWebAuthenticationTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -593,7 +583,6 @@
 				};
 			};
 			buildConfigurationList = 537EDCFE24F49F1E003DC54A /* Build configuration list for PBXProject "APWebAuthentication" */;
-			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -615,6 +604,7 @@
 				778D187E2DA2EEB800101D91 /* XCRemoteSwiftPackageReference "CryptoSwift" */,
 				777A846F2DAEA39700872AB4 /* XCRemoteSwiftPackageReference "APUserAgentGenerator" */,
 			);
+			preferredProjectObjectVersion = 90;
 			productRefGroup = 537EDD0524F49F1E003DC54A /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -628,24 +618,19 @@
 /* Begin PBXResourcesBuildPhase section */
 		537EDD0224F49F1E003DC54A /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		537EDD0B24F49F1E003DC54A /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		537EDD0024F49F1E003DC54A /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 				7743057D2DA1FC2700588966 /* GitHubAPIClient.swift in Sources */,
 				7743057E2DA1FC2700588966 /* Data+APWebAuthentication.swift in Sources */,
@@ -722,11 +707,9 @@
 				774305CE2DA1FC2700588966 /* PinterestWebHTMLAPIClient.swift in Sources */,
 				774305CF2DA1FC2700588966 /* TikTokWebUser.swift in Sources */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		537EDD0924F49F1E003DC54A /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 				77E2532C2DB045E000B73036 /* AuthClientTests.swift in Sources */,
 				77E2531A2DB0408F00B73036 /* AccountStoreTests.swift in Sources */,
@@ -747,7 +730,6 @@
 				77E253202DB0442600B73036 /* ProviderBrowserModeTests.swift in Sources */,
 				77E253262DB044FF00B73036 /* Auth1AuthenticationTests.swift in Sources */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
@@ -760,7 +742,7 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		537EDD1624F49F1E003DC54A /* Debug */ = {
+		537EDD1624F49F1E003DC54A /* Debug configuration for PBXProject "APWebAuthentication" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -826,7 +808,7 @@
 			};
 			name = Debug;
 		};
-		537EDD1724F49F1E003DC54A /* Release */ = {
+		537EDD1724F49F1E003DC54A /* Release configuration for PBXProject "APWebAuthentication" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -886,7 +868,7 @@
 			};
 			name = Release;
 		};
-		537EDD1924F49F1E003DC54A /* Debug */ = {
+		537EDD1924F49F1E003DC54A /* Debug configuration for PBXNativeTarget "APWebAuthentication" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
@@ -915,7 +897,7 @@
 			};
 			name = Debug;
 		};
-		537EDD1A24F49F1E003DC54A /* Release */ = {
+		537EDD1A24F49F1E003DC54A /* Release configuration for PBXNativeTarget "APWebAuthentication" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
@@ -943,7 +925,7 @@
 			};
 			name = Release;
 		};
-		537EDD1C24F49F1E003DC54A /* Debug */ = {
+		537EDD1C24F49F1E003DC54A /* Debug configuration for PBXNativeTarget "APWebAuthenticationTests" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
@@ -963,7 +945,7 @@
 			};
 			name = Debug;
 		};
-		537EDD1D24F49F1E003DC54A /* Release */ = {
+		537EDD1D24F49F1E003DC54A /* Release configuration for PBXNativeTarget "APWebAuthenticationTests" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
@@ -988,28 +970,25 @@
 		537EDCFE24F49F1E003DC54A /* Build configuration list for PBXProject "APWebAuthentication" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				537EDD1624F49F1E003DC54A /* Debug */,
-				537EDD1724F49F1E003DC54A /* Release */,
+				537EDD1624F49F1E003DC54A /* Debug configuration for PBXProject "APWebAuthentication" */,
+				537EDD1724F49F1E003DC54A /* Release configuration for PBXProject "APWebAuthentication" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 		537EDD1824F49F1E003DC54A /* Build configuration list for PBXNativeTarget "APWebAuthentication" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				537EDD1924F49F1E003DC54A /* Debug */,
-				537EDD1A24F49F1E003DC54A /* Release */,
+				537EDD1924F49F1E003DC54A /* Debug configuration for PBXNativeTarget "APWebAuthentication" */,
+				537EDD1A24F49F1E003DC54A /* Release configuration for PBXNativeTarget "APWebAuthentication" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 		537EDD1B24F49F1E003DC54A /* Build configuration list for PBXNativeTarget "APWebAuthenticationTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				537EDD1C24F49F1E003DC54A /* Debug */,
-				537EDD1D24F49F1E003DC54A /* Release */,
+				537EDD1C24F49F1E003DC54A /* Debug configuration for PBXNativeTarget "APWebAuthenticationTests" */,
+				537EDD1D24F49F1E003DC54A /* Release configuration for PBXNativeTarget "APWebAuthenticationTests" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */

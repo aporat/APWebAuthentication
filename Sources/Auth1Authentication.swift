@@ -12,10 +12,12 @@ public final class Auth1Authentication: Authentication {
     public required init() {}
 
     public var isAuthorized: Bool {
-        if let currentToken = token, let currentSecret = secret, !currentToken.isEmpty, !currentSecret.isEmpty {
+        if let currentToken = token,
+           let currentSecret = secret,
+           !currentToken.isEmpty,
+           !currentSecret.isEmpty {
             return true
         }
-
         return false
     }
 
@@ -28,28 +30,45 @@ public final class Auth1Authentication: Authentication {
         ]
 
         if let authSettingsURL = authSettingsURL {
-            try? NSKeyedArchiver.archivedData(withRootObject: settings, requiringSecureCoding: false).write(to: authSettingsURL)
+            do {
+                let data = try NSKeyedArchiver.archivedData(
+                    withRootObject: settings,
+                    requiringSecureCoding: false
+                )
+                try data.write(to: authSettingsURL)
+            } catch {
+                print("⚠️ Failed to store Auth1 settings: \(error)")
+            }
         }
     }
 
     override public func loadAuthSettings() {
-        if let authSettingsURL = authSettingsURL,
-            let data = try? Data(contentsOf: authSettingsURL),
-            let settings = try? NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(data) as? [String: Any?]
-        {
-            for (key, value) in settings {
-                if key == Keys.token, let currentValue = value as? String {
-                    token = currentValue
-                } else if key == Keys.secret, let currentValue = value as? String {
-                    secret = currentValue
+        guard
+            let authSettingsURL = authSettingsURL,
+            let data = try? Data(contentsOf: authSettingsURL)
+        else { return }
+
+        do {
+            if let settings = try NSKeyedUnarchiver
+                .unarchivedObject(ofClass: NSDictionary.self, from: data) as? [String: Any?] {
+
+                for (key, value) in settings {
+                    switch key {
+                    case Keys.token:
+                        if let v = value as? String { token = v }
+                    case Keys.secret:
+                        if let v = value as? String { secret = v }
+                    default: break
+                    }
                 }
             }
+        } catch {
+            print("⚠️ Failed to load Auth1 settings: \(error)")
         }
     }
 
     override public func clearAuthSettings() {
         super.clearAuthSettings()
-
         token = nil
         secret = nil
     }

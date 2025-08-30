@@ -13,7 +13,6 @@ open class SessionAuthentication: Authentication {
         if let currentSessionId = sessionId, !currentSessionId.isEmpty {
             return true
         }
-
         return false
     }
 
@@ -21,7 +20,6 @@ open class SessionAuthentication: Authentication {
 
     override open func clearAuthSettings() {
         super.clearAuthSettings()
-
         sessionId = nil
         csrfToken = nil
         clearCookiesSettings()
@@ -30,10 +28,7 @@ open class SessionAuthentication: Authentication {
     // MARK: - Cookies Settings
 
     fileprivate var cookiesURL: URL? {
-        guard let currentAccountIdentifier = accountIdentifier else {
-            return nil
-        }
-
+        guard let currentAccountIdentifier = accountIdentifier else { return nil }
         return URL(fileURLWithPath: String.documentDirectory.appendingPathComponent("account_" + currentAccountIdentifier + ".cookies"))
     }
 
@@ -45,23 +40,35 @@ open class SessionAuthentication: Authentication {
 
     open func storeCookiesSettings() {
         if let cookiesURL = cookiesURL, let cookies = cookieStorage.cookies {
-            try? NSKeyedArchiver.archivedData(withRootObject: cookies, requiringSecureCoding: false).write(to: cookiesURL)
+            // Keep same archiving style (no secure coding requirement)
+            if let data = try? NSKeyedArchiver.archivedData(withRootObject: cookies, requiringSecureCoding: false) {
+                try? data.write(to: cookiesURL)
+            }
         }
     }
 
     @discardableResult
     open func loadCookiesSettings() -> [HTTPCookie]? {
-        if let cookiesURL = cookiesURL,
-            let data = try? Data(contentsOf: cookiesURL),
-            let cookies = try? NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(data) as? [HTTPCookie]
-        {
-            cookies.forEach {
-                if cookiesDomain.isEmpty || $0.domain.hasSuffix(cookiesDomain) {
-                    cookieStorage.setCookie($0)
-                }
-            }
+        guard
+            let cookiesURL = cookiesURL,
+            let data = try? Data(contentsOf: cookiesURL)
+        else {
+            return nil
+        }
 
-            return cookies
+        do {
+            // Modern API: provide allowed classes (NSArray + HTTPCookie) and cast to [HTTPCookie]
+            if let nsArray = try NSKeyedUnarchiver.unarchivedObject(ofClasses: [NSArray.self, HTTPCookie.self], from: data) as? [HTTPCookie] {
+                nsArray.forEach {
+                    if cookiesDomain.isEmpty || $0.domain.hasSuffix(cookiesDomain) {
+                        cookieStorage.setCookie($0)
+                    }
+                }
+                return nsArray
+            }
+        } catch {
+            // Silently ignore (keeps prior behavior of try?)
+            // You could log if desired
         }
 
         return nil

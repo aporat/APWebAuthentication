@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 
 public final class TikTokWebAuthentication: SessionAuthentication {
     enum Keys {
@@ -39,15 +40,11 @@ public final class TikTokWebAuthentication: SessionAuthentication {
 
     public required init() {
         super.init()
-
         cookieSessionIdField = "sessionid"
     }
 
     override public var isAuthorized: Bool {
-        if let currentSessionId = sessionId, !currentSessionId.isEmpty {
-            return true
-        }
-
+        if let currentSessionId = sessionId, !currentSessionId.isEmpty { return true }
         return false
     }
 
@@ -92,56 +89,56 @@ public final class TikTokWebAuthentication: SessionAuthentication {
         ]
 
         if let authSettingsURL = authSettingsURL {
-            try? NSKeyedArchiver.archivedData(withRootObject: deviceSettings, requiringSecureCoding: false).write(to: authSettingsURL)
+            try? NSKeyedArchiver
+                .archivedData(withRootObject: deviceSettings, requiringSecureCoding: false)
+                .write(to: authSettingsURL)
         }
 
         storeCookiesSettings()
     }
 
     override public func loadAuthSettings() {
-        if let authSettingsURL = authSettingsURL,
-            let data = try? Data(contentsOf: authSettingsURL),
-            let settings = try? NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(data) as? [String: Any?]
-        {
-            for (key, value) in settings {
-                if key == Keys.signatureUrl, let currentValue = value as? URL {
-                    signatureUrl = currentValue
-                } else if key == Keys.cookiesDomain, let currentValue = value as? String {
-                    cookiesDomain = currentValue
-                } else if key == Keys.cookieSessionIdField, let currentValue = value as? String {
-                    cookieSessionIdField = currentValue
-                } else if key == Keys.browserMode, let currentValue = value as? String, let mode = ProviderBrowserMode(rawValue: currentValue) {
-                    browserMode = mode
-                } else if key == Keys.customUserAgent, let currentValue = value as? String {
-                    customUserAgent = currentValue
-                }
+        guard
+            let authSettingsURL = authSettingsURL,
+            let data = try? Data(contentsOf: authSettingsURL)
+        else {
+            loadCookiesSettings()
+            return
+        }
 
-                if key == Keys.sessionId, let currentValue = value as? String {
-                    sessionId = currentValue
-                } else if key == Keys.svWebId, let currentValue = value as? String {
-                    svWebId = currentValue
-                } else if key == Keys.sessionLastValidated, let currentValue = value as? Date {
-                    sessionLastValidated = currentValue
-                }
+        do {
+            // Modern API: avoids deprecated `unarchiveTopLevelObjectWithData`
+            if let settings = try NSKeyedUnarchiver
+                .unarchivedObject(ofClass: NSDictionary.self, from: data) as? [String: Any?] {
 
-                if key == Keys.aid, let currentValue = value as? String {
-                    aid = currentValue
-                } else if key == Keys.screenWidth, let currentValue = value as? String {
-                    screenWidth = currentValue
-                } else if key == Keys.screenHeight, let currentValue = value as? String {
-                    screenHeight = currentValue
-                } else if key == Keys.browserLanguage, let currentValue = value as? String {
-                    browserLanguage = currentValue
-                } else if key == Keys.browserPlatform, let currentValue = value as? String {
-                    browserPlatform = currentValue
-                } else if key == Keys.browserName, let currentValue = value as? String {
-                    browserName = currentValue
-                } else if key == Keys.browserVersion, let currentValue = value as? String {
-                    browserVersion = currentValue
-                } else if key == Keys.timezoneName, let currentValue = value as? String {
-                    timezoneName = currentValue
+                for (key, value) in settings {
+                    switch key {
+                    case Keys.signatureUrl:          signatureUrl = value as? URL
+                    case Keys.cookiesDomain:         cookiesDomain = value as? String ?? cookiesDomain
+                    case Keys.cookieSessionIdField:  cookieSessionIdField = value as? String ?? cookieSessionIdField
+                    case Keys.browserMode:
+                        if let raw = value as? String, let mode = ProviderBrowserMode(rawValue: raw) {
+                            browserMode = mode
+                        }
+                    case Keys.customUserAgent:       customUserAgent = value as? String
+                    case Keys.sessionId:             sessionId = value as? String
+                    case Keys.svWebId:               svWebId = value as? String
+                    case Keys.sessionLastValidated:  if let d = value as? Date { sessionLastValidated = d }
+
+                    case Keys.aid:                   aid = value as? String ?? aid
+                    case Keys.screenWidth:           screenWidth = value as? String ?? screenWidth
+                    case Keys.screenHeight:          screenHeight = value as? String ?? screenHeight
+                    case Keys.browserLanguage:       browserLanguage = value as? String ?? browserLanguage
+                    case Keys.browserPlatform:       browserPlatform = value as? String ?? browserPlatform
+                    case Keys.browserName:           browserName = value as? String ?? browserName
+                    case Keys.browserVersion:        browserVersion = value as? String ?? browserVersion
+                    case Keys.timezoneName:          timezoneName = value as? String ?? timezoneName
+                    default: break
+                    }
                 }
             }
+        } catch {
+            print("⚠️ Failed to unarchive TikTok auth settings: \(error)")
         }
 
         loadCookiesSettings()

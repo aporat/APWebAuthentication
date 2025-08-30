@@ -15,7 +15,6 @@ public final class Auth2Authentication: Authentication {
         if let currentAccessToken = accessToken, !currentAccessToken.isEmpty {
             return true
         }
-
         return false
     }
 
@@ -28,28 +27,45 @@ public final class Auth2Authentication: Authentication {
         ]
 
         if let authSettingsURL = authSettingsURL {
-            try? NSKeyedArchiver.archivedData(withRootObject: deviceSettings, requiringSecureCoding: false).write(to: authSettingsURL)
+            do {
+                let data = try NSKeyedArchiver.archivedData(
+                    withRootObject: deviceSettings,
+                    requiringSecureCoding: false
+                )
+                try data.write(to: authSettingsURL)
+            } catch {
+                print("⚠️ Failed to store Auth2 settings: \(error)")
+            }
         }
     }
 
     override public func loadAuthSettings() {
-        if let authSettingsURL = authSettingsURL,
-            let data = try? Data(contentsOf: authSettingsURL),
-            let settings = try? NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(data) as? [String: Any?]
-        {
-            for (key, value) in settings {
-                if key == Keys.accessToken, let currentValue = value as? String {
-                    accessToken = currentValue
-                } else if key == Keys.clientId, let currentValue = value as? String {
-                    clientId = currentValue
+        guard
+            let authSettingsURL = authSettingsURL,
+            let data = try? Data(contentsOf: authSettingsURL)
+        else { return }
+
+        do {
+            if let settings = try NSKeyedUnarchiver
+                .unarchivedObject(ofClass: NSDictionary.self, from: data) as? [String: Any?] {
+
+                for (key, value) in settings {
+                    switch key {
+                    case Keys.accessToken:
+                        if let v = value as? String { accessToken = v }
+                    case Keys.clientId:
+                        if let v = value as? String { clientId = v }
+                    default: break
+                    }
                 }
             }
+        } catch {
+            print("⚠️ Failed to load Auth2 settings: \(error)")
         }
     }
 
     override public func clearAuthSettings() {
         super.clearAuthSettings()
-
         accessToken = nil
         clientId = nil
     }

@@ -10,15 +10,6 @@
       }
     },
     {
-      "identity" : "apuseragentgenerator",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/aporat/APUserAgentGenerator",
-      "state" : {
-        "revision" : "dbadec5371076e6e83a61e11b17775aedd8e1ada",
-        "version" : "1.3.0"
-      }
-    },
-    {
       "identity" : "cryptoswift",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/krzyzanowskim/CryptoSwift.git",
