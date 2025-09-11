@@ -1,7 +1,7 @@
 import UIKit
 
-public struct AccountType {
-    public enum Code: String {
+public struct AccountType: Sendable {
+    public enum Code: String, Sendable {
         case twitter = "com.apple.twitter"
         case instagram = "com.apple.instagram"
         case fiveHundredpx = "com.apple.500px"

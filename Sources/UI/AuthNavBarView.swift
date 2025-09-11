@@ -1,15 +1,19 @@
-import SnapKit
 import UIKit
+import SnapKit
 
+@MainActor
 final class AuthNavBarView: UIView {
     // MARK: - UI Elements
 
     lazy var imageView: UIImageView = {
         let view = UIImageView()
-
         view.image = UIImage(systemName: "lock.fill")
-        view.tintColor = .black
-
+        // Set initial tint color based on the current trait collection.
+        if self.traitCollection.userInterfaceStyle == .dark {
+            view.tintColor = .white
+        } else {
+            view.tintColor = .black
+        }
         return view
     }()
 
@@ -31,28 +35,24 @@ final class AuthNavBarView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    override func awakeFromNib() {
-        super.awakeFromNib()
-        setupSubviews()
-    }
-
     fileprivate func setupSubviews() {
         addSubview(imageView)
         addSubview(titleLabel)
 
+        // Register for changes to the user interface style.
+        self.registerForTraitChanges([UITraitUserInterfaceStyle.self]) { (self: AuthNavBarView, previousTraitCollection: UITraitCollection) in
+            if self.traitCollection.userInterfaceStyle == .dark {
+                self.imageView.tintColor = .white
+            } else {
+                self.imageView.tintColor = .black
+            }
+        }
+        
         setNeedsUpdateConstraints()
         hideSecure()
     }
 
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-        
-        if traitCollection.userInterfaceStyle == .dark {
-            imageView.tintColor = .white
-        } else {
-            imageView.tintColor = .black
-        }
-    }
+    // The deprecated method has been removed.
 
     public func showSecure() {
         imageView.isHidden = false

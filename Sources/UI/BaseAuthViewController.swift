@@ -17,6 +17,7 @@ extension BaseAuthViewController {
     }
 }
 
+@MainActor
 open class BaseAuthViewController: UIViewController, WKNavigationDelegate {
     public var dismissButtonStyle: BaseAuthViewController.DismissButtonStyle = .cancel
     
@@ -135,11 +136,6 @@ open class BaseAuthViewController: UIViewController, WKNavigationDelegate {
         super.init(coder: aDecoder)!
     }
     
-    deinit {
-        webView.navigationDelegate = nil
-        webView.uiDelegate = nil
-    }
-    
     override open func viewDidLoad() {
         super.viewDidLoad()
         
@@ -211,6 +207,52 @@ open class BaseAuthViewController: UIViewController, WKNavigationDelegate {
         
         activityIndicator.style = .medium
         
+        // Register for changes to the userInterfaceStyle
+        self.registerForTraitChanges([UITraitUserInterfaceStyle.self]) { (self: Self, previousTraitCollection: UITraitCollection) in
+            // The handler is called only when the userInterfaceStyle changes
+            if self.appearanceStyle == .safari, let currentNavigationController = self.navigationController {
+                let newNavBarAppearance = UINavigationBarAppearance()
+                newNavBarAppearance.configureWithOpaqueBackground()
+
+                if currentNavigationController.traitCollection.userInterfaceStyle == .dark {
+                    newNavBarAppearance.backgroundColor = UIColor(hex: 0x565656)!
+                } else {
+                    newNavBarAppearance.backgroundColor = UIColor(hex: 0xF8F8F8)!
+                }
+
+                newNavBarAppearance.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor(hex: 0x0079FF)!]
+                currentNavigationController.navigationBar.standardAppearance = newNavBarAppearance
+                currentNavigationController.navigationBar.scrollEdgeAppearance = newNavBarAppearance
+                currentNavigationController.navigationBar.compactAppearance = newNavBarAppearance
+                currentNavigationController.navigationBar.compactScrollEdgeAppearance = newNavBarAppearance
+
+                let newToolbarBarAppearance = UIToolbarAppearance()
+                newToolbarBarAppearance.configureWithOpaqueBackground()
+
+                if currentNavigationController.traitCollection.userInterfaceStyle == .dark {
+                    newToolbarBarAppearance.backgroundColor = UIColor(hex: 0x565656)!
+                } else {
+                    newToolbarBarAppearance.backgroundColor = UIColor(hex: 0xF8F8F8)!
+                }
+
+                self.navigationController?.toolbar.standardAppearance = newToolbarBarAppearance
+                self.navigationController?.toolbar.scrollEdgeAppearance = newToolbarBarAppearance
+                self.navigationController?.toolbar.compactAppearance = newToolbarBarAppearance
+                self.navigationController?.toolbar.compactScrollEdgeAppearance = newToolbarBarAppearance
+
+                if currentNavigationController.traitCollection.userInterfaceStyle == .dark {
+                    currentNavigationController.navigationBar.tintColor = UIColor(hex: 0x5A91F7)
+                    currentNavigationController.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor(hex: 0x5A91F7)!]
+                    currentNavigationController.navigationBar.barTintColor = UIColor(hex: 0x565656)
+                } else {
+                    currentNavigationController.navigationBar.tintColor = UIColor(hex: 0x0079FF)
+                    currentNavigationController.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor(hex: 0x0079FF)!]
+                    currentNavigationController.navigationBar.barTintColor = UIColor(hex: 0xF8F8F8)
+                }
+            }
+        }
+
+        
         view.setNeedsUpdateConstraints()
     }
     
@@ -274,58 +316,13 @@ open class BaseAuthViewController: UIViewController, WKNavigationDelegate {
         navigationItem.leftBarButtonItems = [dismissBarButtonItem]
     }
     
-    override public func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-        
-        if appearanceStyle == .safari, let currentNavigationController = navigationController {
-            
-            let newNavBarAppearance = UINavigationBarAppearance()
-            newNavBarAppearance.configureWithOpaqueBackground()
-            
-            if let currentNavigationController = navigationController, currentNavigationController.traitCollection.userInterfaceStyle == .dark {
-                newNavBarAppearance.backgroundColor = UIColor(hex: 0x565656)!
-            } else {
-                newNavBarAppearance.backgroundColor = UIColor(hex: 0xF8F8F8)!
-            }
-            
-            newNavBarAppearance.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor(hex: 0x0079FF)!]
-
-            currentNavigationController.navigationBar.standardAppearance = newNavBarAppearance
-            currentNavigationController.navigationBar.scrollEdgeAppearance = newNavBarAppearance
-            currentNavigationController.navigationBar.compactAppearance = newNavBarAppearance
-            currentNavigationController.navigationBar.compactScrollEdgeAppearance = newNavBarAppearance
-            
-            let newToolbarBarAppearance = UIToolbarAppearance()
-            newToolbarBarAppearance.configureWithOpaqueBackground()
-            
-            if let currentNavigationController = navigationController, currentNavigationController.traitCollection.userInterfaceStyle == .dark {
-                newToolbarBarAppearance.backgroundColor = UIColor(hex: 0x565656)!
-            } else {
-                newToolbarBarAppearance.backgroundColor = UIColor(hex: 0xF8F8F8)!
-            }
-            
-            self.navigationController?.toolbar.standardAppearance = newToolbarBarAppearance
-            self.navigationController?.toolbar.scrollEdgeAppearance = newToolbarBarAppearance
-            self.navigationController?.toolbar.compactAppearance = newToolbarBarAppearance
-            self.navigationController?.toolbar.compactScrollEdgeAppearance = newToolbarBarAppearance
-            
-            if currentNavigationController.traitCollection.userInterfaceStyle == .dark {
-                currentNavigationController.navigationBar.tintColor = UIColor(hex: 0x5A91F7)
-                currentNavigationController.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor(hex: 0x5A91F7)!]
-                currentNavigationController.navigationBar.barTintColor = UIColor(hex: 0x565656)
-            } else {
-                currentNavigationController.navigationBar.tintColor = UIColor(hex: 0x0079FF)
-                currentNavigationController.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor(hex: 0x0079FF)!]
-                currentNavigationController.navigationBar.barTintColor = UIColor(hex: 0xF8F8F8)
-            }
-        }
-    }
-    
     // MARK: - KVO
     
     override open func observeValue(forKeyPath keyPath: String?, of _: Any?, change _: [NSKeyValueChangeKey: Any]?, context _: UnsafeMutableRawPointer?) {
         if keyPath == "estimatedProgress" {
-            updateProgressBar(Float(webView.estimatedProgress))
+            Task { @MainActor in
+                self.updateProgressBar(Float(self.webView.estimatedProgress))
+            }
         }
     }
     

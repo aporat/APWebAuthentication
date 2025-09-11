@@ -1,5 +1,5 @@
 import Foundation
-import Alamofire
+@preconcurrency import Alamofire
 import CryptoKit
 
 public enum ProviderAuthMode: String {
@@ -91,7 +91,7 @@ open class AuthClient {
     }
 
     @discardableResult
-    public func request<Parameters: Encodable>(
+    public func request<Parameters: Encodable & Sendable>(
         urlString: String,
         method: HTTPMethod = .get,
         parameters: Parameters? = nil,
@@ -108,7 +108,7 @@ open class AuthClient {
     }
 
     @discardableResult
-    public func request<Parameters: Encodable>(
+    public func request<Parameters: Encodable & Sendable>(
         _ path: String,
         method: HTTPMethod = .get,
         parameters: Parameters? = nil,

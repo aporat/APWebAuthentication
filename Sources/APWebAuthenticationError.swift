@@ -1,5 +1,5 @@
 import Foundation
-import SwiftyJSON
+@preconcurrency import SwiftyJSON
 
 public enum APWebAuthenticationError: Error {
     case failed(reason: String?)

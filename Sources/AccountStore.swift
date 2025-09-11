@@ -1,7 +1,7 @@
 import Foundation
 import UIKit
 import SwifterSwift
-import SwiftyUserDefaults
+@preconcurrency import SwiftyUserDefaults
 
 public extension DefaultsKeys {
     var Instagram: DefaultsKey<Bool> { .init("kServiceInstagram", defaultValue: false) }

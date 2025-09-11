@@ -1,15 +1,18 @@
 import UIKit
 import WebKit
+import SnapKit
 
+@MainActor
 public protocol WebTokensDelegate: AnyObject {
     func didStepLoaded(_ progress: Float)
 }
 
+@MainActor
 open class WebTokensViewController: UIViewController, WKNavigationDelegate {
     public weak var delegate: WebTokensDelegate?
     public var customUserAgent: String?
     open var isFinished = false
-    open var completionHandler: BaseAuthViewController.CompletionHandler
+    open var completionHandler: AuthViewController.CompletionHandler
     var url: URL
     var forURL: URL
 
@@ -89,13 +92,6 @@ open class WebTokensViewController: UIViewController, WKNavigationDelegate {
         }
     }
 
-    deinit {
-        webView.stopLoading()
-        webView.scrollView.delegate = nil
-        webView.navigationDelegate = nil
-        webView.uiDelegate = nil
-    }
-
     // MARK: - WKNavigationDelegate
 
     public func webView(_: WKWebView, decidePolicyFor _: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
@@ -114,7 +110,9 @@ open class WebTokensViewController: UIViewController, WKNavigationDelegate {
 
     override open func observeValue(forKeyPath keyPath: String?, of _: Any?, change _: [NSKeyValueChangeKey: Any]?, context _: UnsafeMutableRawPointer?) {
         if keyPath == "estimatedProgress" {
-            delegate?.didStepLoaded(Float(webView.estimatedProgress))
+            Task { @MainActor in
+                delegate?.didStepLoaded(Float(self.webView.estimatedProgress))
+            }
         }
     }
 
@@ -155,6 +153,7 @@ open class WebTokensViewController: UIViewController, WKNavigationDelegate {
     open func requestLoaded(_: URL, forURL _: URL) {}
 }
 
+@MainActor
 extension WebTokensViewController: WKScriptMessageHandler {
     public func userContentController(_: WKUserContentController, didReceive message: WKScriptMessage) {
         if let results = message.body as? [String: Any], let responseUrl = results["responseURL"] as? String {

@@ -1,4 +1,5 @@
 {
+  "originHash" : "b207ca532a822a409792ecacf564d9d740d8e3473a3274963fcf8fc9bfb08e00",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -59,8 +60,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/SwifterSwift/SwifterSwift.git",
       "state" : {
-        "revision" : "5a6de915bb80234e1e31b3e3e5f7a7995fc1f4db",
-        "version" : "7.0.0"
+        "revision" : "5d948a15446bddb6c367bc7e7100cfcbaa0e9b57",
+        "version" : "8.0.0"
       }
     },
     {
@@ -100,5 +101,5 @@
       }
     }
   ],
-  "version" : 2
+  "version" : 3
 }

@@ -1,11 +1,12 @@
-// swift-tools-version:6.0
+// swift-tools-version:5.9
 
 import PackageDescription
 
 let package = Package(
     name: "APWebAuthentication",
     platforms: [
-        .iOS(.v16)
+        .iOS(.v17),
+        .macOS(.v10_14)
     ],
     products: [
         .library(
@@ -21,7 +22,7 @@ let package = Package(
         .package(url: "https://github.com/SFSafeSymbols/SFSafeSymbols.git", from: "6.2.0"),
         .package(url: "https://github.com/SnapKit/SnapKit.git", from: "5.0.0"),
         .package(url: "https://github.com/SwiftyBeaver/SwiftyBeaver.git", from: "2.1.1"),
-        .package(url: "https://github.com/SwifterSwift/SwifterSwift.git", from: "7.0.0"),
+        .package(url: "https://github.com/SwifterSwift/SwifterSwift.git", from: "8.0.0"),
         .package(url: "https://github.com/SwiftyJSON/SwiftyJSON.git", from: "5.0.0"),
         .package(url: "https://github.com/sunshinejr/SwiftyUserDefaults.git", from: "5.0.0"),
         .package(url: "https://github.com/devicekit/DeviceKit.git", from: "5.0.0"),
@@ -52,5 +53,6 @@ let package = Package(
             path: "Tests"
         )
     ],
-    swiftLanguageVersions: [.v5, .v6]
+    // Corrected syntax for older tools-version
+    swiftLanguageVersions: [.v5]
 )

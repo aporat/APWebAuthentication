@@ -13,6 +13,7 @@ public protocol APWebAuthenticationPresentationContextProviding: NSObjectProtoco
     func presentationAnchor(for session: APWebAuthenticationSession) -> UIViewController?
 }
 
+@MainActor
 public class APWebAuthenticationSession {
     public var statusBarStyle = UIStatusBarStyle.default
     public var appearanceStyle: APWebAuthenticationSession.AppearanceStyle = .normal
