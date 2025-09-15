@@ -52,7 +52,5 @@ let package = Package(
             dependencies: ["APWebAuthentication"],
             path: "Tests"
         )
-    ],
-    // Corrected syntax for older tools-version
-    swiftLanguageVersions: [.v5]
+    ]
 )
