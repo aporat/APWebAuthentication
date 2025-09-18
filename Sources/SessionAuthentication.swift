@@ -47,30 +47,31 @@ open class SessionAuthentication: Authentication {
         }
     }
 
+    
+    
     @discardableResult
     open func loadCookiesSettings() -> [HTTPCookie]? {
-        guard
-            let cookiesURL = cookiesURL,
-            let data = try? Data(contentsOf: cookiesURL)
-        else {
-            return nil
-        }
+        if let cookiesURL = cookiesURL,
+           let data = try? Data(contentsOf: cookiesURL) {
 
-        do {
-            // Modern API: provide allowed classes (NSArray + HTTPCookie) and cast to [HTTPCookie]
-            if let nsArray = try NSKeyedUnarchiver.unarchivedObject(ofClasses: [NSArray.self, HTTPCookie.self], from: data) as? [HTTPCookie] {
-                nsArray.forEach {
-                    if cookiesDomain.isEmpty || $0.domain.hasSuffix(cookiesDomain) {
-                        cookieStorage.setCookie($0)
+            let allowedClasses = [
+                NSArray.self,
+                HTTPCookie.self,
+                NSDictionary.self,
+                NSString.self,
+                NSDate.self,
+                NSNumber.self
+            ]
+
+            if let cookies = try? NSKeyedUnarchiver.unarchivedObject(ofClasses: allowedClasses, from: data) as? [HTTPCookie] {
+                cookies.forEach { cookie in
+                    if cookiesDomain.isEmpty || cookie.domain.hasSuffix(cookiesDomain) {
+                        cookieStorage.setCookie(cookie)
                     }
                 }
-                return nsArray
+                return cookies
             }
-        } catch {
-            // Silently ignore (keeps prior behavior of try?)
-            // You could log if desired
         }
-
         return nil
     }
 

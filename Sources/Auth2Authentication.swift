@@ -40,27 +40,25 @@ public final class Auth2Authentication: Authentication {
     }
 
     override public func loadAuthSettings() {
-        guard
-            let authSettingsURL = authSettingsURL,
-            let data = try? Data(contentsOf: authSettingsURL)
-        else { return }
+        if let authSettingsURL = authSettingsURL,
+           let data = try? Data(contentsOf: authSettingsURL) {
 
-        do {
-            if let settings = try NSKeyedUnarchiver
-                .unarchivedObject(ofClass: NSDictionary.self, from: data) as? [String: Any?] {
+            let allowedClasses = [
+                NSDictionary.self,
+                NSString.self
+            ]
 
+            if let settings = try? NSKeyedUnarchiver.unarchivedObject(ofClasses: allowedClasses, from: data) as? [String: Any?] {
+                
                 for (key, value) in settings {
                     switch key {
-                    case Keys.accessToken:
-                        if let v = value as? String { accessToken = v }
-                    case Keys.clientId:
-                        if let v = value as? String { clientId = v }
-                    default: break
+                    case Keys.accessToken: accessToken = (value as? String) ?? accessToken
+                    case Keys.clientId:    clientId = (value as? String) ?? clientId
+                    default:
+                        break
                     }
                 }
             }
-        } catch {
-            print("⚠️ Failed to load Auth2 settings: \(error)")
         }
     }
 

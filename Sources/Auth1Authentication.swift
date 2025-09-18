@@ -43,27 +43,25 @@ public final class Auth1Authentication: Authentication {
     }
 
     override public func loadAuthSettings() {
-        guard
-            let authSettingsURL = authSettingsURL,
-            let data = try? Data(contentsOf: authSettingsURL)
-        else { return }
+        if let authSettingsURL = authSettingsURL,
+           let data = try? Data(contentsOf: authSettingsURL) {
 
-        do {
-            if let settings = try NSKeyedUnarchiver
-                .unarchivedObject(ofClass: NSDictionary.self, from: data) as? [String: Any?] {
+            let allowedClasses = [
+                NSDictionary.self,
+                NSString.self
+            ]
 
+            if let settings = try? NSKeyedUnarchiver.unarchivedObject(ofClasses: allowedClasses, from: data) as? [String: Any?] {
+                
                 for (key, value) in settings {
                     switch key {
-                    case Keys.token:
-                        if let v = value as? String { token = v }
-                    case Keys.secret:
-                        if let v = value as? String { secret = v }
-                    default: break
+                    case Keys.token:  token = (value as? String) ?? token
+                    case Keys.secret: secret = (value as? String) ?? secret
+                    default:
+                        break
                     }
                 }
             }
-        } catch {
-            print("⚠️ Failed to load Auth1 settings: \(error)")
         }
     }
 

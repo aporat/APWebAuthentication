@@ -11,17 +11,17 @@ public final class PinterestWebAuthentication: SessionAuthentication {
         static let csrfToken = "csrf_token"
         static let username = "username"
     }
-
+    
     var appId = "ad0e169"
     public var username: String?
-
+    
     public required init() {
         super.init()
-
+        
         cookieSessionIdField = "_pinterest_sess"
         browserMode = .desktopFirefox
     }
-
+    
     public func loadAuthTokens(forceLoad: Bool = false) {
         if forceLoad || sessionId == nil || csrfToken == nil {
             cookieStorage.cookies?.forEach {
@@ -35,9 +35,9 @@ public final class PinterestWebAuthentication: SessionAuthentication {
             }
         }
     }
-
+    
     // MARK: - Auth Settings
-
+    
     override public func storeAuthSettings() {
         let deviceSettings: [String: Any?] = [
             Keys.cookiesDomain: cookiesDomain,
@@ -49,50 +49,48 @@ public final class PinterestWebAuthentication: SessionAuthentication {
             Keys.csrfToken: csrfToken,
             Keys.username: username,
         ]
-
+        
         if let authSettingsURL = authSettingsURL {
             try? NSKeyedArchiver.archivedData(withRootObject: deviceSettings, requiringSecureCoding: false).write(to: authSettingsURL)
         }
-
+        
         storeCookiesSettings()
     }
-
+    
     override public func loadAuthSettings() {
-        guard
-            let authSettingsURL = authSettingsURL,
-            let data = try? Data(contentsOf: authSettingsURL)
-        else {
-            loadCookiesSettings()
-            return
-        }
-
-        do {
-            if let settings = try NSKeyedUnarchiver.unarchivedObject(
-                ofClass: NSDictionary.self,
-                from: data
-            ) as? [String: Any?] {
+        if let authSettingsURL = authSettingsURL,
+           let data = try? Data(contentsOf: authSettingsURL) {
+            
+            let allowedClasses = [
+                NSDictionary.self,
+                NSString.self
+            ]
+            
+            if let settings = try? NSKeyedUnarchiver.unarchivedObject(ofClasses: allowedClasses, from: data) as? [String: Any?] {
                 
                 for (key, value) in settings {
                     switch key {
-                    case Keys.cookiesDomain:       cookiesDomain       = value as? String ?? cookiesDomain
-                    case Keys.cookieSessionIdField: cookieSessionIdField = value as? String ?? cookieSessionIdField
-                    case Keys.appId:               appId               = value as? String ?? appId
+                    case Keys.cookiesDomain:        cookiesDomain = (value as? String) ?? cookiesDomain
+                    case Keys.cookieSessionIdField: cookieSessionIdField = (value as? String) ?? cookieSessionIdField
+                    case Keys.appId:                appId = (value as? String) ?? appId
+                    case Keys.customUserAgent:      customUserAgent = (value as? String) ?? customUserAgent
+                    case Keys.sessionId:            sessionId = (value as? String) ?? sessionId
+                    case Keys.csrfToken:            csrfToken = (value as? String) ?? csrfToken
+                    case Keys.username:             username = (value as? String) ?? username
+                        
                     case Keys.browserMode:
                         if let currentValue = value as? String,
                            let mode = ProviderBrowserMode(rawValue: currentValue) {
                             browserMode = mode
                         }
-                    case Keys.customUserAgent:     customUserAgent     = value as? String
-                    case Keys.sessionId:           sessionId           = value as? String
-                    case Keys.csrfToken:           csrfToken           = value as? String
-                    case Keys.username:            username            = value as? String
-                    default: break
+                        
+                    default:
+                        break
                     }
                 }
             }
-        } catch {
-            print("⚠️ Failed to unarchive auth settings:", error)
         }
-
+        
         loadCookiesSettings()
-    }}
+    }
+}

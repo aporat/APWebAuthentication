@@ -98,47 +98,50 @@ public final class TikTokWebAuthentication: SessionAuthentication {
     }
 
     override public func loadAuthSettings() {
-        guard
-            let authSettingsURL = authSettingsURL,
-            let data = try? Data(contentsOf: authSettingsURL)
-        else {
-            loadCookiesSettings()
-            return
-        }
+        if let authSettingsURL = authSettingsURL,
+           let data = try? Data(contentsOf: authSettingsURL) {
 
-        do {
-            // Modern API: avoids deprecated `unarchiveTopLevelObjectWithData`
-            if let settings = try NSKeyedUnarchiver
-                .unarchivedObject(ofClass: NSDictionary.self, from: data) as? [String: Any?] {
+            let allowedClasses = [
+                NSDictionary.self,
+                NSURL.self,
+                NSString.self,
+                NSDate.self
+            ]
 
+            if let settings = try? NSKeyedUnarchiver.unarchivedObject(ofClasses: allowedClasses, from: data) as? [String: Any?] {
+                
                 for (key, value) in settings {
                     switch key {
-                    case Keys.signatureUrl:          signatureUrl = value as? URL
-                    case Keys.cookiesDomain:         cookiesDomain = value as? String ?? cookiesDomain
-                    case Keys.cookieSessionIdField:  cookieSessionIdField = value as? String ?? cookieSessionIdField
+                    // Properties that appear to be optional
+                    case Keys.signatureUrl:       signatureUrl = value as? URL
+                    case Keys.customUserAgent:    customUserAgent = value as? String
+                    case Keys.sessionId:          sessionId = value as? String
+                    case Keys.svWebId:            svWebId = value as? String
+
+                    // Properties that appear to be non-optional
+                    case Keys.cookiesDomain:      cookiesDomain = (value as? String) ?? cookiesDomain
+                    case Keys.cookieSessionIdField: cookieSessionIdField = (value as? String) ?? cookieSessionIdField
+                    case Keys.aid:                aid = (value as? String) ?? aid
+                    case Keys.screenWidth:        screenWidth = (value as? String) ?? screenWidth
+                    case Keys.screenHeight:       screenHeight = (value as? String) ?? screenHeight
+                    case Keys.browserLanguage:    browserLanguage = (value as? String) ?? browserLanguage
+                    case Keys.browserPlatform:    browserPlatform = (value as? String) ?? browserPlatform
+                    case Keys.browserName:        browserName = (value as? String) ?? browserName
+                    case Keys.browserVersion:     browserVersion = (value as? String) ?? browserVersion
+                    case Keys.timezoneName:       timezoneName = (value as? String) ?? timezoneName
+                    case Keys.sessionLastValidated: sessionLastValidated = (value as? Date) ?? sessionLastValidated
+
+                    // Special case for enum initialization
                     case Keys.browserMode:
                         if let raw = value as? String, let mode = ProviderBrowserMode(rawValue: raw) {
                             browserMode = mode
                         }
-                    case Keys.customUserAgent:       customUserAgent = value as? String
-                    case Keys.sessionId:             sessionId = value as? String
-                    case Keys.svWebId:               svWebId = value as? String
-                    case Keys.sessionLastValidated:  if let d = value as? Date { sessionLastValidated = d }
 
-                    case Keys.aid:                   aid = value as? String ?? aid
-                    case Keys.screenWidth:           screenWidth = value as? String ?? screenWidth
-                    case Keys.screenHeight:          screenHeight = value as? String ?? screenHeight
-                    case Keys.browserLanguage:       browserLanguage = value as? String ?? browserLanguage
-                    case Keys.browserPlatform:       browserPlatform = value as? String ?? browserPlatform
-                    case Keys.browserName:           browserName = value as? String ?? browserName
-                    case Keys.browserVersion:        browserVersion = value as? String ?? browserVersion
-                    case Keys.timezoneName:          timezoneName = value as? String ?? timezoneName
-                    default: break
+                    default:
+                        break
                     }
                 }
             }
-        } catch {
-            print("⚠️ Failed to unarchive TikTok auth settings: \(error)")
         }
 
         loadCookiesSettings()
