@@ -1,15 +1,15 @@
 import Foundation
 
 public final class PinterestWebAuthentication: SessionAuthentication {
-    enum Keys {
-        static let cookiesDomain = "cookies_domain"
-        static let cookieSessionIdField = "cookie_session_id_field"
-        static let browserMode = "browser_mode"
-        static let customUserAgent = "custom_user_agent"
-        static let appId = "app_id"
-        static let sessionId = "session_id"
-        static let csrfToken = "csrf_token"
-        static let username = "username"
+    private struct AuthSettings: Codable {
+        var cookiesDomain: String?
+        var cookieSessionIdField: String?
+        var browserMode: ProviderBrowserMode?
+        var customUserAgent: String?
+        var appId: String?
+        var sessionId: String?
+        var csrfToken: String?
+        var username: String?
     }
     
     var appId = "ad0e169"
@@ -39,58 +39,53 @@ public final class PinterestWebAuthentication: SessionAuthentication {
     // MARK: - Auth Settings
     
     override public func storeAuthSettings() {
-        let deviceSettings: [String: Any?] = [
-            Keys.cookiesDomain: cookiesDomain,
-            Keys.cookieSessionIdField: cookieSessionIdField,
-            Keys.appId: appId,
-            Keys.browserMode: browserMode?.rawValue,
-            Keys.customUserAgent: customUserAgent,
-            Keys.sessionId: sessionId,
-            Keys.csrfToken: csrfToken,
-            Keys.username: username,
-        ]
+        let settings = AuthSettings(
+            cookiesDomain: cookiesDomain,
+            cookieSessionIdField: cookieSessionIdField,
+            browserMode: browserMode,
+            customUserAgent: customUserAgent,
+            appId: appId,
+            sessionId: sessionId,
+            csrfToken: csrfToken,
+            username: username
+        )
         
         if let authSettingsURL = authSettingsURL {
-            try? NSKeyedArchiver.archivedData(withRootObject: deviceSettings, requiringSecureCoding: false).write(to: authSettingsURL)
+            let encoder = PropertyListEncoder()
+            do {
+                let data = try encoder.encode(settings)
+                try data.write(to: authSettingsURL)
+            } catch {
+                print("⚠️ Failed to store Pinterest settings: \(error)")
+            }
         }
         
         storeCookiesSettings()
     }
     
     override public func loadAuthSettings() {
-        if let authSettingsURL = authSettingsURL,
-           let data = try? Data(contentsOf: authSettingsURL) {
-            
-            let allowedClasses = [
-                NSDictionary.self,
-                NSString.self
-            ]
-            
-            if let settings = try? NSKeyedUnarchiver.unarchivedObject(ofClasses: allowedClasses, from: data) as? [String: Any?] {
+            if let authSettingsURL = authSettingsURL,
+               let data = try? Data(contentsOf: authSettingsURL) {
                 
-                for (key, value) in settings {
-                    switch key {
-                    case Keys.cookiesDomain:        cookiesDomain = (value as? String) ?? cookiesDomain
-                    case Keys.cookieSessionIdField: cookieSessionIdField = (value as? String) ?? cookieSessionIdField
-                    case Keys.appId:                appId = (value as? String) ?? appId
-                    case Keys.customUserAgent:      customUserAgent = (value as? String) ?? customUserAgent
-                    case Keys.sessionId:            sessionId = (value as? String) ?? sessionId
-                    case Keys.csrfToken:            csrfToken = (value as? String) ?? csrfToken
-                    case Keys.username:             username = (value as? String) ?? username
-                        
-                    case Keys.browserMode:
-                        if let currentValue = value as? String,
-                           let mode = ProviderBrowserMode(rawValue: currentValue) {
-                            browserMode = mode
-                        }
-                        
-                    default:
-                        break
-                    }
+                let decoder = PropertyListDecoder()
+                do {
+                    let settings = try decoder.decode(AuthSettings.self, from: data)
+                    
+                    // Assign properties, falling back to current values if nil
+                    cookiesDomain = settings.cookiesDomain ?? cookiesDomain
+                    cookieSessionIdField = settings.cookieSessionIdField ?? cookieSessionIdField
+                    browserMode = settings.browserMode ?? browserMode
+                    customUserAgent = settings.customUserAgent ?? customUserAgent
+                    appId = settings.appId ?? appId
+                    sessionId = settings.sessionId ?? sessionId
+                    csrfToken = settings.csrfToken ?? csrfToken
+                    username = settings.username ?? username
+                    
+                } catch {
+                    print("⚠️ Failed to load Pinterest settings: \(error)")
                 }
             }
+            
+            loadCookiesSettings()
         }
-        
-        loadCookiesSettings()
-    }
 }

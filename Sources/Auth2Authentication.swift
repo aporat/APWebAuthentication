@@ -1,9 +1,10 @@
 import Foundation
 
 public final class Auth2Authentication: Authentication {
-    enum Keys {
-        static let accessToken = "access_token"
-        static let clientId = "client_id"
+    
+    private struct AuthSettings: Codable {
+        let accessToken: String?
+        let clientId: String?
     }
 
     public var clientId: String?
@@ -21,17 +22,15 @@ public final class Auth2Authentication: Authentication {
     // MARK: - Auth Settings
 
     override public func storeAuthSettings() {
-        let deviceSettings: [String: Any?] = [
-            Keys.accessToken: accessToken,
-            Keys.clientId: clientId,
-        ]
+        let settings = AuthSettings(
+            accessToken: self.accessToken,
+            clientId: self.clientId
+        )
 
         if let authSettingsURL = authSettingsURL {
+            let encoder = PropertyListEncoder()
             do {
-                let data = try NSKeyedArchiver.archivedData(
-                    withRootObject: deviceSettings,
-                    requiringSecureCoding: false
-                )
+                let data = try encoder.encode(settings)
                 try data.write(to: authSettingsURL)
             } catch {
                 print("⚠️ Failed to store Auth2 settings: \(error)")
@@ -42,22 +41,15 @@ public final class Auth2Authentication: Authentication {
     override public func loadAuthSettings() {
         if let authSettingsURL = authSettingsURL,
            let data = try? Data(contentsOf: authSettingsURL) {
-
-            let allowedClasses = [
-                NSDictionary.self,
-                NSString.self
-            ]
-
-            if let settings = try? NSKeyedUnarchiver.unarchivedObject(ofClasses: allowedClasses, from: data) as? [String: Any?] {
-                
-                for (key, value) in settings {
-                    switch key {
-                    case Keys.accessToken: accessToken = (value as? String) ?? accessToken
-                    case Keys.clientId:    clientId = (value as? String) ?? clientId
-                    default:
-                        break
-                    }
-                }
+            
+            let decoder = PropertyListDecoder()
+            do {
+                // Decode the data directly into the settings struct
+                let settings = try decoder.decode(AuthSettings.self, from: data)
+                self.accessToken = settings.accessToken
+                self.clientId = settings.clientId
+            } catch {
+                print("⚠️ Failed to load Auth2 settings: \(error)")
             }
         }
     }

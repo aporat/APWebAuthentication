@@ -2,33 +2,32 @@ import Foundation
 import UIKit
 
 public final class TikTokWebAuthentication: SessionAuthentication {
-    enum Keys {
-        static let signatureUrl = "signature_url"
-        static let cookiesDomain = "cookies_domain"
-        static let cookieSessionIdField = "cookie_session_id_field"
-        static let browserMode = "browser_mode"
-        static let customUserAgent = "custom_user_agent"
-        static let sessionId = "session_id"
-        static let svWebId = "s_v_web_id"
-        static let sessionLastValidated = "session_last_validated"
-
-        static let aid = "aid"
-        static let screenWidth = "screen_width"
-        static let screenHeight = "screen_height"
-        static let browserLanguage = "browser_language"
-        static let browserPlatform = "browser_platform"
-        static let browserName = "browser_name"
-        static let browserVersion = "browser_version"
-        static let timezoneName = "timezone_name"
+    private struct AuthSettings: Codable {
+        var signatureUrl: URL?
+        var cookiesDomain: String?
+        var cookieSessionIdField: String?
+        var browserMode: ProviderBrowserMode?
+        var customUserAgent: String?
+        var sessionId: String?
+        var svWebId: String?
+        var sessionLastValidated: Date?
+        var aid: String?
+        var screenWidth: String?
+        var screenHeight: String?
+        var browserLanguage: String?
+        var browserPlatform: String?
+        var browserName: String?
+        var browserVersion: String?
+        var timezoneName: String?
     }
-
+    
     public var signatureUrl: URL?
     public var secUid: String?
     public var svWebId: String?
     public var ttWebId: String?
     public var uidtt: String?
     public var sessionLastValidated = Date().adding(.hour, value: -2)
-
+    
     public var aid: String = "1988"
     public var screenWidth: String = "375"
     public var screenHeight: String = "812"
@@ -37,17 +36,17 @@ public final class TikTokWebAuthentication: SessionAuthentication {
     public var browserName: String = "Mozilla"
     public var browserVersion: String = "5.0+(iPhone;+CPU+iPhone+OS+13_2_3+like+Mac+OS+X)+AppleWebKit/605.1.15+(KHTML,+like+Gecko)+Version/13.0.3+Mobile/15E148+Safari/604.1"
     public var timezoneName: String = "America/Chicago"
-
+    
     public required init() {
         super.init()
         cookieSessionIdField = "sessionid"
     }
-
+    
     override public var isAuthorized: Bool {
         if let currentSessionId = sessionId, !currentSessionId.isEmpty { return true }
         return false
     }
-
+    
     public func loadAuthTokens(forceLoad: Bool = false) {
         if forceLoad || sessionId == nil || svWebId == nil {
             cookieStorage.cookies?.forEach {
@@ -65,85 +64,73 @@ public final class TikTokWebAuthentication: SessionAuthentication {
             }
         }
     }
-
+    
     // MARK: - Auth Settings
-
+    
     override public func storeAuthSettings() {
-        let deviceSettings: [String: Any?] = [
-            Keys.signatureUrl: signatureUrl,
-            Keys.cookiesDomain: cookiesDomain,
-            Keys.cookieSessionIdField: cookieSessionIdField,
-            Keys.browserMode: browserMode?.rawValue,
-            Keys.customUserAgent: customUserAgent,
-            Keys.sessionId: sessionId,
-            Keys.svWebId: svWebId,
-            Keys.sessionLastValidated: sessionLastValidated,
-            Keys.aid: aid,
-            Keys.screenWidth: screenWidth,
-            Keys.screenHeight: screenHeight,
-            Keys.browserLanguage: browserLanguage,
-            Keys.browserPlatform: browserPlatform,
-            Keys.browserName: browserName,
-            Keys.browserVersion: browserVersion,
-            Keys.timezoneName: timezoneName,
-        ]
-
+        let settings = AuthSettings(
+            signatureUrl: signatureUrl,
+            cookiesDomain: cookiesDomain,
+            cookieSessionIdField: cookieSessionIdField,
+            browserMode: browserMode,
+            customUserAgent: customUserAgent,
+            sessionId: sessionId,
+            svWebId: svWebId,
+            sessionLastValidated: sessionLastValidated,
+            aid: aid,
+            screenWidth: screenWidth,
+            screenHeight: screenHeight,
+            browserLanguage: browserLanguage,
+            browserPlatform: browserPlatform,
+            browserName: browserName,
+            browserVersion: browserVersion,
+            timezoneName: timezoneName
+        )
+        
         if let authSettingsURL = authSettingsURL {
-            try? NSKeyedArchiver
-                .archivedData(withRootObject: deviceSettings, requiringSecureCoding: false)
-                .write(to: authSettingsURL)
+            let encoder = PropertyListEncoder()
+            do {
+                let data = try encoder.encode(settings)
+                try data.write(to: authSettingsURL)
+            } catch {
+                print("⚠️ Failed to store TikTok settings: \(error)")
+            }
         }
-
+        
         storeCookiesSettings()
     }
-
+    
     override public func loadAuthSettings() {
         if let authSettingsURL = authSettingsURL,
            let data = try? Data(contentsOf: authSettingsURL) {
-
-            let allowedClasses = [
-                NSDictionary.self,
-                NSURL.self,
-                NSString.self,
-                NSDate.self
-            ]
-
-            if let settings = try? NSKeyedUnarchiver.unarchivedObject(ofClasses: allowedClasses, from: data) as? [String: Any?] {
+            
+            let decoder = PropertyListDecoder()
+            do {
+                let settings = try decoder.decode(AuthSettings.self, from: data)
                 
-                for (key, value) in settings {
-                    switch key {
-                    // Properties that appear to be optional
-                    case Keys.signatureUrl:       signatureUrl = value as? URL
-                    case Keys.customUserAgent:    customUserAgent = value as? String
-                    case Keys.sessionId:          sessionId = value as? String
-                    case Keys.svWebId:            svWebId = value as? String
-
-                    // Properties that appear to be non-optional
-                    case Keys.cookiesDomain:      cookiesDomain = (value as? String) ?? cookiesDomain
-                    case Keys.cookieSessionIdField: cookieSessionIdField = (value as? String) ?? cookieSessionIdField
-                    case Keys.aid:                aid = (value as? String) ?? aid
-                    case Keys.screenWidth:        screenWidth = (value as? String) ?? screenWidth
-                    case Keys.screenHeight:       screenHeight = (value as? String) ?? screenHeight
-                    case Keys.browserLanguage:    browserLanguage = (value as? String) ?? browserLanguage
-                    case Keys.browserPlatform:    browserPlatform = (value as? String) ?? browserPlatform
-                    case Keys.browserName:        browserName = (value as? String) ?? browserName
-                    case Keys.browserVersion:     browserVersion = (value as? String) ?? browserVersion
-                    case Keys.timezoneName:       timezoneName = (value as? String) ?? timezoneName
-                    case Keys.sessionLastValidated: sessionLastValidated = (value as? Date) ?? sessionLastValidated
-
-                    // Special case for enum initialization
-                    case Keys.browserMode:
-                        if let raw = value as? String, let mode = ProviderBrowserMode(rawValue: raw) {
-                            browserMode = mode
-                        }
-
-                    default:
-                        break
-                    }
-                }
+                // Assign properties, falling back to current values if nil
+                signatureUrl = settings.signatureUrl ?? signatureUrl
+                cookiesDomain = settings.cookiesDomain ?? cookiesDomain
+                cookieSessionIdField = settings.cookieSessionIdField ?? cookieSessionIdField
+                browserMode = settings.browserMode ?? browserMode
+                customUserAgent = settings.customUserAgent ?? customUserAgent
+                sessionId = settings.sessionId ?? sessionId
+                svWebId = settings.svWebId ?? svWebId
+                sessionLastValidated = settings.sessionLastValidated ?? sessionLastValidated
+                aid = settings.aid ?? aid
+                screenWidth = settings.screenWidth ?? screenWidth
+                screenHeight = settings.screenHeight ?? screenHeight
+                browserLanguage = settings.browserLanguage ?? browserLanguage
+                browserPlatform = settings.browserPlatform ?? browserPlatform
+                browserName = settings.browserName ?? browserName
+                browserVersion = settings.browserVersion ?? browserVersion
+                timezoneName = settings.timezoneName ?? timezoneName
+                
+            } catch {
+                print("⚠️ Failed to load TikTok settings: \(error)")
             }
         }
-
+        
         loadCookiesSettings()
     }
 }

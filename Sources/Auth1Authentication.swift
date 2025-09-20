@@ -1,9 +1,9 @@
 import Foundation
 
 public final class Auth1Authentication: Authentication {
-    enum Keys {
-        static let token = "token"
-        static let secret = "secret"
+    private struct AuthSettings: Codable {
+        let token: String?
+        let secret: String?
     }
 
     public var token: String?
@@ -24,43 +24,30 @@ public final class Auth1Authentication: Authentication {
     // MARK: - Auth Settings
 
     override public func storeAuthSettings() {
-        let settings: [String: Any?] = [
-            Keys.token: token,
-            Keys.secret: secret,
-        ]
+            let settings = AuthSettings(token: token, secret: secret)
 
-        if let authSettingsURL = authSettingsURL {
-            do {
-                let data = try NSKeyedArchiver.archivedData(
-                    withRootObject: settings,
-                    requiringSecureCoding: false
-                )
-                try data.write(to: authSettingsURL)
-            } catch {
-                print("⚠️ Failed to store Auth1 settings: \(error)")
+            if let authSettingsURL = authSettingsURL {
+                let encoder = PropertyListEncoder()
+                do {
+                    let data = try encoder.encode(settings)
+                    try data.write(to: authSettingsURL)
+                } catch {
+                    print("⚠️ Failed to store Auth1 settings: \(error)")
+                }
             }
         }
-    }
 
     override public func loadAuthSettings() {
         if let authSettingsURL = authSettingsURL,
            let data = try? Data(contentsOf: authSettingsURL) {
-
-            let allowedClasses = [
-                NSDictionary.self,
-                NSString.self
-            ]
-
-            if let settings = try? NSKeyedUnarchiver.unarchivedObject(ofClasses: allowedClasses, from: data) as? [String: Any?] {
-                
-                for (key, value) in settings {
-                    switch key {
-                    case Keys.token:  token = (value as? String) ?? token
-                    case Keys.secret: secret = (value as? String) ?? secret
-                    default:
-                        break
-                    }
-                }
+            
+            let decoder = PropertyListDecoder()
+            do {
+                let settings = try decoder.decode(AuthSettings.self, from: data)
+                self.token = settings.token
+                self.secret = settings.secret
+            } catch {
+                print("⚠️ Failed to load Auth1 settings: \(error)")
             }
         }
     }

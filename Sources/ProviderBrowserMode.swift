@@ -1,6 +1,6 @@
 import Foundation
 
-public enum ProviderBrowserMode: String {
+public enum ProviderBrowserMode: String, Codable {
     case `default`
     case webView = "webview"
     case ios
