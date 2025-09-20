@@ -1,85 +1,68 @@
 import Foundation
 import Alamofire
 
+// MARK: - Error Extensions
 public extension Error {
-    var isConnectionError: Bool {
-        if let currentError = self as? URLError {
-            if currentError.code == URLError.timedOut ||
-                currentError.code == URLError.dnsLookupFailed ||
-                currentError.code == URLError.secureConnectionFailed ||
-                currentError.code == URLError.notConnectedToInternet ||
-                currentError.code == URLError.cannotFindHost ||
-                currentError.code == URLError.networkConnectionLost
-            {
-                return true
-            }
-        }
-
-        if let currentError = asAFError?.underlyingError as? URLError {
-            if currentError.code == URLError.timedOut ||
-                currentError.code == URLError.dnsLookupFailed ||
-                currentError.code == URLError.secureConnectionFailed ||
-                currentError.code == URLError.notConnectedToInternet ||
-                currentError.code == URLError.cannotFindHost ||
-                currentError.code == URLError.networkConnectionLost
-            {
-                return true
-            }
-        }
-
-        return false
+    
+    /// A private helper that safely unwraps and returns a `URLError` regardless of whether
+    /// the error is a direct `URLError` or is wrapped inside an `AFError`.
+    private var underlyingURLError: URLError? {
+        // First, try to cast `self` directly to a URLError.
+        // If that fails, check if `self` is an AFError and if its underlyingError is a URLError.
+        self as? URLError ?? asAFError?.underlyingError as? URLError
     }
 
+    /// A private helper that safely unwraps and returns an `APWebAuthenticationError`.
+    private var underlyingAuthenticationError: APWebAuthenticationError? {
+        self as? APWebAuthenticationError ?? asAFError?.underlyingError as? APWebAuthenticationError
+    }
+    
+    /// Checks if the error is a common network connection-related issue.
+    var isConnectionError: Bool {
+        guard let urlError = underlyingURLError else { return false }
+        
+        // Use a switch statement for a cleaner, more readable check.
+        switch urlError.code {
+        case .timedOut,
+             .dnsLookupFailed,
+             .secureConnectionFailed,
+             .notConnectedToInternet,
+             .cannotFindHost,
+             .networkConnectionLost:
+            return true
+        default:
+            return false
+        }
+    }
+
+    /// Checks if the error represents a user-initiated cancellation.
+    var isCancelledError: Bool {
+        // Check for Alamofire's explicit cancellation flag first.
+        if self.asAFError?.isExplicitlyCancelledError == true {
+            return true
+        }
+
+        // Check for the standard URLError cancellation code.
+        if underlyingURLError?.code == .cancelled {
+            return true
+        }
+        
+        // Check for custom cancellation errors from your app.
+        if let authError = underlyingAuthenticationError {
+            switch authError {
+            case .canceled, .loginCanceled, .badRequest, .unknown:
+                return true
+            default:
+                return false
+            }
+        }
+        
+        return false
+    }
+    
+    /// A convenience property to determine if an error is likely safe to ignore
+    /// from a user-facing perspective (e.g., no need to show an alert).
     var isIgnorableError: Bool {
         isConnectionError || isCancelledError
-    }
-
-    var isCancelledError: Bool {
-        // no point of showing badRequest or unkown error dialogs
-        if let currentError = self as? APWebAuthenticationError, case APWebAuthenticationError.badRequest = currentError {
-            return true
-        }
-
-        if let currentError = self as? APWebAuthenticationError, case APWebAuthenticationError.unknown = currentError {
-            return true
-        }
-
-        if let currentError = self as? APWebAuthenticationError, case APWebAuthenticationError.canceled = currentError {
-            return true
-        }
-
-        if let currentError = asAFError?.underlyingError as? APWebAuthenticationError, case APWebAuthenticationError.canceled = currentError {
-            return true
-        }
-
-        if let currentError = self as? APWebAuthenticationError, case APWebAuthenticationError.loginCanceled = currentError {
-            return true
-        }
-
-        if let currentError = asAFError?.underlyingError as? APWebAuthenticationError, case APWebAuthenticationError.loginCanceled = currentError {
-            return true
-        }
-
-        if let currentError = self as? URLError, currentError.code == URLError.cancelled {
-            return true
-        }
-
-        if let currentError = asAFError?.underlyingError as? URLError, currentError.code == URLError.cancelled {
-            return true
-        }
-
-        if let currentError = self as? AFError, currentError.isExplicitlyCancelledError {
-            return true
-        }
-
-        if let currentError = asAFError?.underlyingError as? URLError, currentError.localizedDescription == "cancelled" {
-            return true
-        }
-
-        if localizedDescription == "cancelled" {
-            return true
-        }
-
-        return false
     }
 }

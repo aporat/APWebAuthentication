@@ -1,6 +1,6 @@
 import Foundation
 
-open class BaseUser: User, Hashable {
+open class BaseUser: User, Hashable, Sendable {
     public var userId: String
     public var username: String?
     public var fullname: String?

@@ -1,7 +1,7 @@
 import Foundation
 @preconcurrency import SwiftyJSON
 
-public enum APWebAuthenticationError: Error {
+public enum APWebAuthenticationError: Error, Sendable, Equatable {
     case failed(reason: String?)
     case connectionError(reason: String?)
     case serverError(reason: String?)
@@ -28,6 +28,8 @@ public enum APWebAuthenticationError: Error {
     public var content: JSON? {
         switch self {
         case let .appCheckPointRequired(content),
+             let .checkPointRequired(content),
+             let .checkPointNotice(content),
              let .appDownloadNewAppRequired(content),
              let .appUpdateRequired(content):
             return content
@@ -37,6 +39,7 @@ public enum APWebAuthenticationError: Error {
     }
 }
 
+// MARK: - LocalizedError
 extension APWebAuthenticationError: LocalizedError {
     public var errorTitle: String {
         switch self {
@@ -46,11 +49,11 @@ extension APWebAuthenticationError: LocalizedError {
             return "Network Error"
         case .serverError:
             return "Server Error"
-        case .sessionExpired(_), .appSessionExpired:
+        case .sessionExpired, .appSessionExpired:
             return "Session Expired"
         case .rateLimit:
             return "Rate Limit Reached"
-        case .feedbackRequired(_), .externalActionRequired:
+        case .feedbackRequired, .externalActionRequired:
             return "Action Blocked"
         default:
             return "Error"
@@ -59,148 +62,80 @@ extension APWebAuthenticationError: LocalizedError {
 
     public var errorDescription: String? {
         switch self {
-        case let .failed(reason), let .serverError(reason), let .feedbackRequired(reason), let .externalActionRequired(reason):
-
-            if let reason = reason, !reason.isEmpty {
-                return reason
-            }
-
-            return nil
+        case let .failed(reason),
+             let .serverError(reason),
+             let .feedbackRequired(reason),
+             let .externalActionRequired(reason),
+             let .sessionExpired(reason),
+             let .appSessionExpired(reason):
+            return reason
+            
         case let .connectionError(reason):
-
-            if let reason = reason, !reason.isEmpty {
-                return reason
-            }
-
-            return "Check your network connection. Server could also be down."
+            return reason ?? "Check your network connection. The server could also be down."
+            
         case let .loginFailed(reason):
-
-            if let reason = reason, !reason.isEmpty {
-                return reason
-            }
-
-            return "Unable to login. Server could also be down."
+            return reason ?? "Unable to login. The server could also be down."
+            
         case let .rateLimit(reason):
-
-            if let reason = reason, !reason.isEmpty {
-                return reason
-            }
-
-            return "You have made too many requests. Please try again later"
-        case let .sessionExpired(reason), let .appSessionExpired(reason):
-
-            if let reason = reason, !reason.isEmpty {
-                return reason
-            }
-
-            return "Your session has expired. Please login again."
+            return reason ?? "You have made too many requests. Please try again later."
+            
         default:
-            return "Unable to perform action. Please try again later."
+            return "Unable to perform this action. Please try again later."
         }
     }
-
+    
     public var errorCode: String? {
         switch self {
-        case .failed:
-            return "failed"
-        case .connectionError:
-            return "connection_error"
-        case .serverError:
-            return "server_error"
-        case .loginFailed:
-            return "login_failed"
-        case .checkPointRequired:
-            return "checkpoint_required"
-        case .checkPointNotice:
-            return "checkpoint_notice"
-        case .feedbackRequired:
-            return "feedback_required"
-        case .externalActionRequired:
-            return "external_action_required"
-        case .sessionExpired:
-            return "session_expired"
-        case .rateLimit:
-            return "rate_limit"
-        case .appSessionExpired:
-            return "app_session_expired"
-        case .appCheckPointRequired:
-            return "app_checkpoint_required"
-        case .appDownloadNewAppRequired:
-            return "app_download_new_app_required"
-        case .appUpdateRequired:
-            return "app_update_required"
-        case .canceled:
-            return "canceled"
-        case .loginCanceled:
-            return "login_canceled"
-        case .notFound:
-            return "not_found"
-        case .timeout:
-            return "timeout"
-        case .badRequest, .unknown:
-            return "bad_request"
+        case .failed: return "failed"
+        case .connectionError: return "connection_error"
+        case .serverError: return "server_error"
+        case .loginFailed: return "login_failed"
+        case .checkPointRequired: return "checkpoint_required"
+        case .checkPointNotice: return "checkpoint_notice"
+        case .feedbackRequired: return "feedback_required"
+        case .externalActionRequired: return "external_action_required"
+        case .sessionExpired: return "session_expired"
+        case .rateLimit: return "rate_limit"
+        case .appSessionExpired: return "app_session_expired"
+        case .appCheckPointRequired: return "app_checkpoint_required"
+        case .appDownloadNewAppRequired: return "app_download_new_app_required"
+        case .appUpdateRequired: return "app_update_required"
+        case .canceled: return "canceled"
+        case .loginCanceled: return "login_canceled"
+        case .notFound: return "not_found"
+        case .timeout: return "timeout"
+        case .badRequest, .unknown: return "bad_request"
         }
     }
 }
 
+// MARK: - Convenience Properties
 extension APWebAuthenticationError {
+    
     public var isAppError: Bool {
-        if case APWebAuthenticationError.appSessionExpired = self {
+        switch self {
+        case .appSessionExpired, .appCheckPointRequired, .appDownloadNewAppRequired, .appUpdateRequired:
             return true
+        default:
+            return false
         }
-
-        if case APWebAuthenticationError.appCheckPointRequired = self {
-            return true
-        }
-
-        if case APWebAuthenticationError.appDownloadNewAppRequired = self {
-            return true
-        }
-
-        if case APWebAuthenticationError.appUpdateRequired = self {
-            return true
-        }
-
-        return false
     }
 
     public var isLoginError: Bool {
-        if case APWebAuthenticationError.loginFailed = self {
+        switch self {
+        case .loginFailed, .sessionExpired, .appSessionExpired, .feedbackRequired:
             return true
+        default:
+            return false
         }
-
-        if case APWebAuthenticationError.sessionExpired = self {
-            return true
-        }
-
-        if case APWebAuthenticationError.appSessionExpired = self {
-            return true
-        }
-
-        if case APWebAuthenticationError.feedbackRequired = self {
-            return true
-        }
-
-        return false
     }
 
     public var isGenericError: Bool {
-        if case APWebAuthenticationError.failed = self {
+        switch self {
+        case .failed, .serverError, .notFound, .badRequest:
             return true
+        default:
+            return false
         }
-
-        if case APWebAuthenticationError.serverError = self {
-            return true
-        }
-
-        if case APWebAuthenticationError.notFound = self {
-            return true
-        }
-
-        if case APWebAuthenticationError.badRequest = self {
-            return true
-        }
-
-        return false
     }
 }

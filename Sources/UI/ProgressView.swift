@@ -1,105 +1,110 @@
 import UIKit
 
+/// A simple, customizable progress bar view.
+@MainActor
 public final class ProgressView: UIView {
-    
-    internal var progress: Float = 0 {
-        didSet {
-            progress = min(1, progress)
-            barWidthConstraint.constant = bounds.width * CGFloat(progress)
-        }
-    }
-    
-    internal let bar = UIView()
-    
-    @objc public dynamic var progressTintColor: UIColor? = UIColor(red: 0, green: 122/255, blue: 1, alpha: 1) {
+
+    // MARK: - Public Properties
+
+    /// The current progress value, ranging from 0.0 to 1.0.
+    public private(set) var progress: Float = 0
+
+    /// The color of the progress bar. Defaults to the standard system blue.
+    public var progressTintColor: UIColor? = .systemBlue {
         didSet {
             bar.backgroundColor = progressTintColor
         }
     }
-    
-    @objc public dynamic var trackTintColor: UIColor? = .clear {
+
+    /// The color of the track behind the progress bar. Defaults to clear.
+    public var trackTintColor: UIColor? = .clear {
         didSet {
             backgroundColor = trackTintColor
         }
     }
-    
-    fileprivate let barWidthConstraint: NSLayoutConstraint
-    
-    override public var frame: CGRect {
-        didSet {
-            let tmpProgress = progress
-            progress = tmpProgress
-        }
+
+    // MARK: - Private Properties
+
+    private let bar = UIView()
+    private var barWidthConstraint: NSLayoutConstraint!
+
+    // MARK: - UIView Lifecycle
+
+    override public init(frame: CGRect) {
+        super.init(frame: frame)
+        setupView()
     }
 
-    required public init?(coder aDecoder: NSCoder) {
+    @available(*, unavailable)
+    required public init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+
+    override public func layoutSubviews() {
+        super.layoutSubviews()
+        barWidthConstraint.constant = bounds.width * CGFloat(progress)
+    }
+
+    // MARK: - Public Methods
+
+    /// Updates the progress bar to a new value, with an optional animation.
+    public func setProgress(_ newProgress: Float, animated: Bool) {
+        // When setting progress, ensure the bar is visible.
+        self.bar.alpha = 1.0
+        
+        self.progress = min(1.0, max(0.0, newProgress))
+        barWidthConstraint.constant = self.bounds.width * CGFloat(self.progress)
+        
+        guard animated else {
+            layoutIfNeeded()
+            return
+        }
+        
+        UIView.animate(withDuration: 0.25) {
+            self.layoutIfNeeded()
+        }
+    }
     
-    override init(frame: CGRect) {
-        barWidthConstraint = NSLayoutConstraint(
-            item: bar,
-            attribute: .width,
-            relatedBy: .equal,
-            toItem: nil,
-            attribute: .notAnAttribute,
-            multiplier: 1,
-            constant: frame.width * CGFloat(progress))
+    /// Animates the progress to completion (1.0), fades out, and then resets.
+    public func finishProgress() {
+        setProgress(1.0, animated: true)
         
-        super.init(frame: frame)
+        // After the progress animation completes, fade out the bar.
+        UIView.animate(withDuration: 0.25, delay: 0.25, options: [], animations: {
+            self.bar.alpha = 0
+        }, completion: { _ in
+            // Reset for the next use.
+            self.progress = 0
+        })
+    }
+
+    /// Animates the progress to the beginning (0.0) and fades out the bar.
+    public func cancelProgress() {
+        setProgress(0.0, animated: true)
         
-        let leftConstraint = NSLayoutConstraint(
-            item: bar,
-            attribute: .left,
-            relatedBy: .equal,
-            toItem: self,
-            attribute: .left,
-            multiplier: 1,
-            constant: 0)
-        
-        let bottomConstraint = NSLayoutConstraint(
-            item: bar,
-            attribute: .bottom,
-            relatedBy: .equal,
-            toItem: self,
-            attribute: .bottom,
-            multiplier: 1,
-            constant: 0)
-        
-        let topConstraint = NSLayoutConstraint(
-            item: bar,
-            attribute: .top,
-            relatedBy: .equal,
-            toItem: self,
-            attribute: .top,
-            multiplier: 1,
-            constant: 0)
-        
-        addSubview(bar)
-        
+        // Fade out the bar. A short delay can make it look smoother.
+        UIView.animate(withDuration: 0.25, delay: 0.1, options: [], animations: {
+            self.bar.alpha = 0
+        })
+    }
+    
+    // MARK: - Private Setup
+
+    private func setupView() {
         backgroundColor = trackTintColor
         
         bar.backgroundColor = progressTintColor
         bar.translatesAutoresizingMaskIntoConstraints = false
-        addConstraints([
-                        barWidthConstraint,
-                        leftConstraint,
-                        topConstraint,
-                        bottomConstraint])
-    }
-    
-    
-    func deviceDidRotate(_ notification: Notification) {
-    }
-    
-    internal func setProgress(_ progress: Float, animated: Bool) {
-        let duration: TimeInterval = animated ? 0.1 : 0
+        addSubview(bar)
         
-        self.progress = progress
+        barWidthConstraint = bar.widthAnchor.constraint(equalToConstant: 0)
         
-        UIView.animate(withDuration: duration, animations: {
-            self.layoutIfNeeded()
-        })
+        NSLayoutConstraint.activate([
+            bar.leadingAnchor.constraint(equalTo: self.leadingAnchor),
+            bar.topAnchor.constraint(equalTo: self.topAnchor),
+            bar.bottomAnchor.constraint(equalTo: self.bottomAnchor),
+            barWidthConstraint
+        ])
     }
-    
 }
+

@@ -5,11 +5,14 @@ open class Authentication {
     public var accountIdentifier: String?
 
     public var authSettingsURL: URL? {
-        guard let currentAccountIdentifier = accountIdentifier else {
+        guard let currentAccountIdentifier = accountIdentifier,
+              let documentsURL = FileManager.documentsDirectoryURL else {
             return nil
         }
-
-        return URL(fileURLWithPath: String.documentDirectory.appendingPathComponent(currentAccountIdentifier + ".settings"))
+        
+        let fileName = currentAccountIdentifier + ".settings"
+        
+        return documentsURL.appendingPathComponent(fileName)
     }
 
     // MARK: - User Agent
@@ -74,11 +77,15 @@ open class Authentication {
     open func storeAuthSettings() {}
 
     public func clearAuthSettings() {
-        guard let currentAccountIdentifier = accountIdentifier else {
+        guard let currentAccountIdentifier = accountIdentifier,
+              let documentsURL = FileManager.documentsDirectoryURL else {
             return
         }
-
-        let url = URL(fileURLWithPath: String.documentDirectory.appendingPathComponent(currentAccountIdentifier + ".settings"))
+        
+        let fileName = currentAccountIdentifier + ".settings"
+        
+        let url = documentsURL.appendingPathComponent(fileName)
+        
         try? FileManager.default.removeItem(at: url)
     }
 }

@@ -1,24 +1,27 @@
 import Foundation
 
-/// A structure representing a RFC 5988 link.
-public struct APWebAuthenticationLink: Equatable, Hashable {
-    /// The URI for the link
+public struct APWebAuthenticationLink: Equatable, Hashable, Sendable {
+    /// The URI for the link.
     public let uri: String
 
-    /// The parameters for the link
+    /// The parameters for the link.
     public let parameters: [String: String]
 
-    /// Initialize a Link with a given uri and parameters
+    /// Initializes a Link with a given URI and parameters.
     public init(uri: String, parameters: [String: String]? = nil) {
         self.uri = uri
         self.parameters = parameters ?? [:]
     }
 
     public func hash(into hasher: inout Hasher) {
-        hasher.combine(uri.hashValue)
+        hasher.combine(uri)
     }
 
-    /// Relation type of the Link.
+    public static func == (lhs: APWebAuthenticationLink, rhs: APWebAuthenticationLink) -> Bool {
+        lhs.uri == rhs.uri && lhs.parameters == rhs.parameters
+    }
+
+    /// Relation type of the Link (e.g., "next", "prev").
     public var relationType: String? {
         parameters["rel"]
     }
@@ -34,168 +37,98 @@ public struct APWebAuthenticationLink: Equatable, Hashable {
     }
 }
 
-/// Returns whether two Link's are equivalent
-public func == (lhs: APWebAuthenticationLink, rhs: APWebAuthenticationLink) -> Bool {
-    lhs.uri == rhs.uri && lhs.parameters == rhs.parameters
-}
-
-// MARK: HTML Element Conversion
-
-/// An extension to Link to provide conversion to a HTML element
+// MARK: - HTML Element Conversion
 extension APWebAuthenticationLink {
-    /// Encode the link into a HTML element
+    /// Encodes the link into an HTML `<link>` element string.
     public var html: String {
-        let components = parameters.map { key, value in
+        let paramString = parameters.map { key, value in
             "\(key)=\"\(value)\""
-        } + ["href=\"\(uri)\""]
-        let elements = components.joined(separator: " ")
-        return "<link \(elements) />"
+        }.joined(separator: " ")
+        
+        return "<link href=\"\(uri)\" \(paramString) />"
     }
 }
 
-// MARK: Header link conversion
-
-/// An extension to Link to provide conversion to and from a HTTP "Link" header
+// MARK: - HTTP Header Conversion
 extension APWebAuthenticationLink {
-    /// Encode the link into a header
+    /// Encodes the link into a `Link` header string, as per RFC 5988.
     public var header: String {
-        let components = ["<\(uri)>"] + parameters.map { key, value in
-            "\(key)=\"\(value)\""
-        }
-        return components.joined(separator: "; ")
+        let paramString = parameters.map { key, value in
+            "; \(key)=\"\(value)\""
+        }.joined()
+        
+        return "<\(uri)>\(paramString)"
     }
 
-    /*** Initialize a Link with a HTTP Link header
-     - parameter header: A HTTP Link Header
-     */
-    public init(header: String) {
-        let (uri, parametersString) = takeFirst(separateBy(";")(header))
-
-        let parameters = parametersString.map(split("=")).map { parameter in
-            [parameter.0: trim("\"", "\"")(parameter.1)]
+    /// Initializes a Link by parsing a single HTTP `Link` header value.
+    /// - parameter header: A string component from a `Link` header (e.g., `<http://example.com>; rel="next"`).
+    public init?(header: String) {
+        let components = header.components(separatedBy: ";").map {
+            $0.trimmingCharacters(in: .whitespaces)
         }
 
-        self.uri = trim("<", ">")(uri)
-        self.parameters = parameters.reduce([:], +)
+        guard !components.isEmpty else { return nil }
+
+        // Extract and clean the URI
+        let uriComponent = components[0]
+        guard uriComponent.hasPrefix("<") && uriComponent.hasSuffix(">") else {
+            return nil
+        }
+        self.uri = String(uriComponent.dropFirst().dropLast())
+
+        // Parse parameters
+        var params: [String: String] = [:]
+        for paramComponent in components.dropFirst() {
+            let paramParts = paramComponent.split(separator: "=", maxSplits: 1).map(String.init)
+            if paramParts.count == 2 {
+                let key = paramParts[0]
+                let value = paramParts[1].trimmingCharacters(in: CharacterSet(charactersIn: "\""))
+                params[key] = value
+            }
+        }
+        self.parameters = params
     }
 }
 
-/*** Parses a Web Linking (RFC5988) header into an array of Links
- - parameter header: RFC5988 link header. For example `<?page=3>; rel=\"next\", <?page=1>; rel=\"prev\"`
- :return: An array of Links
- */
+/// Parses a Web Linking (RFC 5988) header into an array of Links.
+/// - parameter header: Full RFC 5988 link header string. (e.g., `</page=3>; rel="next", </page=1>; rel="prev"`)
+/// - returns: An array of `APWebAuthenticationLink` structs.
 public func parseLinkHeader(_ header: String) -> [APWebAuthenticationLink] {
-    separateBy(",")(header).map { string in
-        APWebAuthenticationLink(header: string)
-    }
+    // 5. Use `compactMap` with the new failable initializer for a clean and safe parsing implementation.
+    header.components(separatedBy: ",").compactMap { APWebAuthenticationLink(header: $0) }
 }
 
-/// An extension to NSHTTPURLResponse adding a links property
+// MARK: - HTTPURLResponse Extension
 extension HTTPURLResponse {
-    /// Parses the links on the response `Link` header
+    /// Parses the links from the response's `Link` header.
     public var links: [APWebAuthenticationLink] {
-        if let linkHeader = allHeaderFields["Link"] as? String {
-            return parseLinkHeader(linkHeader).map { link in
-                var uri = link.uri
+        guard let linkHeader = allHeaderFields["Link"] as? String else {
+            return []
+        }
+        
+        return parseLinkHeader(linkHeader).map { link in
+            // Handle relative URIs by resolving them against the response's base URL.
+            if let baseURL = self.url, let resolvedURL = URL(string: link.uri, relativeTo: baseURL) {
+                return APWebAuthenticationLink(uri: resolvedURL.absoluteString, parameters: link.parameters)
+            }
+            return link
+        }
+    }
 
-                /// Handle relative URIs
-                if let baseURL = self.url, let URL = URL(string: uri, relativeTo: baseURL) {
-                    uri = URL.absoluteString
-                }
-
-                return APWebAuthenticationLink(uri: uri, parameters: link.parameters)
+    /// Finds a link that has a set of matching parameters.
+    /// - parameter parameters: A dictionary of parameters to match (e.g., `["rel": "next"]`).
+    public func findLink(where parameters: [String: String]) -> APWebAuthenticationLink? {
+        // 6. Replaced the custom `~=` operator with a clearer, standard `first(where:)` loop.
+        links.first { link in
+            parameters.allSatisfy { key, value in
+                link.parameters[key] == value
             }
         }
-
-        return []
     }
 
-    /// Finds a link which has matching parameters
-    public func findLink(_ parameters: [String: String]) -> APWebAuthenticationLink? {
-        for link in links {
-            if link.parameters ~= parameters {
-                return link
-            }
-        }
-
-        return nil
-    }
-
-    /// Find a link for the relation
-    public func findLink(_ relation: String) -> APWebAuthenticationLink? {
-        findLink(["rel": relation])
-    }
-}
-
-// MARK: Private methods (used by link header conversion)
-
-/// Merge two dictionaries together
-func + <K, V>(lhs: [K: V], rhs: [K: V]) -> [K: V] {
-    var dictionary = [K: V]()
-
-    for (key, value) in rhs {
-        dictionary[key] = value
-    }
-
-    for (key, value) in lhs {
-        dictionary[key] = value
-    }
-
-    return dictionary
-}
-
-/// LHS contains all the keys and values from RHS
-func ~= (lhs: [String: String], rhs: [String: String]) -> Bool {
-    for (key, value) in rhs {
-        if lhs[key] != value {
-            return false
-        }
-    }
-
-    return true
-}
-
-/// Separate a trim a string by a separator
-func separateBy(_ separator: String) -> (String) -> [String] {
-    { input in
-        input.components(separatedBy: separator).map {
-            $0.trimmingCharacters(in: CharacterSet.whitespaces)
-        }
-    }
-}
-
-/// Split a string by a separator into two components
-func split(_ separator: String) -> (String) -> (String, String) {
-    return { input in
-        let range = input.range(of: separator, options: String.CompareOptions(rawValue: 0), range: nil, locale: nil)
-
-        if let range = range {
-            let lhs = String(input[..<range.lowerBound])
-            let rhs = String(input[range.upperBound...])
-            return (lhs, rhs)
-        }
-
-        return (input, "")
-    }
-}
-
-/// Separate the first element in an array from the rest
-func takeFirst(_ input: [String]) -> (String, ArraySlice<String>) {
-    if let first = input.first {
-        let items = input[input.indices.suffix(from: input.startIndex + 1)]
-        return (first, items)
-    }
-
-    return ("", [])
-}
-
-/// Trim a prefix and suffix from a string
-func trim(_ lhs: Character, _ rhs: Character) -> (String) -> String {
-    { input in
-        if input.hasPrefix("\(lhs)"), input.hasSuffix("\(rhs)") {
-            return String(input[input.index(after: input.startIndex) ..< input.index(before: input.endIndex)])
-        }
-
-        return input
+    /// Finds a link for a specific relation type.
+    /// - parameter relation: The relation type to find (e.g., "next").
+    public func findLink(for relation: String) -> APWebAuthenticationLink? {
+        findLink(where: ["rel": relation])
     }
 }

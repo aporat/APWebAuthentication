@@ -106,7 +106,7 @@ public class APWebAuthenticationSession {
 
         let navView = AuthNavBarView()
         navView.hideSecure()
-        navView.titleLabel.text = accountType.webAddress
+        navView.title = accountType.webAddress
 
         loginViewController.navigationItem.titleView = navView
         loginViewController.appearanceStyle = .safari

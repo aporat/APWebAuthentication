@@ -1,22 +1,25 @@
 import Foundation
 import SwiftyJSON
 
-public final class TumblrUser: BaseUser {
+/// A concrete user model for a Tumblr user, including their blogs.
+public final class TumblrUser: BaseUser, Sendable {
+
+    /// A list of the user's blogs.
     public var blogs = [TumblrBlog]()
 
+    /// A failable initializer that creates a `TumblrUser` from a SwiftyJSON object.
+    /// - Parameter info: The JSON object containing the user's data.
     public required init?(info: JSON) {
-        if let id = info["name"].string {
-            super.init(userId: id)
-            username = id
-            fullname = id
-        } else {
+        guard let id = info["name"].string, !id.isEmpty else {
             return nil
         }
-
-        for blogData in info["blogs"].arrayValue {
-            if let blog = TumblrBlog(info: blogData) {
-                blogs.append(blog)
-            }
-        }
+        
+        super.init(userId: id)
+        
+        // Set the properties on the instance.
+        self.username = id
+        self.fullname = id
+        
+        self.blogs = info["blogs"].arrayValue.compactMap { TumblrBlog(info: $0) }
     }
 }

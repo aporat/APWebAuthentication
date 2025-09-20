@@ -1,59 +1,49 @@
 import UIKit
 import SnapKit
 
+/// A custom navigation bar view that displays a title and an optional security lock icon.
 @MainActor
-final class AuthNavBarView: UIView {
+public final class AuthNavBarView: UIView {
+    
+    // MARK: - Public Properties
+    
+    /// The text to display in the title label.
+    public var title: String? {
+        get { titleLabel.text }
+        set { titleLabel.text = newValue }
+    }
+    
     // MARK: - UI Elements
-
-    lazy var imageView: UIImageView = {
+    
+    private lazy var imageView: UIImageView = {
         let view = UIImageView()
         view.image = UIImage(systemName: "lock.fill")
-        // Set initial tint color based on the current trait collection.
-        if self.traitCollection.userInterfaceStyle == .dark {
-            view.tintColor = .white
-        } else {
-            view.tintColor = .black
-        }
+        view.tintColor = .label
         return view
     }()
 
-    lazy var titleLabel: UILabel = {
+    private lazy var titleLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.boldSystemFont(ofSize: 17)
         label.textAlignment = .center
         return label
     }()
 
-    // MARK: - UIView
+    // MARK: - UIView Lifecycle
 
-    override init(frame: CGRect) {
+    override public init(frame: CGRect) {
         super.init(frame: frame)
-        setupSubviews()
+        setupView()
     }
 
+    @available(*, unavailable)
     required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
-    fileprivate func setupSubviews() {
-        addSubview(imageView)
-        addSubview(titleLabel)
-
-        // Register for changes to the user interface style.
-        self.registerForTraitChanges([UITraitUserInterfaceStyle.self]) { (self: AuthNavBarView, previousTraitCollection: UITraitCollection) in
-            if self.traitCollection.userInterfaceStyle == .dark {
-                self.imageView.tintColor = .white
-            } else {
-                self.imageView.tintColor = .black
-            }
-        }
-        
-        setNeedsUpdateConstraints()
-        hideSecure()
-    }
-
-    // The deprecated method has been removed.
-
+    
+    // MARK: - Public Methods
+    
+    /// Displays the security lock icon next to the title.
     public func showSecure() {
         imageView.isHidden = false
 
@@ -64,19 +54,28 @@ final class AuthNavBarView: UIView {
         }
 
         titleLabel.snp.remakeConstraints { make in
-            make.centerX.equalToSuperview().offset(10)
+            make.centerX.equalToSuperview().offset(10) // Shift title to center the combined view
             make.centerY.equalToSuperview()
         }
     }
 
+    /// Hides the security lock icon and centers the title.
     public func hideSecure() {
         imageView.isHidden = true
-
         imageView.snp.removeConstraints()
 
         titleLabel.snp.remakeConstraints { make in
-            make.centerX.equalToSuperview()
-            make.centerY.equalToSuperview()
+            make.center.equalToSuperview()
         }
+    }
+    
+    // MARK: - Private Setup
+
+    private func setupView() {
+        addSubview(imageView)
+        addSubview(titleLabel)
+        
+        // Set the initial state of the view.
+        hideSecure()
     }
 }

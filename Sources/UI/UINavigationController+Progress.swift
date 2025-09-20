@@ -1,108 +1,92 @@
 import UIKit
 
+// Use a private struct for the associated object key to avoid conflicts.
+private enum AssociatedKeys {
+    static var progressView = "navigationControllerProgressView"
+}
+
+/// An extension to add a progress bar to a `UINavigationController`.
+@MainActor
 public extension UINavigationController {
 
-    /**
-     Default is 2.0
-    */
+    // MARK: - Public Properties
+
+    /// The height of the progress bar. The default is 2.0.
     var progressHeight: CGFloat {
-        get { return progressView.frame.height }
+        get {
+            // Find the height constraint and return its constant.
+            return progressView.constraints.first { $0.firstAttribute == .height }?.constant ?? 0
+        }
         set {
-            progressView.frame.origin.y = navigationBar.frame.height - newValue
-            progressView.frame.size.height = newValue
+            // Find the height constraint and update its constant.
+            progressView.constraints.first { $0.firstAttribute == .height }?.constant = newValue
         }
-    }
-    
-    /**
-     The color shown for the portion of the progress bar that is not filled.
-     default is clear color.
-    */
-    var trackTintColor: UIColor? {
-        get { return progressView.trackTintColor }
-        set { progressView.trackTintColor = newValue }
-    }
-    
-    /**
-     The color shown for the portion of the progress bar that is filled.
-     default is (r: 0, g: 122, b: 225, a: 255.
-    */
-    var progressTintColor: UIColor? {
-        get { return progressView.progressTintColor }
-        set { progressView.progressTintColor = newValue }
-    }
-    
-    /**
-     The current progress is represented by a floating-point value between 0.0 and 1.0,
-     inclusive, where 1.0 indicates the completion of the task. The default value is 0.0.
-    */
-    var progress: Float {
-        get { return progressView.progress }
-        set { progressView.progress = newValue }
-    }
-    
-    
-    private var progressView: ProgressView {
-        for subview in navigationBar.subviews {
-            if let progressView = subview as? ProgressView {
-                return progressView
-            }
-        }
-        
-        let defaultHeight = CGFloat(2)
-        let frame = CGRect(
-            x: 0,
-            y: navigationBar.frame.height - defaultHeight,
-            width: navigationBar.frame.width,
-            height: defaultHeight
-        )
-        let progressView = ProgressView(frame: frame)
-        
-        navigationBar.addSubview(progressView)
-        
-        progressView.autoresizingMask = [
-            .flexibleWidth, .flexibleTopMargin
-        ]
-        
-        
-        return progressView
     }
 
-    /**
-    Adjusts the current progress shown by the receiver, optionally animating the change.
-    
-    - parameter progress: The new progress value.
-    - parameter animated: true if the change should be animated, false if the change should happen immediately.
-    */
+    /// The color of the track behind the progress bar.
+    var trackTintColor: UIColor? {
+        get { progressView.trackTintColor }
+        set { progressView.trackTintColor = newValue }
+    }
+
+    /// The color shown for the filled portion of the progress bar.
+    var progressTintColor: UIColor? {
+        get { progressView.progressTintColor }
+        set { progressView.progressTintColor = newValue }
+    }
+
+    /// The current progress value, between 0.0 and 1.0.
+    var progress: Float {
+        get { progressView.progress }
+        set { setProgress(newValue, animated: false) }
+    }
+
+    // MARK: - Private Computed Property
+
+    private var progressView: ProgressView {
+        // Try to retrieve the existing progress view.
+        if let view = objc_getAssociatedObject(self, &AssociatedKeys.progressView) as? ProgressView {
+            // Ensure it's on top of other navigation bar subviews.
+            navigationBar.bringSubviewToFront(view)
+            return view
+        }
+
+        // If it doesn't exist, create and configure a new one.
+        let defaultHeight: CGFloat = 2.0
+        let newProgressView = ProgressView(frame: .zero)
+        newProgressView.translatesAutoresizingMaskIntoConstraints = false
+        navigationBar.addSubview(newProgressView)
+        
+        // Set up Auto Layout constraints to pin it to the bottom of the navigation bar.
+        NSLayoutConstraint.activate([
+            newProgressView.leadingAnchor.constraint(equalTo: navigationBar.leadingAnchor),
+            newProgressView.trailingAnchor.constraint(equalTo: navigationBar.trailingAnchor),
+            newProgressView.bottomAnchor.constraint(equalTo: navigationBar.bottomAnchor),
+            newProgressView.heightAnchor.constraint(equalToConstant: defaultHeight)
+        ])
+        
+        // Store the new progress view as an associated object for future access.
+        objc_setAssociatedObject(self, &AssociatedKeys.progressView, newProgressView, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        
+        return newProgressView
+    }
+
+    // MARK: - Public Methods
+
+    /// Adjusts the current progress shown by the receiver, optionally animating the change.
     func setProgress(_ progress: Float, animated: Bool) {
-        progressView.bar.alpha = 1
         progressView.setProgress(progress, animated: animated)
     }
-    
-    /**
-     While progress is changed to 1.0, the bar will fade out. After that, progress will be 0.0.
-    */
+
+    /// Animates the progress to completion (1.0) and then fades out.
     func finishProgress() {
-        progressView.bar.alpha = 1
-        progressView.setProgress(1, animated: true)
-        
-        UIView.animate(withDuration: 0.25,
-            animations: {
-                self.progressView.bar.alpha = 0
-            }, completion: { finished in
-                self.progressView.progress = 0
-            }
-        )
+        // The animation logic is now correctly encapsulated within the ProgressView.
+        progressView.finishProgress()
     }
-    
-    /**
-     While progress is changed to 0.0, the bar will fade out.
-    */
+
+    /// Animates the progress to 0 and fades out.
     func cancelProgress() {
-        progressView.setProgress(0, animated: true)
-        
-        UIView.animate(withDuration: 0.25, animations: {
-            self.progressView.bar.alpha = 0
-        }) 
+        // The animation logic is now correctly encapsulated within the ProgressView.
+        progressView.cancelProgress()
     }
-    
 }

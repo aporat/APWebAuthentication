@@ -1,99 +1,78 @@
 import Foundation
 
-extension URL {
-    /// [RFC-5849 Section 3.4.1.2](https://tools.ietf.org/html/rfc5849#section-3.4.1.2)
-    var oAuthBaseURL: String {
-        let scheme = self.scheme?.lowercased() ?? ""
-        let host = self.host?.lowercased() ?? ""
-
-        var authority = ""
-        if let user = self.user, let pw = password {
-            authority = user + ":" + pw + "@"
-        } else if let user = self.user {
-            authority = user + "@"
+// MARK: - URL Extension for Web Authentication
+public extension URL {
+    
+    /// The base URL string for OAuth signature generation, as per RFC 5849.
+    /// This string excludes the query, fragment, user, password, and default ports.
+    var oAuthBaseURL: String? {
+        guard var components = URLComponents(url: self, resolvingAgainstBaseURL: false) else {
+            return nil
         }
-
-        var port = ""
-        if let iport = self.port, iport != 80, scheme == "http" {
-            port = ":\(iport)"
-        } else if let iport = self.port, iport != 443, scheme == "https" {
-            port = ":\(iport)"
-        }
-
-        return scheme + "://" + authority + host + port + path
+        components.query = nil
+        components.fragment = nil
+        components.user = nil
+        components.password = nil
+        
+        // URLComponents automatically omits default ports (80 for http, 443 for https)
+        // when generating the string, simplifying the logic.
+        return components.string
     }
 
-    public var withoutScheme: URL? {
-        var components = URLComponents(url: self, resolvingAgainstBaseURL: false)
-        components?.scheme = nil
-
-        guard let url = components?.url else { return nil }
-
-        let urlString = url.absoluteString
-        let index = urlString.index(urlString.startIndex, offsetBy: 2)
-        let modifiedString = String(describing: urlString[index...])
-
-        return URL(string: modifiedString)
-    }
-
-    public func conformToHypertextProtocol() -> Bool {
-        guard let scheme = self.scheme, scheme == URLComponents.Schemes.http || scheme == URLComponents.Schemes.https else {
+    /// Checks if the URL scheme is either `http` or `https`.
+    func isWebURL() -> Bool {
+        guard let scheme = self.scheme?.lowercased() else {
             return false
         }
-
-        return true
+        return ["http", "https"].contains(scheme)
+    }
+    
+    /// Returns a new URL without the scheme component.
+    var withoutScheme: URL? {
+        var components = URLComponents(url: self, resolvingAgainstBaseURL: false)
+        components?.scheme = nil
+        return components?.url
     }
 
-    public var parameters: [String: String] {
-        var queryParams = [String: String]()
-
-        // If we are here it's was native iOS authorization and we have redirect URL like this:
-        // testapp123://foursquare?access_token=ACCESS_TOKEN
-        if let parameters = query?.components(separatedBy: "&") {
-            for string in parameters {
-                let keyValue = string.components(separatedBy: "=")
-                if keyValue.count == 2 {
-                    queryParams[keyValue[0]] = keyValue[1].urlUnescaped
-                }
-            }
+    /// A dictionary of parameters from the URL's query string and/or fragment.
+    /// If a key exists in both, the value from the fragment takes precedence.
+    var parameters: [String: String] {
+        guard let components = URLComponents(url: self, resolvingAgainstBaseURL: false) else {
+            return [:]
         }
-
-        // If we are here it's was web authorization and we have redirect URL like this:
-        // testapp123://foursquare#access_token=ACCESS_TOKEN
-        if let parameters = fragment?.components(separatedBy: "&") {
-            for string in parameters {
-                let keyValue = string.components(separatedBy: "=")
-                if keyValue.count == 2 {
-                    queryParams[keyValue[0]] = keyValue[1].urlUnescaped
-                }
-            }
+        
+        // Parse the main query string
+        let queryParams = components.queryItems?.reduce(into: [String: String]()) { result, item in
+            result[item.name] = item.value
+        } ?? [:]
+        
+        // Also parse the fragment, as it's often used in OAuth redirects
+        var fragmentParams: [String: String] = [:]
+        if let fragment = components.fragment,
+           let fragmentComponents = URLComponents(string: "?\(fragment)") {
+            fragmentParams = fragmentComponents.queryItems?.reduce(into: [String: String]()) { result, item in
+                result[item.name] = item.value
+            } ?? [:]
         }
-
-        return queryParams
+        
+        // Merge the two, with fragment values overwriting query values for duplicate keys.
+        return queryParams.merging(fragmentParams, uniquingKeysWith: { _, new in new })
     }
 
-    public func getResponse() -> Result<[String: String], APWebAuthenticationError> {
-        let params = parameters
+    /// Parses the URL to determine if it represents a success or failure response.
+    func getResponse() -> Result<[String: String], APWebAuthenticationError> {
+        let params = self.parameters
 
-        if let errorMessage = params["error"]?.removingPercentEncoding {
-            return (.failure(APWebAuthenticationError.failed(reason: errorMessage)))
-        } else if let errorMessage = params["error_description"]?.removingPercentEncoding {
-            return (.failure(APWebAuthenticationError.failed(reason: errorMessage)))
-        } else if let errorMessage = params["error_message"]?.removingPercentEncoding {
+        // Check for various error keys used in OAuth and other APIs.
+        let errorReason = params["error_description"] ?? params["error_message"] ?? params["error"]
+        
+        if let reason = errorReason?.removingPercentEncoding {
             if params["error_type"] == "login_failed" {
-                return (.failure(APWebAuthenticationError.loginFailed(reason: errorMessage)))
+                return .failure(.loginFailed(reason: reason))
             }
-
-            return (.failure(APWebAuthenticationError.failed(reason: errorMessage)))
+            return .failure(.failed(reason: reason))
         }
 
         return .success(params)
-    }
-}
-
-extension URLComponents {
-    struct Schemes {
-        static let http = "http"
-        static let https = "https"
     }
 }

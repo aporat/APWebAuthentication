@@ -1,13 +1,22 @@
 import Foundation
 import Alamofire
 import CryptoSwift
-import SwifterSwift
 
-open class OAuth1RequestAdapter: RequestAdapter, @unchecked Sendable {
-    var dataEncoding: String.Encoding = .utf8
-    var auth: Auth1Authentication
-    var consumerKey: String
-    var consumerSecret: String
+// MARK: - OAuth1Error
+/// Defines errors specific to the OAuth1 request adaptation process.
+public enum OAuth1Error: Error {
+    case missingURLInRequest
+    case requestBodyNotUTF8Encodable
+    case signatureGenerationFailed
+}
+
+// MARK: - OAuth1RequestAdapter
+/// An Alamofire `RequestAdapter` that applies an OAuth 1.0a signature to outgoing requests.
+/// This implementation is thread-safe and designed for modern Swift concurrency.
+public final class OAuth1RequestAdapter: RequestAdapter, Sendable {
+    private let consumerKey: String
+    private let consumerSecret: String
+    public let auth: Auth1Authentication
 
     public init(consumerKey: String, consumerSecret: String, auth: Auth1Authentication) {
         self.consumerKey = consumerKey
@@ -15,110 +24,129 @@ open class OAuth1RequestAdapter: RequestAdapter, @unchecked Sendable {
         self.auth = auth
     }
 
-    public func adapt(_ urlRequest: URLRequest, for _: Session, completion: @escaping (Result<URLRequest, Error>) -> Void) {
-        var urlRequest = urlRequest
+    public func adapt(_ urlRequest: URLRequest, for session: Session, completion: @escaping (Result<URLRequest, Error>) -> Void) {
+        guard let url = urlRequest.url else {
+            return completion(.failure(OAuth1Error.missingURLInRequest))
+        }
 
+        let authToken = auth.token
+        let authSecret = auth.secret
+        let userAgent = auth.userAgent
+        
+        var adaptedRequest = urlRequest
         var formParameters: [String: String] = [:]
-        if urlRequest.method == .post {
-            formParameters = urlRequest.httpBody!.string(encoding: .utf8)!.parameters
-            urlRequest.httpBody = httpBody(forFormParameters: formParameters)
+
+        if adaptedRequest.method == .post, let httpBody = adaptedRequest.httpBody {
+            guard let bodyString = String(data: httpBody, encoding: .utf8) else {
+                return completion(.failure(OAuth1Error.requestBodyNotUTF8Encodable))
+            }
+            // Use URLComponents for robust query string parsing. This resolves the compiler error.
+            if let components = URLComponents(string: "?\(bodyString)") {
+                formParameters = components.queryItems?.reduce(into: [String: String]()) { result, item in
+                    result[item.name] = item.value ?? ""
+                } ?? [:]
+            }
+        }
+        
+        do {
+            let authHeader = try authorizationHeader(
+                for: url,
+                method: adaptedRequest.httpMethod ?? "GET",
+                formParameters: formParameters,
+                authToken: authToken,
+                authSecret: authSecret
+            )
+            adaptedRequest.headers.add(.authorization(authHeader))
+        } catch {
+            return completion(.failure(error))
         }
 
-        let authHeader = authorizationHeader(url: urlRequest.url!, method: urlRequest.httpMethod!, parameter: formParameters)
-
-        urlRequest.headers.add(.authorization(authHeader))
-
-        if let currentUserAgent = auth.userAgent, !currentUserAgent.isEmpty {
-            urlRequest.headers.add(.userAgent(currentUserAgent))
+        if let userAgent = userAgent, !userAgent.isEmpty {
+            adaptedRequest.headers.add(.userAgent(userAgent))
         }
+        
+        adaptedRequest.headers.add(.accept("application/json"))
 
-        urlRequest.headers.add(.accept("application/json"))
-
-        completion(.success(urlRequest))
-        return
+        completion(.success(adaptedRequest))
     }
+}
 
-    /// Function to calculate the OAuth protocol parameters and signature ready to be added
-    /// as the HTTP header "Authorization" entry. A detailed explanation of the procedure
-    /// can be found at: [RFC-5849 Section 3](https://tools.ietf.org/html/rfc5849#section-3)
-    ///
-    /// - Parameters:
-    ///   - url: Request url (with all query parameters etc.)
-    ///   - method: HTTP method
-    ///   - parameter: url-form parameters
-    ///   - consumerCredentials: consumer credentials
-    ///   - userCredentials: user credentials (nil if this is a request without user association)
-    ///
-    /// - Returns: OAuth HTTP header entry for the Authorization field.
-    private func authorizationHeader(url: URL, method: String, parameter: [String: String]) -> String {
-        typealias Tup = (key: String, value: String)
+// MARK: - Private Helpers
+private extension OAuth1RequestAdapter {
+    /// Constructs the final "Authorization" header string for an OAuth 1.0a request.
+    func authorizationHeader(
+        for url: URL,
+        method: String,
+        formParameters: [String: String],
+        authToken: String?,
+        authSecret: String?
+    ) throws -> String {
+        
+        // [RFC 5849 Section 3.1]
+        var oauthParameters = buildOAuthParameters(token: authToken)
 
-        let tuplify: (String, String) -> Tup = {
-            (key: $0.urlEscaped, value: $1.urlEscaped)
-        }
-        let cmp: (Tup, Tup) -> Bool = {
-            $0.key < $1.key
-        }
-        let toPairString: (Tup) -> String = {
-            $0.key + "=" + $0.value
-        }
-        let toBrackyPairString: (Tup) -> String = {
-            $0.key + "=\"" + $0.value + "\""
-        }
-
-        /// [RFC-5849 Section 3.1](https://tools.ietf.org/html/rfc5849#section-3.1)
-        var oAuthParameters = authorizationParameters(consumerKey: consumerKey, token: auth.token)
-
-        /// [RFC-5849 Section 3.4.1.3.1](https://tools.ietf.org/html/rfc5849#section-3.4.1.3.1)
-        let signString: String = [oAuthParameters, parameter, url.parameters]
-            .flatMap { $0.map(tuplify) }
-            .sorted(by: cmp)
-            .map(toPairString)
+        // [RFC 5849 Section 3.4.1.3.1]
+        // Combine all parameters (OAuth, form, and URL query) into a single collection.
+        let allParameters = oauthParameters
+            .merging(formParameters, uniquingKeysWith: { _, new in new })
+            .merging(url.parameters, uniquingKeysWith: { _, new in new }) // Assumes `url.parameters` extension exists
+        
+        // Percent-encode, sort, and join all parameters to form the parameter string.
+        let parameterString = allParameters
+            .map { ($0.key.urlEscaped, $0.value.urlEscaped) }
+            // FIX: Correctly sort by the key of the two tuples being compared.
+            .sorted { $0.0 < $1.0 }
+            .map { "\($0.0)=\($0.1)" }
             .joined(separator: "&")
+        
+        // [RFC 5849 Section 3.4.1]
+        // Construct the signature base string from the method, base URL, and parameter string.
+        let signatureBase = [
+            method.uppercased().urlEscaped,
+            url.oAuthBaseURL?.urlEscaped, // Assumes `url.oAuthBaseURL` extension exists
+            parameterString.urlEscaped
+        ]
+        .compactMap { $0 }
+        .joined(separator: "&")
 
-        /// [RFC-5849 Section 3.4.1](https://tools.ietf.org/html/rfc5849#section-3.4.1)
-        let signatureBase: String = [method.urlEscaped, url.oAuthBaseURL.urlEscaped, signString.urlEscaped]
-            .joined(separator: "&")
+        // [RFC 5849 Section 3.4.2]
+        // The signing key is composed of the consumer secret and the token secret.
+        let signingKey = "\(consumerSecret.urlEscaped)&\((authSecret ?? "").urlEscaped)"
 
-        /// [RFC-5849 Section 3.4.2](https://tools.ietf.org/html/rfc5849#section-3.4.2)
-        let signingKey: String = [consumerSecret, auth.secret ?? ""].joined(separator: "&")
-
-        /// [RFC-5849 Section 3.4.2](https://tools.ietf.org/html/rfc5849#section-3.4.2)
-        let bytes: [UInt8] = Array(signatureBase.utf8)
-
-        if let signature = try? HMAC(key: signingKey, variant: .sha1).authenticate(bytes) {
-            oAuthParameters["oauth_signature"] = signature.toBase64()
+        // Generate the HMAC-SHA1 signature.
+        guard let signature = try? HMAC(key: signingKey, variant: .sha1)
+                .authenticate(Array(signatureBase.utf8))
+                .toBase64()
+        else {
+            throw OAuth1Error.signatureGenerationFailed
         }
+        
+        oauthParameters["oauth_signature"] = signature
 
-        /// [RFC-5849 Section 3.5.1](https://tools.ietf.org/html/rfc5849#section-3.5.1)
-        return "OAuth " + oAuthParameters
-            .map(tuplify)
-            .sorted(by: cmp)
-            .map(toBrackyPairString)
-            .joined(separator: ",")
+        // [RFC 5849 Section 3.5.1]
+        // Build the final header value string.
+        let headerParameters = oauthParameters
+            .map { ($0.key.urlEscaped, $0.value.urlEscaped) }
+            // FIX: Correctly sort by the key of the two tuples being compared.
+            .sorted { $0.0 < $1.0 }
+            .map { "\($0.0)=\"\($0.1)\"" }
+            .joined(separator: ", ")
+
+        return "OAuth \(headerParameters)"
     }
 
-    private func httpBody(forFormParameters paras: [String: String], encoding: String.Encoding = .utf8) -> Data? {
-        let trans: (String, String) -> String = { k, v in
-            k.urlEscaped + "=" + v.urlEscaped
-        }
-
-        return paras.map(trans).joined(separator: "&").data(using: encoding)
-    }
-
-    private func authorizationParameters(consumerKey: String, token: String?) -> [String: String] {
-        /// [RFC-5849 Section 3.1](https://tools.ietf.org/html/rfc5849#section-3.1)
-        var defaults: [String: String] = [
+    /// Builds the dictionary of standard OAuth parameters.
+    func buildOAuthParameters(token: String?) -> [String: String] {
+        var parameters: [String: String] = [
             "oauth_consumer_key": consumerKey,
             "oauth_signature_method": "HMAC-SHA1",
             "oauth_version": "1.0",
-            /// [RFC-5849 Section 3.3](https://tools.ietf.org/html/rfc5849#section-3.3)
             "oauth_timestamp": String(Int(Date().timeIntervalSince1970)),
-            "oauth_nonce": UUID().uuidString,
+            "oauth_nonce": UUID().uuidString.replacingOccurrences(of: "-", with: ""),
         ]
-        if let token = token {
-            defaults["oauth_token"] = token
+        if let token = token, !token.isEmpty {
+            parameters["oauth_token"] = token
         }
-        return defaults
+        return parameters
     }
 }

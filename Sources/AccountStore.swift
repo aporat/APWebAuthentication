@@ -3,6 +3,7 @@ import UIKit
 import SwifterSwift
 @preconcurrency import SwiftyUserDefaults
 
+// MARK: - Defaults Keys
 public extension DefaultsKeys {
     var Instagram: DefaultsKey<Bool> { .init("kServiceInstagram", defaultValue: false) }
     var Twitter: DefaultsKey<Bool> { .init("kServiceTwitter", defaultValue: false) }
@@ -12,84 +13,49 @@ public extension DefaultsKeys {
     var Reddit: DefaultsKey<Bool> { .init("kServiceReddit", defaultValue: false) }
     var Github: DefaultsKey<Bool> { .init("kServiceGithub", defaultValue: false) }
     var Twitch: DefaultsKey<Bool> { .init("kServiceTwitch", defaultValue: false) }
+    var FiveHundredpx: DefaultsKey<Bool> { .init("kServiceFiveHundredpx", defaultValue: false) }
+    var TikTok: DefaultsKey<Bool> { .init("kServiceTikTok", defaultValue: false) }
 }
 
+// MARK: - AccountStore
 public final class AccountStore {
-    public static let instagram = AccountType(code: AccountType.Code.instagram, webAddress: "instagram.com", description: "Instagram", color: UIColor.Social.instagram)
-    public static let twitter = AccountType(code: AccountType.Code.twitter, webAddress: "x.com", description: "X", color: UIColor.Social.twitter)
-    public static let pinterest = AccountType(code: AccountType.Code.pinterest, webAddress: "pinterest.com", description: "Pinterest", color: UIColor.Social.pinterest)
-    public static let tumblr = AccountType(code: AccountType.Code.tumblr, webAddress: "tumblr.com", description: "Tumblr", color: UIColor.Social.tumblr)
-    public static let twitch = AccountType(code: AccountType.Code.twitch, webAddress: "twitch.tv", description: "Twitch", color: UIColor(hex: 0x6441A5)!)
-    public static let reddit = AccountType(code: AccountType.Code.reddit, webAddress: "reddit.com", description: "Reddit", color: UIColor.Social.reddit)
-    public static let foursquare = AccountType(code: AccountType.Code.foursquare, webAddress: "foursquare.com", description: "Foursquare", color: UIColor.Social.foursquare)
-    public static let github = AccountType(code: AccountType.Code.github, webAddress: "github.com", description: "Github", color: UIColor(hex: 0xCE4258)!)
-    public static let fiveHundredpx = AccountType(code: AccountType.Code.fiveHundredpx, webAddress: "500px.com", description: "500px", color: UIColor.Social.px500)
-    public static let tiktok = AccountType(code: AccountType.Code.tiktok, webAddress: "tiktok.com", description: "TikTok", color: UIColor(hex: 0xF61E55)!)
-    public static let parler = AccountType(code: AccountType.Code.parler, webAddress: "parler.com", description: "Parler", color: UIColor(hex: 0xBE1E2C)!)
+    
+    public static let instagram = AccountType(code: .instagram, webAddress: "instagram.com", description: "Instagram")!
+    public static let twitter = AccountType(code: .twitter, webAddress: "x.com", description: "X")!
+    public static let pinterest = AccountType(code: .pinterest, webAddress: "pinterest.com", description: "Pinterest")!
+    public static let tumblr = AccountType(code: .tumblr, webAddress: "tumblr.com", description: "Tumblr")!
+    public static let twitch = AccountType(code: .twitch, webAddress: "twitch.tv", description: "Twitch")!
+    public static let reddit = AccountType(code: .reddit, webAddress: "reddit.com", description: "Reddit")!
+    public static let foursquare = AccountType(code: .foursquare, webAddress: "foursquare.com", description: "Foursquare")!
+    public static let github = AccountType(code: .github, webAddress: "github.com", description: "Github")!
+    public static let fiveHundredpx = AccountType(code: .fiveHundredpx, webAddress: "500px.com", description: "500px")!
+    public static let tiktok = AccountType(code: .tiktok, webAddress: "tiktok.com", description: "TikTok")!
 
+    public static let all: [AccountType] = [
+        instagram, twitter, pinterest, tumblr, twitch,
+        reddit, foursquare, github, fiveHundredpx, tiktok
+    ]
+    
     public static var accountTypes: [AccountType] {
-        var types = [AccountType]()
-
-        if Defaults.Instagram {
-            types.append(AccountStore.instagram)
+        all.filter { type in
+            switch type.code {
+            case .instagram: return Defaults.Instagram
+            case .twitter: return Defaults.Twitter
+            case .pinterest: return Defaults.Pinterest
+            case .tumblr: return Defaults.Tumblr
+            case .twitch: return Defaults.Twitch
+            case .reddit: return Defaults.Reddit
+            case .foursquare: return Defaults.Foursquare
+            case .github: return Defaults.Github
+            case .fiveHundredpx: return Defaults.FiveHundredpx
+            case .tiktok: return Defaults.TikTok
+            default: return false
+            }
         }
-
-        if Defaults.Twitter {
-            types.append(AccountStore.twitter)
-        }
-
-        if Defaults.Pinterest {
-            types.append(AccountStore.pinterest)
-        }
-
-        if Defaults.Tumblr {
-            types.append(AccountStore.tumblr)
-        }
-
-        if Defaults.Twitch {
-            types.append(AccountStore.twitch)
-        }
-
-        if Defaults.Reddit {
-            types.append(AccountStore.reddit)
-        }
-
-        if Defaults.Foursquare {
-            types.append(AccountStore.foursquare)
-        }
-
-        if Defaults.Github {
-            types.append(AccountStore.github)
-        }
-
-        return types
     }
 
-    public class func accountType(_ code: AccountType.Code) -> AccountType? {
-        if code == AccountType.Code.instagram {
-            return AccountStore.instagram
-        } else if code == AccountType.Code.twitter {
-            return AccountStore.twitter
-        } else if code == AccountType.Code.pinterest {
-            return AccountStore.pinterest
-        } else if code == AccountType.Code.tiktok {
-            return AccountStore.tiktok
-        } else if code == AccountType.Code.tumblr {
-            return AccountStore.tumblr
-        } else if code == AccountType.Code.twitch {
-            return AccountStore.twitch
-        } else if code == AccountType.Code.reddit {
-            return AccountStore.reddit
-        } else if code == AccountType.Code.foursquare {
-            return AccountStore.foursquare
-        } else if code == AccountType.Code.github {
-            return AccountStore.github
-        } else if code == AccountType.Code.fiveHundredpx {
-            return AccountStore.fiveHundredpx
-        } else if code == AccountType.Code.parler {
-            return AccountStore.parler
-        }
-
-        return nil
+    public class func accountType(for code: AccountType.Code) -> AccountType? {
+        all.first { $0.code == code }
     }
 }
+

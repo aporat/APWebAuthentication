@@ -1,7 +1,7 @@
 import Foundation
 import SwiftyJSON
 
-public protocol MediaComment {
+public protocol MediaComment: Sendable {
     init?(info: JSON)
 
     var commentId: String { get }

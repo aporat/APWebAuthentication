@@ -1,70 +1,53 @@
 import UIKit
 
-class WebActivitySafari: UIActivity {
-    override class var activityCategory: UIActivity.Category {
+@MainActor
+public final class WebActivitySafari: UIActivity {
+    
+    private var urlToOpen: URL?
+
+    // --- Overrides ---
+
+    override public class var activityCategory: UIActivity.Category {
         .action
     }
 
-    override var activityImage: UIImage? {
+    override public var activityImage: UIImage? {
         UIImage(systemName: "safari")
     }
 
-    override var activityTitle: String {
-        NSLocalizedString("Open in Safari", comment: "")
+    override public var activityTitle: String {
+        // Provide a more descriptive comment for localization.
+        NSLocalizedString("Open in Safari", comment: "Title for a button that opens a link in the Safari browser.")
     }
 
-    override var activityType: UIActivity.ActivityType? {
-        guard let bundleID = Bundle.main.bundleIdentifier else {
-            return nil
-        }
-
-        let type = bundleID + "." + String(describing: WebActivitySafari.self)
-        return UIActivity.ActivityType(rawValue: type)
+    override public var activityType: UIActivity.ActivityType? {
+        let typeString = "com.aporat.apwebauthentication." + String(describing: Self.self)
+        return UIActivity.ActivityType(rawValue: typeString)
     }
 
-    var activityDeepLink: String?
-
-    var activityURL: URL?
-
-    override func canPerform(withActivityItems activityItems: [Any]) -> Bool {
-        for item in activityItems {
-            guard let url = item as? URL else {
-                continue
+    override public func canPerform(withActivityItems activityItems: [Any]) -> Bool {
+        activityItems.contains { item in
+            if let url = item as? URL, url.isWebURL() {
+                return true
             }
-
-            guard url.conformToHypertextProtocol() else {
-                return false
-            }
-
-            return true
-        }
-
-        return false
-    }
-
-    override func prepare(withActivityItems activityItems: [Any]) {
-        activityItems.forEach { item in
-            guard let url = item as? URL, url.conformToHypertextProtocol() else {
-                return
-            }
-
-            activityURL = url
-            return
+            return false
         }
     }
 
-    override func perform() {
-        guard let activityURL = activityURL else {
+    override public func prepare(withActivityItems activityItems: [Any]) {
+        self.urlToOpen = activityItems.first { item in
+            (item as? URL)?.isWebURL() ?? false
+        } as? URL
+    }
+
+    override public func perform() {
+        guard let url = urlToOpen else {
+            // Always call `activityDidFinish` to signal completion, even on failure.
             return activityDidFinish(false)
         }
-
-        UIApplication.shared.open(activityURL, options: [:]) { [weak self] opened in
-            guard opened else {
-                self?.activityDidFinish(false)
-                return
-            }
+        
+        UIApplication.shared.open(url, options: [:]) { [weak self] success in
+            self?.activityDidFinish(success)
         }
-
-        activityDidFinish(true)
     }
 }

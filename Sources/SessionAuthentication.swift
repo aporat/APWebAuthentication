@@ -66,8 +66,14 @@ open class SessionAuthentication: Authentication {
     // MARK: - Cookies Settings
 
     fileprivate var cookiesURL: URL? {
-        guard let currentAccountIdentifier = accountIdentifier else { return nil }
-        return URL(fileURLWithPath: String.documentDirectory.appendingPathComponent("account_" + currentAccountIdentifier + ".cookies"))
+        guard let currentAccountIdentifier = accountIdentifier,
+              let documentsURL = FileManager.documentsDirectoryURL else {
+            return nil
+        }
+        
+        let fileName = "account_" + currentAccountIdentifier + ".cookies"
+        
+        return documentsURL.appendingPathComponent(fileName)
     }
 
     lazy open var cookieStorage: HTTPCookieStorage = {

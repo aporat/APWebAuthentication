@@ -1,6 +1,6 @@
 import Foundation
 
-public protocol User {
+public protocol User: Sendable {
     var userId: String { get set }
     var username: String? { get set }
     var avatarPicture: URL? { get set }

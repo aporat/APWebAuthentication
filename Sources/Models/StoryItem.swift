@@ -1,7 +1,7 @@
 import Foundation
 import SwiftyJSON
 
-public protocol StoryItem {
+public protocol StoryItem: Sendable {
     init?(info: JSON)
 
     var storyId: String { get }

@@ -1,9 +1,20 @@
 import Foundation
 import UIKit
 
-extension UIApplication {
+@MainActor
+public extension UIApplication {
     
+    /// A safe method to get the app's display name from the Info.plist.
     var shortAppName: String {
-        Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as! String
+        guard let displayName = Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String else {
+            
+            if let bundleName = Bundle.main.object(forInfoDictionaryKey: "CFBundleName") as? String {
+                return bundleName
+            }
+            
+            return ""
+        }
+        
+        return displayName
     }
 }
