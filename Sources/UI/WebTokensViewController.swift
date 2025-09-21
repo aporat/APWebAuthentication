@@ -31,7 +31,6 @@ open class WebTokensViewController: UIViewController, WKNavigationDelegate {
 
     fileprivate lazy var webViewConfiguration: WKWebViewConfiguration = {
         let config = WKWebViewConfiguration()
-        config.processPool = WKProcessPool()
         config.websiteDataStore = WKWebsiteDataStore.default()
 
         return config

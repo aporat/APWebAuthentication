@@ -105,7 +105,6 @@ open class BaseAuthViewController: UIViewController, WKNavigationDelegate {
     
     open lazy var webViewConfiguration: WKWebViewConfiguration = {
         let config = WKWebViewConfiguration()
-        config.processPool = WKProcessPool()
         config.websiteDataStore = WKWebsiteDataStore.nonPersistent()
         
         return config
