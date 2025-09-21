@@ -1,7 +1,7 @@
 import Foundation
 import SwiftyJSON
 
-public final class TwitterUser: BaseUser {
+public final class TwitterUser: BaseUser, @unchecked Sendable {
     public required init?(info: JSON) {
         if let id = info["id_str"].idString {
             super.init(userId: id)

@@ -1,7 +1,7 @@
 import Foundation
 import SwiftyJSON
 
-public final class TikTokWebUser: BaseUser {
+public final class TikTokWebUser: BaseUser, @unchecked Sendable {
     public required init?(info: JSON) {
         if let id = info["uid"].idString {
             super.init(userId: id)

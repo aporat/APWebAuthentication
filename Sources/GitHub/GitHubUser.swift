@@ -1,7 +1,7 @@
 import Foundation
 import SwiftyJSON
 
-public final class GitHubUser: BaseUser {
+public final class GitHubUser: BaseUser, @unchecked Sendable {
     public required init?(info: JSON) {
         if let id = info["id"].idString {
             super.init(userId: id)

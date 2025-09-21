@@ -69,16 +69,16 @@ extension APWebAuthenticationError: LocalizedError {
              let .sessionExpired(reason),
              let .appSessionExpired(reason):
             return reason
-            
+             
         case let .connectionError(reason):
             return reason ?? "Check your network connection. The server could also be down."
-            
+             
         case let .loginFailed(reason):
             return reason ?? "Unable to login. The server could also be down."
-            
+             
         case let .rateLimit(reason):
             return reason ?? "You have made too many requests. Please try again later."
-            
+             
         default:
             return "Unable to perform this action. Please try again later."
         }

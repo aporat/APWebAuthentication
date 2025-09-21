@@ -1,6 +1,6 @@
 import Foundation
 
-public final class Auth1Authentication: Authentication, Sendable {
+public final class Auth1Authentication: Authentication {
     private struct AuthSettings: Codable {
         let token: String?
         let secret: String?

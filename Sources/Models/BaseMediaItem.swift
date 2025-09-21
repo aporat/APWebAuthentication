@@ -1,6 +1,6 @@
 import Foundation
 
-open class BaseMediaItem: MediaItem, Hashable {
+open class BaseMediaItem: MediaItem, Hashable, @unchecked Sendable {
     public var type = MediaItemType.photo
     public var mediaId: String
     public var userId: String?

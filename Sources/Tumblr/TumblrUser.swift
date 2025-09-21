@@ -2,7 +2,7 @@ import Foundation
 import SwiftyJSON
 
 /// A concrete user model for a Tumblr user, including their blogs.
-public final class TumblrUser: BaseUser, Sendable {
+public final class TumblrUser: BaseUser, @unchecked Sendable {
 
     /// A list of the user's blogs.
     public var blogs = [TumblrBlog]()

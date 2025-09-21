@@ -1,7 +1,7 @@
 import Foundation
 import SwiftyJSON
 
-public final class TikTokWebMediaItem: MediaItem, Hashable {
+public final class TikTokWebMediaItem: MediaItem, Hashable, @unchecked Sendable {
     public var type = MediaItemType.video
     public var mediaId: String
     public var shortcode: String?

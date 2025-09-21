@@ -1,7 +1,7 @@
 import Foundation
 import SwiftyJSON
 
-public final class TikTokWebMediaComment: MediaComment {
+public final class TikTokWebMediaComment: MediaComment, @unchecked Sendable {
     public var commentId: String
     public var text: String?
     public var mediaId: String?

@@ -13,7 +13,7 @@ public enum OAuth1Error: Error {
 // MARK: - OAuth1RequestAdapter
 /// An Alamofire `RequestAdapter` that applies an OAuth 1.0a signature to outgoing requests.
 /// This implementation is thread-safe and designed for modern Swift concurrency.
-public final class OAuth1RequestAdapter: RequestAdapter, Sendable {
+public final class OAuth1RequestAdapter: RequestAdapter {
     private let consumerKey: String
     private let consumerSecret: String
     public let auth: Auth1Authentication

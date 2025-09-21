@@ -1,7 +1,7 @@
 import Foundation
 import SwiftyJSON
 
-public final class TwitterPost: MediaItem, Hashable {
+public final class TwitterPost: MediaItem, Hashable, @unchecked Sendable {
     public var type = MediaItemType.post
     public var mediaId: String
     public var shortcode: String?
