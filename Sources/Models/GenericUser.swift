@@ -1,12 +1,10 @@
 import Foundation
 
-open class BaseUser: User, Hashable, @unchecked Sendable {
+open class GenericUser: User, Hashable, @unchecked Sendable {
     public var userId: String
     public var username: String?
     public var fullname: String?
     public var avatarPicture: URL?
-
-    // user info
     public var privateProfile = false
     public var verified = false
     public var followersCount: Int32?
@@ -30,7 +28,7 @@ open class BaseUser: User, Hashable, @unchecked Sendable {
         self.fullname = fullname
     }
 
-    public static func == (lhs: BaseUser, rhs: BaseUser) -> Bool {
+    public static func == (lhs: GenericUser, rhs: GenericUser) -> Bool {
         lhs.userId == rhs.userId
     }
 

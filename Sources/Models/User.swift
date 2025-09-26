@@ -1,10 +1,10 @@
 import Foundation
 
 public protocol User: Sendable {
-    var userId: String { get set }
-    var username: String? { get set }
-    var avatarPicture: URL? { get set }
-    var fullname: String? { get set }
-    var privateProfile: Bool { get set }
-    var verified: Bool { get set }
+    var userId: String { get }
+    var username: String? { get }
+    var fullname: String? { get }
+    var avatarPicture: URL? { get }
+    var privateProfile: Bool { get }
+    var verified: Bool { get }
 }

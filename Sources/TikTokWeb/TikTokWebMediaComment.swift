@@ -1,12 +1,12 @@
 import Foundation
 import SwiftyJSON
 
-public final class TikTokWebMediaComment: MediaComment, @unchecked Sendable {
-    public var commentId: String
-    public var text: String?
-    public var mediaId: String?
-    public var dateTaken: Date
-    public var user: User?
+public final class TikTokWebMediaComment: MediaComment, Sendable {
+    public let commentId: String
+    public let text: String?
+    public let mediaId: String?
+    public let dateTaken: Date
+    public let user: User?
 
     public required init?(info: JSON) {
         if let id = info["cid"].idString {
@@ -16,6 +16,7 @@ public final class TikTokWebMediaComment: MediaComment, @unchecked Sendable {
             return nil
         }
 
+        mediaId = nil
         text = info["text"].string
         user = TikTokWebUser(info: info["user"])
     }

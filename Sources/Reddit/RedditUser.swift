@@ -1,7 +1,7 @@
 import Foundation
 import SwiftyJSON
 
-public final class RedditUser: BaseUser, @unchecked Sendable {
+public final class RedditUser: GenericUser, @unchecked Sendable {
     public required init?(info: JSON) {
         if let id = info["id"].idString {
             super.init(userId: id)

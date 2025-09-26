@@ -1,7 +1,7 @@
 import Foundation
 import SwiftyJSON
 
-public final class PinterestUser: BaseUser, @unchecked Sendable {
+public final class PinterestUser: GenericUser, @unchecked Sendable {
     public required init?(info: JSON) {
         if let id = info["id"].idString {
             super.init(userId: id)

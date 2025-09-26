@@ -1,7 +1,7 @@
 import Foundation
 import SwiftyJSON
 
-public final class TumblrBlog: BaseUser, @unchecked Sendable {
+public final class TumblrBlog: GenericUser, @unchecked Sendable {
     
     /// The display name of the blog, which may differ from the username/URL.
     public var name: String?
