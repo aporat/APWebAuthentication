@@ -10,24 +10,29 @@ public final class FoursquareUser: User, Sendable {
     public let verified: Bool = false
     
     public required init?(info: JSON) {
-        if let id = info["id"].idString {
-            userId = id
-        } else {
+        guard let id = info["id"].idString else {
             return nil
         }
         
-        self.username = info["homeCity"].string
+        let homeCity = info["homeCity"].string
         
+        let constructedFullname: String?
         if let firstName = info["firstName"].string, let lastName = info["lastName"].string {
-            fullname = firstName + " " + lastName
+            constructedFullname = firstName + " " + lastName
         } else {
-            fullname = nil
+            constructedFullname = nil
         }
         
+        let constructedAvatarPicture: URL?
         if let photoPrefix = info["photo"]["prefix"].string, let photoSuffix = info["photo"]["suffix"].string {
-            avatarPicture = URL(string: photoPrefix + "110x110" + photoSuffix)
+            constructedAvatarPicture = URL(string: photoPrefix + "110x110" + photoSuffix)
         } else {
-            avatarPicture = nil
+            constructedAvatarPicture = nil
         }
+        
+        self.userId = id
+        self.username = homeCity
+        self.fullname = constructedFullname
+        self.avatarPicture = constructedAvatarPicture
     }
 }

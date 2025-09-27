@@ -12,20 +12,18 @@ public final class TumblrUser: User, Sendable {
     public let verified: Bool = false
     
     /// A list of the user's blogs.
-    public var blogs = [TumblrBlog]()
+    public var blogs: [TumblrBlog]
 
     /// A failable initializer that creates a `TumblrUser` from a SwiftyJSON object.
     /// - Parameter info: The JSON object containing the user's data.
     public required init?(info: JSON) {
-        if let id = info["name"].idString {
-            userId = id
-        } else {
+        guard let name = info["name"].string else {
             return nil
         }
         
-        self.username = userId
-        self.fullname = userId
-        
+        self.userId = name
+        self.username = name
+        self.fullname = name
         self.blogs = info["blogs"].arrayValue.compactMap { TumblrBlog(info: $0) }
     }
 }

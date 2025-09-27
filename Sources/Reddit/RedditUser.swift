@@ -3,14 +3,19 @@ import SwiftyJSON
 
 public final class RedditUser: GenericUser, @unchecked Sendable {
     public required init?(info: JSON) {
-        if let id = info["id"].idString {
-            super.init(userId: id)
-        } else {
+        guard let id = info["id"].string else {
             return nil
         }
+        
+        let name = info["name"].string
+        let avatarPicture = info["icon_img"].url
+        let isVerified = info["verified"].boolValue
 
-        username = info["name"].string
-        fullname = info["name"].string
-        avatarPicture = info["icon_img"].url
+        super.init(userId: id,
+                   username: name,
+                   fullname: name,
+                   avatarPicture: avatarPicture,
+                   privateProfile: false,
+                   verified: isVerified)
     }
 }

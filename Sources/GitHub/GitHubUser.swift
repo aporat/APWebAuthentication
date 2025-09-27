@@ -3,14 +3,17 @@ import SwiftyJSON
 
 public final class GitHubUser: GenericUser, @unchecked Sendable {
     public required init?(info: JSON) {
-        if let id = info["id"].idString {
-            super.init(userId: id)
-        } else {
+        guard let id = info["id"].number?.stringValue else {
             return nil
         }
+        
+        let username = info["login"].string
+        let fullname = info["name"].string
+        let avatarPicture = info["avatar_url"].url
 
-        username = info["login"].string
-        fullname = info["name"].string
-        avatarPicture = info["avatar_url"].url
+        super.init(userId: id,
+                   username: username,
+                   fullname: fullname,
+                   avatarPicture: avatarPicture)
     }
 }

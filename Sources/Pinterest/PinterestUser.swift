@@ -3,20 +3,23 @@ import SwiftyJSON
 
 public final class PinterestUser: GenericUser, @unchecked Sendable {
     public required init?(info: JSON) {
-        if let id = info["id"].idString {
-            super.init(userId: id)
-        } else if let id = info["username"].idString {
-            super.init(userId: id)
-        } else {
+        guard let id = info["id"].idString ?? info["username"].idString else {
             return nil
         }
-
-        username = info["username"].string
-
-        if let currentFirstName = info["first_name"].string, let currentLastName = info["last_name"].string {
-            fullname = currentFirstName + " " + currentLastName
+        
+        let username = info["username"].string
+        let avatarPicture = info["profile_image"].url
+        
+        let constructedFullname: String?
+        if let firstName = info["first_name"].string, let lastName = info["last_name"].string {
+            constructedFullname = firstName + " " + lastName
+        } else {
+            constructedFullname = nil
         }
 
-        avatarPicture = info["profile_image"].url
+        super.init(userId: id,
+                   username: username,
+                   fullname: constructedFullname,
+                   avatarPicture: avatarPicture)
     }
 }

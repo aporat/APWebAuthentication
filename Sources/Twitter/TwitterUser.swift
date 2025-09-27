@@ -3,19 +3,29 @@ import SwiftyJSON
 
 public final class TwitterUser: GenericUser, @unchecked Sendable {
     public required init?(info: JSON) {
-        if let id = info["id_str"].idString {
-            super.init(userId: id)
-        } else if let id = info["id"].idString {
-            super.init(userId: String(id))
-        } else {
+        guard let id = info["id_str"].string ?? info["id"].number?.stringValue else {
             return nil
         }
-
-        username = info["username"].string
-        fullname = info["name"].string
-
-        if let currentProfilePicture = info["profile_image_url"].string {
-            avatarPicture = URL(string: currentProfilePicture.replacingOccurrences(of: "_normal", with: "_bigger"))
+        
+        let username = info["screen_name"].string
+        let fullname = info["name"].string
+        let isVerified = info["verified"].boolValue
+        let privateProfile = info["protected"].boolValue
+        
+        let constructedAvatarPicture: URL?
+        if let pictureString = info["profile_image_url_https"].string {
+            let biggerPictureString = pictureString.replacingOccurrences(of: "_normal", with: "")
+            constructedAvatarPicture = URL(string: biggerPictureString)
+        } else {
+            constructedAvatarPicture = nil
         }
+        
+        super.init(userId: id,
+                   username: username,
+                   fullname: fullname,
+                   avatarPicture: constructedAvatarPicture,
+                   privateProfile: privateProfile,
+                   verified: isVerified)
+        
     }
 }

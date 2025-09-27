@@ -3,26 +3,17 @@ import SwiftyJSON
 
 public final class TwitchUser: GenericUser, @unchecked Sendable {
     public required init?(info: JSON) {
-        if let id = info["id"].idString {
-            super.init(userId: id)
-        } else if let id = info["_id"].idString {
-            super.init(userId: id)
-        } else {
+        guard let id = info["id"].string ?? info["_id"].string else {
             return nil
         }
+        
+        let username = info["login"].string ?? info["name"].string
+        let fullname = info["display_name"].string
+        let avatarPicture = info["profile_image_url"].url ?? info["logo"].url
 
-        if let currentUsername = info["name"].string {
-            username = currentUsername
-        } else if let currentUsername = info["login"].string {
-            username = currentUsername
-        }
-
-        fullname = info["display_name"].string
-
-        if let currentProfilePicture = info["logo"].url {
-            avatarPicture = currentProfilePicture
-        } else if let currentProfilePicture = info["profile_image_url"].url {
-            avatarPicture = currentProfilePicture
-        }
+        super.init(userId: id,
+                   username: username,
+                   fullname: fullname,
+                   avatarPicture: avatarPicture)
     }
 }

@@ -3,38 +3,33 @@ import SwiftyJSON
 
 public final class TikTokWebUser: GenericUser, @unchecked Sendable {
     public required init?(info: JSON) {
-        if let id = info["uid"].idString {
-            super.init(userId: id)
-        } else if let id = info["id"].idString {
-            super.init(userId: id)
-        } else if let id = info["userId"].idString {
-            super.init(userId: id)
-        } else if let id = info["sec_uid"].idString { // comments dont have user id
-            super.init(userId: id)
-        } else {
+        let id = info["uid"].string ?? info["id"].string ?? info["userId"].string ?? info["sec_uid"].string
+        
+        guard let userId = id else {
             return nil
         }
-
-        if let value = info["unique_id"].string {
-            username = value
-        } else if let value = info["uniqueId"].string {
-            username = value
+        
+        let username = info["unique_id"].string ?? info["uniqueId"].string
+        let fullname = info["nickname"].string ?? info["nickName"].string
+        
+        let avatarPicture: URL?
+        if let thumbURL = info["avatarThumb"].url {
+            avatarPicture = thumbURL
+        } else if let mediumURL = info["avatarMedium"].url {
+            avatarPicture = mediumURL
+        } else if let firstURL = info["avatar_thumb"]["url_list"].array?.first?.url {
+            avatarPicture = firstURL
+        } else if let firstCoverURL = info["coversMedium"].array?.first?.url {
+            avatarPicture = firstCoverURL
+        } else {
+            avatarPicture = nil
         }
 
-        if let value = info["nickname"].string {
-            fullname = value
-        } else if let value = info["nickName"].string {
-            fullname = value
-        }
-
-        if info["avatarThumb"].exists() {
-            avatarPicture = info["avatarThumb"].url
-        } else if info["avatarMedium"].exists() {
-            avatarPicture = info["avatarMedium"].url
-        } else if info["avatar_thumb"]["url_list"].exists() {
-            avatarPicture = info["avatar_thumb"]["url_list"].arrayValue.first?.url
-        } else if info["coversMedium"].exists() {
-            avatarPicture = info["coversMedium"].arrayValue.first?.url
-        }
+        super.init(userId: userId,
+                   username: username,
+                   fullname: fullname,
+                   avatarPicture: avatarPicture)
+        
+      //  self.verified = info["verified"].boolValue
     }
 }
