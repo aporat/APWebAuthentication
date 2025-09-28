@@ -53,8 +53,10 @@ public final class PinterestWebAuthController: AuthViewController {
     }
 
     fileprivate func checkForAuthTokens() {
-        webView.configuration.websiteDataStore.httpCookieStore.getAllCookies { cookies in
-
+        Task {
+            
+            let cookies = await self.getCookies()
+            
             self.auth.setCookies(cookies)
             self.auth.loadAuthTokens(forceLoad: true)
 

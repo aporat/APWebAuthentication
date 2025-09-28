@@ -117,39 +117,39 @@ open class WebTokensViewController: UIViewController, WKNavigationDelegate {
 
     // MARK: - Actions
 
-    public func loadJavascript(_ javaScriptString: String, _ completion: ((String?) -> Void)? = nil) {
-        webView.evaluateJavaScript(javaScriptString) { result, error in
-            if error == nil, let string = result as? String {
-                completion?(string)
-            } else {
-                completion?(nil)
+    @discardableResult
+    public func loadJavascript(_ javaScriptString: String) async -> String? {
+        do {
+            let result = try await webView.evaluateJavaScript(javaScriptString)
+            return result as? String
+        } catch {
+            return nil
+        }
+    }
+    
+    public func getCookies() async -> [HTTPCookie] {
+        await withCheckedContinuation { continuation in
+            webView.configuration.websiteDataStore.httpCookieStore.getAllCookies { cookies in
+                continuation.resume(returning: cookies)
             }
         }
     }
 
-    public func storeCookiesToWebView(_ cookies: [HTTPCookie]?, _ completion: @escaping () -> Void) {
-        if let currentCookies = cookies, currentCookies.count > 0 {
-            let dispatchGroup = DispatchGroup()
-
-            for cookie in currentCookies {
-                dispatchGroup.enter()
-
-                webView.configuration.websiteDataStore.httpCookieStore.setCookie(cookie) {
-                    dispatchGroup.leave()
+    public func storeCookies(_ cookies: [HTTPCookie]?) async {
+        guard let cookies = cookies, !cookies.isEmpty else { return }
+        
+        await withTaskGroup(of: Void.self) { group in
+            for cookie in cookies {
+                group.addTask {
+                    await self.webView.configuration.websiteDataStore.httpCookieStore.setCookie(cookie)
                 }
             }
-
-            dispatchGroup.notify(queue: .main) {
-                DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(3)) {
-                    completion()
-                }
-            }
-        } else {
-            completion()
         }
     }
 
-    open func requestLoaded(_: URL, forURL _: URL) {}
+    open func requestLoaded(_: URL, forURL _: URL) async {
+        
+    }
 }
 
 @MainActor
@@ -157,7 +157,9 @@ extension WebTokensViewController: WKScriptMessageHandler {
     public func userContentController(_: WKUserContentController, didReceive message: WKScriptMessage) {
         if let results = message.body as? [String: Any], let responseUrl = results["responseURL"] as? String {
             if responseUrl.contains(forURL.absoluteString), let url = URL(string: responseUrl) {
-                requestLoaded(url, forURL: forURL)
+                Task {
+                    await requestLoaded(url, forURL: forURL)
+                }
             }
         }
     }

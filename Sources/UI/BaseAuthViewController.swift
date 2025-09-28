@@ -385,7 +385,7 @@ open class BaseAuthViewController: UIViewController, WKNavigationDelegate {
     
     // MARK: - Cookies
     
-    public func storeCookiesToWebView(_ cookies: [HTTPCookie]?) async {
+    public func storeCookies(_ cookies: [HTTPCookie]?) async {
         guard let cookies = cookies, !cookies.isEmpty else { return }
         
         await withTaskGroup(of: Void.self) { group in
@@ -397,7 +397,7 @@ open class BaseAuthViewController: UIViewController, WKNavigationDelegate {
         }
     }
     
-    public func getAllCookies() async -> [HTTPCookie] {
+    public func getCookies() async -> [HTTPCookie] {
         await withCheckedContinuation { continuation in
             webView.configuration.websiteDataStore.httpCookieStore.getAllCookies { cookies in
                 continuation.resume(returning: cookies)

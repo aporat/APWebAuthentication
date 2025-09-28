@@ -18,7 +18,8 @@ public final class TikTokWebAuthCheckpointController: WebTokensViewController {
     }
 
     override public func loadRequest() {
-        storeCookiesToWebView(auth.getCookies()) {
+        Task {
+            await storeCookies(auth.getCookies())
             super.loadRequest()
         }
     }

@@ -18,37 +18,40 @@ public final class TikTokWebSignatureController: WebTokensViewController {
     }
 
     override public func loadRequest() {
-        storeCookiesToWebView(auth.getCookies()) {
+        Task {
+            await storeCookies(auth.getCookies())
             super.loadRequest()
         }
     }
 
-    override public func requestLoaded(_ url: URL, forURL _: URL) {
-        webView.configuration.websiteDataStore.httpCookieStore.getAllCookies { cookies in
+    @MainActor
+    override public func requestLoaded(_ url: URL, forURL _: URL) async {
+        let cookies = await getCookies()
 
-            self.auth.setCookies(cookies)
-            self.auth.loadAuthTokens(forceLoad: true)
+        self.auth.setCookies(cookies)
+        self.auth.loadAuthTokens(forceLoad: true)
 
-            if let signature = url.parameters["_signature"] {
-                let result: [String: Any] = [
-                    "signature": signature,
-                    "url": url,
-                ]
-
-                self.completionHandler(.success(result))
-            }
+        if let signature = url.parameters["_signature"] {
+            let result: [String: Any] = [
+                "signature": signature,
+                "url": url,
+            ]
         }
     }
 
     public func getSignature(_ forURL: URL, _ completion: ((String?) -> Void)? = nil) {
-        loadJavascript("window.byted_acrawler.sign({ url: \"" + forURL.absoluteString + "\" })", completion)
+        Task {
+            await self.loadJavascript("window.byted_acrawler.sign({ url: \"" + forURL.absoluteString + "\" })")
+        }
     }
 
     override public func userContentController(_: WKUserContentController, didReceive message: WKScriptMessage) {
         if let results = message.body as? [String: Any], let responseUrl = results["responseURL"] as? String {
             if responseUrl.contains(forURL.absoluteString), let url = URL(string: responseUrl), !isFinished {
                 //   log.debug( "responseURL " + responseUrl)
-                requestLoaded(url, forURL: forURL)
+                Task {
+                    await requestLoaded(url, forURL: forURL)
+                }
                 isFinished = true
             }
         }
