@@ -1,6 +1,6 @@
 import Foundation
 
-public final class Auth2Authentication: Authentication {
+public final class Auth2Authentication: Authentication, Sendable {
     
     private struct AuthSettings: Codable {
         let accessToken: String?
