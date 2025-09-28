@@ -165,7 +165,7 @@ open class BaseAuthViewController: UIViewController, WKNavigationDelegate {
             newNavBarAppearance.backgroundColor = UIColor(named: "BarTintColor")
             newNavBarAppearance.largeTitleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor(named: "TintColor")!]
             newNavBarAppearance.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor(named: "TintColor")!]
-
+            
             self.navigationController?.navigationBar.standardAppearance = newNavBarAppearance
             self.navigationController?.navigationBar.scrollEdgeAppearance = newNavBarAppearance
             self.navigationController?.navigationBar.compactAppearance = newNavBarAppearance
@@ -181,12 +181,12 @@ open class BaseAuthViewController: UIViewController, WKNavigationDelegate {
             }
             
             newNavBarAppearance.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor(hex: 0x0079FF)!]
-
+            
             self.navigationController?.navigationBar.standardAppearance = newNavBarAppearance
             self.navigationController?.navigationBar.scrollEdgeAppearance = newNavBarAppearance
             self.navigationController?.navigationBar.compactAppearance = newNavBarAppearance
             self.navigationController?.navigationBar.compactScrollEdgeAppearance = newNavBarAppearance
-
+            
             let newToolbarBarAppearance = UIToolbarAppearance()
             newToolbarBarAppearance.configureWithOpaqueBackground()
             
@@ -200,7 +200,7 @@ open class BaseAuthViewController: UIViewController, WKNavigationDelegate {
             self.navigationController?.toolbar.scrollEdgeAppearance = newToolbarBarAppearance
             self.navigationController?.toolbar.compactAppearance = newToolbarBarAppearance
             self.navigationController?.toolbar.compactScrollEdgeAppearance = newToolbarBarAppearance
-
+            
             setupToolbarItems()
         }
         
@@ -212,33 +212,33 @@ open class BaseAuthViewController: UIViewController, WKNavigationDelegate {
             if self.appearanceStyle == .safari, let currentNavigationController = self.navigationController {
                 let newNavBarAppearance = UINavigationBarAppearance()
                 newNavBarAppearance.configureWithOpaqueBackground()
-
+                
                 if currentNavigationController.traitCollection.userInterfaceStyle == .dark {
                     newNavBarAppearance.backgroundColor = UIColor(hex: 0x565656)!
                 } else {
                     newNavBarAppearance.backgroundColor = UIColor(hex: 0xF8F8F8)!
                 }
-
+                
                 newNavBarAppearance.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor(hex: 0x0079FF)!]
                 currentNavigationController.navigationBar.standardAppearance = newNavBarAppearance
                 currentNavigationController.navigationBar.scrollEdgeAppearance = newNavBarAppearance
                 currentNavigationController.navigationBar.compactAppearance = newNavBarAppearance
                 currentNavigationController.navigationBar.compactScrollEdgeAppearance = newNavBarAppearance
-
+                
                 let newToolbarBarAppearance = UIToolbarAppearance()
                 newToolbarBarAppearance.configureWithOpaqueBackground()
-
+                
                 if currentNavigationController.traitCollection.userInterfaceStyle == .dark {
                     newToolbarBarAppearance.backgroundColor = UIColor(hex: 0x565656)!
                 } else {
                     newToolbarBarAppearance.backgroundColor = UIColor(hex: 0xF8F8F8)!
                 }
-
+                
                 self.navigationController?.toolbar.standardAppearance = newToolbarBarAppearance
                 self.navigationController?.toolbar.scrollEdgeAppearance = newToolbarBarAppearance
                 self.navigationController?.toolbar.compactAppearance = newToolbarBarAppearance
                 self.navigationController?.toolbar.compactScrollEdgeAppearance = newToolbarBarAppearance
-
+                
                 if currentNavigationController.traitCollection.userInterfaceStyle == .dark {
                     currentNavigationController.navigationBar.tintColor = UIColor(hex: 0x5A91F7)
                     currentNavigationController.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor(hex: 0x5A91F7)!]
@@ -250,7 +250,7 @@ open class BaseAuthViewController: UIViewController, WKNavigationDelegate {
                 }
             }
         }
-
+        
         
         view.setNeedsUpdateConstraints()
     }
@@ -299,7 +299,7 @@ open class BaseAuthViewController: UIViewController, WKNavigationDelegate {
         
         
         if appearanceStyle == .safari, let currentNavigationController = navigationController {
-   
+            
             currentNavigationController.toolbar.isTranslucent = false
             currentNavigationController.setToolbarHidden(false, animated: false)
             
@@ -336,88 +336,72 @@ open class BaseAuthViewController: UIViewController, WKNavigationDelegate {
     // MARK: - WKNavigationDelegate
     
     open func webView(_: WKWebView, didStartProvisionalNavigation _: WKNavigation!) {
-        DispatchQueue.main.async { [weak self] in
-            self?.didStartLoading()
-        }
+        didStartLoading()
     }
     
     open func webView(_: WKWebView, didFail _: WKNavigation!, withError _: Error) {
-        DispatchQueue.main.async { [weak self] in
-            self?.didStopLoading()
-        }
+        didStopLoading()
     }
     
     open func webView(_: WKWebView, didFailProvisionalNavigation _: WKNavigation!, withError _: Error) {
-        DispatchQueue.main.async { [weak self] in
-            self?.didStopLoading()
-        }
+        didStopLoading()
     }
     
     public func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse, decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
-        if let mimeType = navigationResponse.response.mimeType, mimeType == "application/json" {
-            isJSONContentType = true
-        } else {
-            isJSONContentType = false
-        }
-        
+        isJSONContentType = navigationResponse.response.mimeType == "application/json"
         decisionHandler(.allow)
     }
     
     open func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         initialLoaded = true
         
-        DispatchQueue.main.async { [weak self] in
-            self?.didStopLoading()
-            
-            if let self = self, self.isJSONContentType {
-                self.webView.evaluateJavaScript("document.body.innerText") { results, _ in
-                    if let htmlString = results as? String {
-                        var errorMessage: String?
-                        
-                        let response = JSON(parseJSON: htmlString)
-                        
-                        if let currentErrorMessage = response["meta"]["error_message"].string {
-                            errorMessage = currentErrorMessage
-                        } else if let currentErrorMessage = response["error_message"].string {
-                            errorMessage = currentErrorMessage
-                        } else if let currentErrorMessage = response["error"].string {
-                            errorMessage = currentErrorMessage
-                        } else if response["status"].stringValue == "failure", let currentErrorMessage = response["message"].string {
-                            errorMessage = currentErrorMessage
-                        }
-                        
-                        if let currentErrorMessage = errorMessage, !currentErrorMessage.isEmpty {
-                            DispatchQueue.main.async {
-                                self.dismiss(animated: true)
-                            }
-                            
-                            self.completionHandler?(.failure(APWebAuthenticationError.failed(reason: currentErrorMessage)))
-                        }
-                    }
-                }
+        didStopLoading()
+        
+        if isJSONContentType {
+            Task {
+                await parseAndHandleJSONResponse()
             }
+        }
+    }
+    
+    private func parseAndHandleJSONResponse() async {
+        guard let htmlString = await loadJavascript("document.body.innerText"), !htmlString.isEmpty else {
+            return
+        }
+        
+        let response = JSON(parseJSON: htmlString)
+        var errorMessage: String?
+        
+        if let msg = response["meta"]["error_message"].string { errorMessage = msg }
+        else if let msg = response["error_message"].string { errorMessage = msg }
+        else if let msg = response["error"].string { errorMessage = msg }
+        else if response["status"].stringValue == "failure", let msg = response["message"].string { errorMessage = msg }
+        
+        if let finalMessage = errorMessage, !finalMessage.isEmpty {
+            completionHandler?(.failure(APWebAuthenticationError.failed(reason: finalMessage)))
+            await dismiss(animated: true)
         }
     }
     
     // MARK: - Cookies
     
-    public func storeCookiesToWebView(_ cookies: [HTTPCookie]?, _ completion: @escaping () -> Void) {
-        if let currentCookies = cookies, currentCookies.count > 0 {
-            let dispatchGroup = DispatchGroup()
-            
-            for cookie in currentCookies {
-                dispatchGroup.enter()
-                
-                webView.configuration.websiteDataStore.httpCookieStore.setCookie(cookie) {
-                    dispatchGroup.leave()
+    public func storeCookiesToWebView(_ cookies: [HTTPCookie]?) async {
+        guard let cookies = cookies, !cookies.isEmpty else { return }
+        
+        await withTaskGroup(of: Void.self) { group in
+            for cookie in cookies {
+                group.addTask {
+                    await self.webView.configuration.websiteDataStore.httpCookieStore.setCookie(cookie)
                 }
             }
-            
-            dispatchGroup.notify(queue: .main) {
-                completion()
+        }
+    }
+    
+    public func getAllCookies() async -> [HTTPCookie] {
+        await withCheckedContinuation { continuation in
+            webView.configuration.websiteDataStore.httpCookieStore.getAllCookies { cookies in
+                continuation.resume(returning: cookies)
             }
-        } else {
-            completion()
         }
     }
     
@@ -461,13 +445,13 @@ open class BaseAuthViewController: UIViewController, WKNavigationDelegate {
         }
     }
     
-    public func loadJavascript(_ javaScriptString: String, _ completion: ((String?) -> Void)? = nil) {
-        webView.evaluateJavaScript(javaScriptString) { result, error in
-            if error == nil, let string = result as? String {
-                completion?(string)
-            } else {
-                completion?(nil)
-            }
+    @discardableResult
+    public func loadJavascript(_ javaScriptString: String) async -> String? {
+        do {
+            let result = try await webView.evaluateJavaScript(javaScriptString)
+            return result as? String
+        } catch {
+            return nil
         }
     }
     

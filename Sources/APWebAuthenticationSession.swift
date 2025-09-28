@@ -5,8 +5,6 @@ extension APWebAuthenticationSession {
         case normal
         case safari
     }
-
-    public typealias CompletionHandler = (Result<[String: Any]?, APWebAuthenticationError>) -> Void
 }
 
 public protocol APWebAuthenticationPresentationContextProviding: NSObjectProtocol {
@@ -18,73 +16,71 @@ public class APWebAuthenticationSession {
     public var statusBarStyle = UIStatusBarStyle.default
     public var appearanceStyle: APWebAuthenticationSession.AppearanceStyle = .normal
     public var loginViewController: BaseAuthViewController?
-    public var completionHandler: CompletionHandler?
     public weak var presentationContextProvider: APWebAuthenticationPresentationContextProviding?
 
     fileprivate var accountType: AccountType
 
-    public init(accountType: AccountType, completionHandler: @escaping APWebAuthenticationSession.CompletionHandler) {
+    public init(accountType: AccountType) {
         self.accountType = accountType
-        self.completionHandler = completionHandler
     }
 
     @discardableResult
-    public func start(url URL: URL, callbackURL: URL) -> Bool {
+    public func start(url URL: URL, callbackURL: URL) async throws -> [String: Any]? {
         loginViewController = AuthViewController(authURL: URL, redirectURL: callbackURL)
-
-        return start()
+        return try await start()
     }
 
     @discardableResult
-    public func start() -> Bool {
-        loginViewController?.completionHandler = completionHandler
-
+    public func start() async throws -> [String: Any]? {
         if appearanceStyle == .safari {
-            showLoginPermission { loginRequested in
-
-                if loginRequested {
-                    self.presentSafariStyle()
-                } else {
-                    self.completionHandler?(.failure(APWebAuthenticationError.loginCanceled))
-                }
+            let loginRequested = await showLoginPermission()
+            guard loginRequested else {
+                throw APWebAuthenticationError.loginCanceled
             }
-        } else {
-            presentNormalStyle()
         }
+        
+        return try await withCheckedThrowingContinuation { continuation in
+            self.loginViewController?.completionHandler = { result in
+                continuation.resume(with: result)
+            }
 
-        return true
+            do {
+                if appearanceStyle == .safari {
+                    try self.presentSafariStyle()
+                } else {
+                    try self.presentNormalStyle()
+                }
+            } catch {
+                continuation.resume(throwing: error)
+            }
+        }
     }
 
-    private func showLoginPermission(_ completion: @escaping (_ loginRequested: Bool) -> Void) {
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else {
-                return
+    private func showLoginPermission() async -> Bool {
+        await withCheckedContinuation { continuation in
+            let title = String(format: NSLocalizedString("“%@” Wants to Use “%@” to Sign In", comment: ""), UIApplication.shared.shortAppName, self.accountType.webAddress)
+            let message = NSLocalizedString("This allows the app and website to share information about you.", comment: "")
+            let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+
+            alert.addAction(title: NSLocalizedString("Cancel", comment: ""), style: .cancel) { _ in
+                continuation.resume(returning: false)
             }
-
-            let actionSheetController = UIAlertController(title: String(format: NSLocalizedString("“%@” Wants to Use “%@” to Sign In", comment: ""), UIApplication.shared.shortAppName, self.accountType.webAddress), message: NSLocalizedString("This allows the app and website to share information about you.", comment: ""), preferredStyle: .alert)
-
-            actionSheetController.addAction(title: NSLocalizedString("Cancel", comment: ""), style: .default) { _ in
-                completion(false)
+            alert.addAction(title: NSLocalizedString("Continue", comment: ""), style: .default) { _ in
+                continuation.resume(returning: true)
             }
-
-            actionSheetController.addAction(title: NSLocalizedString("Continue", comment: ""), style: .default) { _ in
-                completion(true)
-            }
-
-            actionSheetController.preferredAction = actionSheetController.actions[actionSheetController.actions.count - 1]
+            alert.preferredAction = alert.actions.last
 
             if let vc = self.presentationContextProvider?.presentationAnchor(for: self), vc.isVisible {
-                vc.present(actionSheetController, animated: true)
+                vc.present(alert, animated: true)
             } else {
-                actionSheetController.show(animated: true, vibrate: false)
+                alert.show(animated: true, vibrate: false)
             }
         }
     }
-
-    private func presentNormalStyle(_ completion: (() -> Void)? = nil) {
+    
+    private func presentNormalStyle() throws {
         guard let loginViewController = loginViewController else {
-            completionHandler?(.failure(APWebAuthenticationError.loginCanceled))
-            return
+            throw APWebAuthenticationError.loginCanceled
         }
 
         loginViewController.title = String(format: NSLocalizedString("Sign in to %@", comment: ""), accountType.description)
@@ -94,14 +90,13 @@ public class APWebAuthenticationSession {
         let navController = UINavigationController(rootViewController: loginViewController)
 
         if let vc = presentationContextProvider?.presentationAnchor(for: self), vc.isVisible {
-            vc.present(navController, animated: true, completion: completion)
+            vc.present(navController, animated: true)
         }
     }
 
-    private func presentSafariStyle(_ completion: (() -> Void)? = nil) {
+    private func presentSafariStyle() throws {
         guard let loginViewController = loginViewController else {
-            completionHandler?(.failure(APWebAuthenticationError.loginCanceled))
-            return
+            throw APWebAuthenticationError.loginCanceled
         }
 
         let navView = AuthNavBarView()
@@ -130,7 +125,7 @@ public class APWebAuthenticationSession {
         navController.modalPresentationStyle = .formSheet
 
         if let vc = presentationContextProvider?.presentationAnchor(for: self), vc.isVisible {
-            vc.present(navController, animated: true, completion: completion)
+            vc.present(navController, animated: true)
         }
     }
 }
