@@ -125,7 +125,7 @@ open class SessionAuthentication: Authentication {
         return nil
     }
 
-    func clearCookiesSettings() {
+    public func clearCookiesSettings() {
         if let cookiesURL = cookiesURL {
             try? FileManager.default.removeItem(at: cookiesURL)
         }
