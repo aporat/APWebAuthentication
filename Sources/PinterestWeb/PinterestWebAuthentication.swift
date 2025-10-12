@@ -10,16 +10,21 @@ public final class PinterestWebAuthentication: SessionAuthentication {
         var sessionId: String?
         var csrfToken: String?
         var username: String?
-    }
+        var isAuthenticated: Bool
+  }
     
     var appId = "ad0e169"
     public var username: String?
+    public var isAuthenticated: Bool = false
     
     public required init() {
         super.init()
         
         cookieSessionIdField = "_pinterest_sess"
-        browserMode = .desktopFirefox
+    }
+    
+    override public var isAuthorized: Bool {
+        return isAuthenticated
     }
     
     public func loadAuthTokens(forceLoad: Bool = false) {
@@ -30,6 +35,8 @@ public final class PinterestWebAuthentication: SessionAuthentication {
                         self.csrfToken = $0.value
                     } else if $0.name == cookieSessionIdField, !$0.value.isEmpty {
                         self.sessionId = $0.value
+                    } else if $0.name == "_auth", !$0.value.isEmpty {
+                        self.isAuthenticated = $0.value == "1"
                     }
                 }
             }
@@ -47,7 +54,8 @@ public final class PinterestWebAuthentication: SessionAuthentication {
             appId: appId,
             sessionId: sessionId,
             csrfToken: csrfToken,
-            username: username
+            username: username,
+            isAuthenticated: isAuthenticated
         )
         
         if let authSettingsURL = authSettingsURL {
@@ -71,7 +79,6 @@ public final class PinterestWebAuthentication: SessionAuthentication {
                 do {
                     let settings = try decoder.decode(AuthSettings.self, from: data)
                     
-                    // Assign properties, falling back to current values if nil
                     cookiesDomain = settings.cookiesDomain ?? cookiesDomain
                     cookieSessionIdField = settings.cookieSessionIdField ?? cookieSessionIdField
                     browserMode = settings.browserMode ?? browserMode
@@ -80,7 +87,8 @@ public final class PinterestWebAuthentication: SessionAuthentication {
                     sessionId = settings.sessionId ?? sessionId
                     csrfToken = settings.csrfToken ?? csrfToken
                     username = settings.username ?? username
-                    
+                    isAuthenticated = settings.isAuthenticated ?? false
+
                 } catch {
                     print("⚠️ Failed to load Pinterest settings: \(error)")
                 }

@@ -26,12 +26,13 @@ public final class PinterestWebAuthController: AuthViewController {
         }
 
         if let urlString = navigationAction.request.url?.absoluteString, let currentRedirectURL = redirectURL?.absoluteString, !urlString.isEmpty {
+
             if urlString == "https://www.pinterest.com/me/" ||
                 urlString == "https://www.pinterest.com/" ||
                 urlString == currentRedirectURL
             {
-                showHUD()
                 loggedIn = true
+                showHUD()
 
                 // make sure we dont get stuck loading
                 DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(3)) {
