@@ -3,7 +3,7 @@ import UIKit
 import Alamofire
 import HTTPStatusCodes
 
-open class AuthClientRequestRetrier: RequestRetrier, @unchecked Sendable {
+open class AuthClientRequestRetrier: RequestRetrier {
     fileprivate var maxRetryCount: UInt = 5
     fileprivate var retryWaitSeconds: Int = 1
     fileprivate var rateLimitWaitSeconds: Int = 60

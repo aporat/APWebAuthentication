@@ -1,8 +1,6 @@
 import Foundation
 import SwifterSwift
 
-// 1. Create a Codable-compliant wrapper for HTTPCookie.
-// This is necessary because the system's HTTPCookie class does not conform to Codable.
 private struct CodableHTTPCookie: Codable {
     // Properties of HTTPCookie that we need to preserve
     let name: String
@@ -13,7 +11,6 @@ private struct CodableHTTPCookie: Codable {
     let isSecure: Bool
     let isHTTPOnly: Bool
     
-    // An initializer to convert a real HTTPCookie into our Codable wrapper
     init?(from cookie: HTTPCookie) {
         self.name = cookie.name
         self.value = cookie.value
@@ -24,7 +21,6 @@ private struct CodableHTTPCookie: Codable {
         self.isHTTPOnly = cookie.isHTTPOnly
     }
     
-    // A computed property to convert our wrapper back into a real HTTPCookie
     var httpCookie: HTTPCookie? {
         var properties: [HTTPCookiePropertyKey: Any] = [:]
         properties[.name] = name
@@ -82,7 +78,6 @@ open class SessionAuthentication: Authentication {
         return storage
     }()
 
-    // 2. Refactored storeCookiesSettings to use the Codable wrapper and PropertyListEncoder.
     open func storeCookiesSettings() {
         if let cookiesURL = cookiesURL, let cookies = cookieStorage.cookies {
             // Convert the array of HTTPCookie objects to our Codable wrapper type
@@ -98,7 +93,6 @@ open class SessionAuthentication: Authentication {
         }
     }
     
-    // 3. Refactored loadCookiesSettings to use PropertyListDecoder.
     @discardableResult
     open func loadCookiesSettings() -> [HTTPCookie]? {
         if let cookiesURL = cookiesURL,

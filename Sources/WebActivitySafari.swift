@@ -5,8 +5,6 @@ public final class WebActivitySafari: UIActivity {
     
     private var urlToOpen: URL?
 
-    // --- Overrides ---
-
     override public class var activityCategory: UIActivity.Category {
         .action
     }
@@ -42,7 +40,6 @@ public final class WebActivitySafari: UIActivity {
 
     override public func perform() {
         guard let url = urlToOpen else {
-            // Always call `activityDidFinish` to signal completion, even on failure.
             return activityDidFinish(false)
         }
         

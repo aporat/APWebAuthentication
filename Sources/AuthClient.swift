@@ -9,7 +9,7 @@ public enum ProviderAuthMode: String {
     case web
     case browser
     case app
-
+    
     public init?(_ rawValue: String?) {
         guard let currentRawValue = rawValue, let value = ProviderAuthMode(rawValue: currentRawValue) else {
             return nil
@@ -29,17 +29,17 @@ open class AuthClient {
     open var sessionManager: Session!
     open var requestRetrier = AuthClientRequestRetrier()
     open var requestInterceptor: RequestInterceptor!
-
+    
     open func makeSessionManager(configuration: URLSessionConfiguration) -> Session {
         Session(configuration: configuration, delegate: SessionDelegate(), interceptor: requestInterceptor)
     }
-
+    
     public var isReloadingCancelled: Bool = false {
         didSet {
             requestRetrier.isReloadingCancelled = isReloadingCancelled
         }
     }
-
+    
     public var shouldRetryRateLimit: Bool = false {
         didSet {
             requestRetrier.shouldRetryRateLimit = shouldRetryRateLimit
@@ -51,11 +51,11 @@ open class AuthClient {
             requestRetrier.shouldAlwaysShowLoginAgain = shouldAlwaysShowLoginAgain
         }
     }
-
+    
     public init(baseURLString: String) {
         self.baseURLString = baseURLString
     }
-
+    
     @discardableResult
     public func request(
         _ path: String,
@@ -64,15 +64,15 @@ open class AuthClient {
         encoding: ParameterEncoding = URLEncoding.default,
         headers: HTTPHeaders? = nil
     )
-        throws -> DataRequest
+    throws(APWebAuthenticationError) -> DataRequest
     {
         guard let url = URL(string: baseURLString)?.appendingPathComponent(path) else {
             throw APWebAuthenticationError.unknown
         }
-
+        
         return sessionManager.request(url, method: method, parameters: parameters, encoding: encoding, headers: headers)
     }
-
+    
     @discardableResult
     public func request(
         urlString: String,
@@ -81,15 +81,15 @@ open class AuthClient {
         encoding: ParameterEncoding = URLEncoding.default,
         headers: HTTPHeaders? = nil
     )
-        throws -> DataRequest
+    throws(APWebAuthenticationError) -> DataRequest
     {
         guard let url = URL(string: urlString) else {
             throw APWebAuthenticationError.unknown
         }
-
+        
         return sessionManager.request(url, method: method, parameters: parameters, encoding: encoding, headers: headers)
     }
-
+    
     @discardableResult
     public func request<Parameters: Encodable & Sendable>(
         urlString: String,
@@ -98,15 +98,15 @@ open class AuthClient {
         encoder: ParameterEncoder = URLEncodedFormParameterEncoder.default,
         headers: HTTPHeaders? = nil
     )
-        throws -> DataRequest
+    throws(APWebAuthenticationError) -> DataRequest
     {
         guard let url = URL(string: urlString) else {
             throw APWebAuthenticationError.unknown
         }
-
+        
         return sessionManager.request(url, method: method, parameters: parameters, encoder: encoder, headers: headers)
     }
-
+    
     @discardableResult
     public func request<Parameters: Encodable & Sendable>(
         _ path: String,
@@ -115,15 +115,16 @@ open class AuthClient {
         encoder: ParameterEncoder = URLEncodedFormParameterEncoder.default,
         headers: HTTPHeaders? = nil
     )
-        throws -> DataRequest
+    throws(APWebAuthenticationError) -> DataRequest
     {
         guard let url = URL(string: baseURLString)?.appendingPathComponent(path) else {
             throw APWebAuthenticationError.unknown
         }
-
+        
         return sessionManager.request(url, method: method, parameters: parameters, encoder: encoder, headers: headers)
     }
-
+    
+    
     @discardableResult
     public func request(
         url: URL,
@@ -132,19 +133,30 @@ open class AuthClient {
         encoding: ParameterEncoding = URLEncoding.default,
         headers: HTTPHeaders? = nil
     )
-        throws -> DataRequest
+    throws(APWebAuthenticationError) -> DataRequest
     {
         sessionManager.request(url, method: method, parameters: parameters, encoding: encoding, headers: headers)
     }
-
+    
     public func cancelAllRequests() {
         isReloadingCancelled = true
-
+        
         sessionManager.session.getAllTasks { tasks in
             tasks.forEach { $0.cancel() }
         }
     }
-
+    
+    open func url(for path: String) throws(APWebAuthenticationError) -> URL {
+        if let absoluteURL = URL(string: path), absoluteURL.scheme != nil {
+            return absoluteURL
+        } else {
+            guard let baseURL = URL(string: baseURLString)?.appendingPathComponent(path) else {
+                throw APWebAuthenticationError.unknown
+            }
+            return baseURL
+        }
+    }
+    
     open func decryptToken(_ payload: String?, tag: String?, iv: String?, password: String) -> String? {
         // Ensure all inputs are present and valid
         guard let payload = payload,
@@ -178,4 +190,5 @@ open class AuthClient {
             return nil
         }
     }
+    
 }
