@@ -5,8 +5,7 @@ import PackageDescription
 let package = Package(
     name: "APWebAuthentication",
     platforms: [
-        .iOS(.v17),
-        .macOS(.v10_14)
+        .iOS(.v17)
     ],
     products: [
         .library(
@@ -26,7 +25,8 @@ let package = Package(
         .package(url: "https://github.com/SwiftyJSON/SwiftyJSON.git", from: "5.0.0"),
         .package(url: "https://github.com/sunshinejr/SwiftyUserDefaults.git", from: "5.0.0"),
         .package(url: "https://github.com/devicekit/DeviceKit.git", from: "5.0.0"),
-        .package(path: "../APUserAgentGenerator")
+        .package(path: "../APUserAgentGenerator"),
+        .package(path: "../AlamofireSwiftyJSON")
     ],
     targets: [
         .target(
@@ -41,6 +41,7 @@ let package = Package(
                 "SFSafeSymbols",
                 "SwifterSwift",
                 "SwiftyJSON",
+                "AlamofireSwiftyJSON",
                 "SwiftyUserDefaults",
                 "DeviceKit",
                 "APUserAgentGenerator"

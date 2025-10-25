@@ -12,7 +12,7 @@ public final class TumblrUser: User, Sendable {
     public let verified: Bool = false
     
     /// A list of the user's blogs.
-    public var blogs: [TumblrBlog]
+    public let blogs: [TumblrBlog]
 
     /// A failable initializer that creates a `TumblrUser` from a SwiftyJSON object.
     /// - Parameter info: The JSON object containing the user's data.

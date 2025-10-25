@@ -38,7 +38,7 @@ open class BaseAuthViewController: UIViewController, WKNavigationDelegate {
         }
     }
     
-    fileprivate var observerAdded = false // track the estimatedProgress observer
+    fileprivate var observerAdded = false 
     
     // MARK: - UI Elements
     
@@ -379,7 +379,7 @@ open class BaseAuthViewController: UIViewController, WKNavigationDelegate {
         
         if let finalMessage = errorMessage, !finalMessage.isEmpty {
             completionHandler?(.failure(APWebAuthenticationError.failed(reason: finalMessage)))
-            await dismiss(animated: true)
+            dismiss(animated: true)
         }
     }
     

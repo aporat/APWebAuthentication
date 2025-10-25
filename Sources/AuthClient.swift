@@ -1,7 +1,7 @@
 import Foundation
 @preconcurrency import Alamofire
 import CryptoKit
-import SwiftyJSON
+@preconcurrency import SwiftyJSON
 import AlamofireSwiftyJSON
 
 public enum ProviderAuthMode: String {
@@ -58,7 +58,7 @@ open class AuthClient {
         self.baseURLString = baseURLString
     }
     
-    public func perform(
+    public func request(
         _ path: String,
         method: HTTPMethod = .get,
         parameters: Parameters = Parameters(),
@@ -80,6 +80,53 @@ open class AuthClient {
             throw generateError(from: response)
         }
     }
+    
+    /// Performs a network request and returns both the JSON and the full HTTPURLResponse.
+    public func requestWithResponse(
+        _ path: String,
+        method: HTTPMethod = .get,
+        parameters: Parameters = Parameters(),
+        encoding: any ParameterEncoding = URLEncoding.default,
+        headers: HTTPHeaders? = nil
+    ) async throws(APWebAuthenticationError) -> (json: JSON, response: HTTPURLResponse) {
+        let url = try url(for: path)
+        
+        let dataTask = sessionManager.request(url, method: method, parameters: parameters, encoding: encoding, headers: headers)
+            .validate()
+            .serializingResponse(using: SwiftyJSONResponseSerializer())
+        
+        let response = await dataTask.response
+        
+        guard let httpResponse = response.response else {
+            throw generateError(from: response)
+        }
+        
+        switch response.result {
+        case .success(let value):
+            return (json: value, response: httpResponse)
+        case .failure:
+            throw generateError(from: response)
+        }
+    }
+    
+    public func getStatusCode(
+        _ path: String,
+        method: HTTPMethod = .get,
+        parameters: Parameters = Parameters(),
+        encoding: any ParameterEncoding = URLEncoding.default,
+        headers: HTTPHeaders? = nil
+    ) async throws(APWebAuthenticationError) -> Int {
+        let url = try url(for: path)
+        
+        let dataTask = sessionManager.request(url, method: method, parameters: parameters, encoding: encoding, headers: headers)
+        
+        guard let statusCode = dataTask.response?.statusCode else {
+            throw APWebAuthenticationError.unknown
+        }
+        
+        return statusCode
+    }
+
     
     open func generateError(from response: DataResponse<JSON, AFError>) -> APWebAuthenticationError {
         if let afError = response.error {
@@ -107,89 +154,6 @@ open class AuthClient {
         }
         
         return .unknown
-    }
-    
-    
-    @discardableResult
-    public func request(
-        _ path: String,
-        method: HTTPMethod = .get,
-        parameters: Parameters = Parameters(),
-        encoding: ParameterEncoding = URLEncoding.default,
-        headers: HTTPHeaders? = nil
-    )
-    throws(APWebAuthenticationError) -> DataRequest
-    {
-        guard let url = URL(string: baseURLString)?.appendingPathComponent(path) else {
-            throw APWebAuthenticationError.unknown
-        }
-        
-        return sessionManager.request(url, method: method, parameters: parameters, encoding: encoding, headers: headers)
-    }
-    
-    @discardableResult
-    public func request(
-        urlString: String,
-        method: HTTPMethod = .get,
-        parameters: Parameters = Parameters(),
-        encoding: ParameterEncoding = URLEncoding.default,
-        headers: HTTPHeaders? = nil
-    )
-    throws(APWebAuthenticationError) -> DataRequest
-    {
-        guard let url = URL(string: urlString) else {
-            throw APWebAuthenticationError.unknown
-        }
-        
-        return sessionManager.request(url, method: method, parameters: parameters, encoding: encoding, headers: headers)
-    }
-    
-    @discardableResult
-    public func request<Parameters: Encodable & Sendable>(
-        urlString: String,
-        method: HTTPMethod = .get,
-        parameters: Parameters? = nil,
-        encoder: ParameterEncoder = URLEncodedFormParameterEncoder.default,
-        headers: HTTPHeaders? = nil
-    )
-    throws(APWebAuthenticationError) -> DataRequest
-    {
-        guard let url = URL(string: urlString) else {
-            throw APWebAuthenticationError.unknown
-        }
-        
-        return sessionManager.request(url, method: method, parameters: parameters, encoder: encoder, headers: headers)
-    }
-    
-    @discardableResult
-    public func request<Parameters: Encodable & Sendable>(
-        _ path: String,
-        method: HTTPMethod = .get,
-        parameters: Parameters? = nil,
-        encoder: ParameterEncoder = URLEncodedFormParameterEncoder.default,
-        headers: HTTPHeaders? = nil
-    )
-    throws(APWebAuthenticationError) -> DataRequest
-    {
-        guard let url = URL(string: baseURLString)?.appendingPathComponent(path) else {
-            throw APWebAuthenticationError.unknown
-        }
-        
-        return sessionManager.request(url, method: method, parameters: parameters, encoder: encoder, headers: headers)
-    }
-    
-    
-    @discardableResult
-    public func request(
-        url: URL,
-        method: HTTPMethod = .get,
-        parameters: Parameters = Parameters(),
-        encoding: ParameterEncoding = URLEncoding.default,
-        headers: HTTPHeaders? = nil
-    )
-    throws(APWebAuthenticationError) -> DataRequest
-    {
-        sessionManager.request(url, method: method, parameters: parameters, encoding: encoding, headers: headers)
     }
     
     public func cancelAllRequests() {

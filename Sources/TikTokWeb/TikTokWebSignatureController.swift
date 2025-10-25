@@ -32,7 +32,7 @@ public final class TikTokWebSignatureController: WebTokensViewController {
         self.auth.loadAuthTokens(forceLoad: true)
 
         if let signature = url.parameters["_signature"] {
-            let result: [String: Any] = [
+            let _: [String: Any] = [
                 "signature": signature,
                 "url": url,
             ]

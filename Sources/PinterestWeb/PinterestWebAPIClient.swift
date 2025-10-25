@@ -1,6 +1,6 @@
 import Foundation
 import Alamofire
-import SwiftyJSON
+@preconcurrency import SwiftyJSON
 
 public final class PinterestWebAPIClient: AuthClient {
     fileprivate var requestAdapter: PinterestWebRequestAdapter
@@ -43,5 +43,31 @@ public final class PinterestWebAPIClient: AuthClient {
         if let value = options?["app_id"].string {
             requestAdapter.auth.appId = value
         }
+    }
+    
+    public override func generateError(from response: DataResponse<JSON, AFError>) -> APWebAuthenticationError {
+        if let afError = response.error {
+            if afError.isExplicitlyCancelledError {
+                return .canceled
+            }
+            if afError.isSessionTaskError {
+                return .connectionError(reason: "Please check your network connection.")
+            }
+        }
+        
+        if let json = response.value {
+            let errorMessage = json["resource_response"]["error"]["message"].string ??
+            json["error"]["message"].string
+            
+            if let message = errorMessage {
+                return .failed(reason: message)
+            }
+        }
+        
+        if let error = response.error {
+            return .failed(reason: error.localizedDescription)
+        }
+        
+        return .unknown
     }
 }

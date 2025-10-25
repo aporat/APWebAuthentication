@@ -23,6 +23,7 @@ public final class TikTokWebAuthentication: SessionAuthentication {
     
     public var signatureUrl: URL?
     public var secUid: String?
+    public var username: String?
     public var svWebId: String?
     public var ttWebId: String?
     public var uidtt: String?

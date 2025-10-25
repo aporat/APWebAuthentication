@@ -24,5 +24,5 @@ open class OAuth1Client: AuthClient {
         if let value = options?["custom_user_agent"].string {
             requestAdapter.auth.customUserAgent = value
         }
-    }
+    }   
 }

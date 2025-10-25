@@ -15,7 +15,7 @@ open class WebTokensViewController: UIViewController, WKNavigationDelegate {
     open var completionHandler: AuthViewController.CompletionHandler
     var url: URL
     var forURL: URL
-
+    
     fileprivate let XMLHttpRequestInjectCodeHandler = "handler"
     fileprivate let XMLHttpRequestInjectCode = """
     var open = XMLHttpRequest.prototype.open;
@@ -24,56 +24,63 @@ open class WebTokensViewController: UIViewController, WKNavigationDelegate {
             var message = {"status" : this.status, "responseURL" : this.responseURL}
             webkit.messageHandlers.handler.postMessage(message);
         });
-
+    
         open.apply(this, arguments);
     };
     """
-
+    
     fileprivate lazy var webViewConfiguration: WKWebViewConfiguration = {
         let config = WKWebViewConfiguration()
         config.websiteDataStore = WKWebsiteDataStore.default()
-
+        
         return config
     }()
-
+    
     lazy open var webView: WKWebView = {
         let view = WKWebView(frame: CGRect.zero, configuration: self.webViewConfiguration)
         view.translatesAutoresizingMaskIntoConstraints = false
         view.isMultipleTouchEnabled = true
         view.autoresizesSubviews = true
         view.scrollView.alwaysBounceVertical = true
-
+        
         return view
     }()
-
+    
     public init(url: URL, forURL: URL, completionHandler: @escaping AuthViewController.CompletionHandler) {
         self.url = url
         self.forURL = forURL
         self.completionHandler = completionHandler
-
+        
         super.init(nibName: nil, bundle: nil)
-
+        
         let userScript = WKUserScript(source: XMLHttpRequestInjectCode, injectionTime: .atDocumentStart, forMainFrameOnly: false)
         webViewConfiguration.userContentController.addUserScript(userScript)
         webViewConfiguration.userContentController.add(self, name: "handler")
-
+        
         webView.navigationDelegate = self
         webView.addObserver(self, forKeyPath: #keyPath(WKWebView.estimatedProgress), options: .new, context: nil)
         view.addSubview(webView)
     }
-
+    
     public required init(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
+    @objc public func didCancel() {
+        guard !isFinished else { return }
+        isFinished = true
+        completionHandler(.failure(APWebAuthenticationError.canceled))
+        self.dismiss(animated: true, completion: nil)
+    }
+    
     open func loadRequest() {
         if let userAgent = customUserAgent {
             webView.customUserAgent = userAgent
         }
-
+        
         webView.load(URLRequest(url: url))
     }
-
+    
     public func stopLoading() {
         webView.stopLoading()
         
@@ -82,21 +89,21 @@ open class WebTokensViewController: UIViewController, WKNavigationDelegate {
         webViewConfiguration.userContentController.removeAllUserScripts()
         webViewConfiguration.userContentController.removeAllContentRuleLists()
     }
-
+    
     override public func updateViewConstraints() {
         super.updateViewConstraints()
-
+        
         webView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
     }
-
+    
     // MARK: - WKNavigationDelegate
-
+    
     public func webView(_: WKWebView, decidePolicyFor _: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         decisionHandler(.allow)
     }
-
+    
     public func webView(_: WKWebView, didFinish _: WKNavigation!) {
         DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(5)) {
             if !self.isFinished {
@@ -104,27 +111,21 @@ open class WebTokensViewController: UIViewController, WKNavigationDelegate {
             }
         }
     }
-
+    
     // MARK: - KVO
-
+    
     override open func observeValue(forKeyPath keyPath: String?, of _: Any?, change _: [NSKeyValueChangeKey: Any]?, context _: UnsafeMutableRawPointer?) {
         if keyPath == "estimatedProgress" {
-            Task { @MainActor in
-                delegate?.didStepLoaded(Float(self.webView.estimatedProgress))
-            }
+            delegate?.didStepLoaded(Float(self.webView.estimatedProgress))
         }
     }
-
+    
     // MARK: - Actions
-
+    
     @discardableResult
     public func loadJavascript(_ javaScriptString: String) async -> String? {
-        do {
-            let result = try await webView.evaluateJavaScript(javaScriptString)
-            return result as? String
-        } catch {
-            return nil
-        }
+        let result = try? await webView.evaluateJavaScript(javaScriptString)
+        return result as? String
     }
     
     public func getCookies() async -> [HTTPCookie] {
@@ -134,7 +135,7 @@ open class WebTokensViewController: UIViewController, WKNavigationDelegate {
             }
         }
     }
-
+    
     public func storeCookies(_ cookies: [HTTPCookie]?) async {
         guard let cookies = cookies, !cookies.isEmpty else { return }
         
@@ -146,9 +147,12 @@ open class WebTokensViewController: UIViewController, WKNavigationDelegate {
             }
         }
     }
-
+    
     open func requestLoaded(_: URL, forURL _: URL) async {
-        
+        guard !isFinished else { return }
+        isFinished = true
+        completionHandler(.success(nil))
+        self.dismiss(animated: true, completion: nil)
     }
 }
 

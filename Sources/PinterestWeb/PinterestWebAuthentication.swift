@@ -87,7 +87,7 @@ public final class PinterestWebAuthentication: SessionAuthentication {
                     sessionId = settings.sessionId ?? sessionId
                     csrfToken = settings.csrfToken ?? csrfToken
                     username = settings.username ?? username
-                    isAuthenticated = settings.isAuthenticated ?? false
+                    isAuthenticated = settings.isAuthenticated
 
                 } catch {
                     print("⚠️ Failed to load Pinterest settings: \(error)")
