@@ -4,34 +4,29 @@ import Alamofire
 import AlamofireSwiftyJSON
 
 public final class TwitterAPIClient: OAuth1Client {
+    
+    public override var accountType: AccountType {
+        AccountStore.twitter
+    }
+    
     public convenience init(consumerKey: String, consumerSecret: String, auth: Auth1Authentication) {
         self.init(baseURLString: "https://api.twitter.com/2/", consumerKey: consumerKey, consumerSecret: consumerSecret, auth: auth)
     }
     
-    public override func generateError(from response: DataResponse<JSON, AFError>) -> APWebAuthenticationError {
-        if let afError = response.error {
-            if afError.isExplicitlyCancelledError {
-                return .canceled
-            }
-            if afError.isSessionTaskError {
-                return .connectionError(reason: "Please check your network connection.")
-            }
+    public override func extractErrorMessage(from json: JSON?) -> String? {
+        if let message = json?["errors"][0]["message"].string { // Common in v1.1 arrays
+            return message
         }
-        
-        if let json = response.value {
-            let errorMessage = json["errors"][0]["message"].string ??
-            json["error"].string ??
-            json["title"].string
-            
-            if let message = errorMessage {
-                return .failed(reason: message)
-            }
+        if let message = json?["title"].string { // Common in v2 top-level
+            return message
         }
-        
-        if let error = response.error {
-            return .failed(reason: error.localizedDescription)
+        if let message = json?["detail"].string { // Also seen in v2
+            return message
         }
-        
-        return .unknown
+        if let message = json?["error"].string { // Seen in v1.1 simple errors
+            return message
+        }
+        return super.extractErrorMessage(from: json)
     }
+    
 }

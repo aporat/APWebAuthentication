@@ -3,6 +3,11 @@ import Alamofire
 @preconcurrency import SwiftyJSON
 
 public class TikTokWebMobileAPIClient: AuthClient {
+    
+    public override var accountType: AccountType {
+        AccountStore.tiktok
+    }
+    
     fileprivate var requestAdapter: TikTokWebRequestAdapter
     
     public init(auth: TikTokWebAuthentication) {
@@ -15,29 +20,19 @@ public class TikTokWebMobileAPIClient: AuthClient {
         sessionManager = makeSessionManager(configuration: configuration)
     }
     
-    public override func generateError(from response: DataResponse<JSON, AFError>) -> APWebAuthenticationError {
-        if let afError = response.error {
-            if afError.isExplicitlyCancelledError {
-                return .canceled
-            }
-            if afError.isSessionTaskError {
-                return .connectionError(reason: "Please check your network connection.")
-            }
+    public override func extractErrorMessage(from json: JSON?) -> String? {
+        if let message = json?["status_msg"].string {
+            return message
         }
-        
-        if let json = response.value {
-            let errorMessage = json["status_msg"].string ??
-                               json["errMsg"].string
-            
-            if let message = errorMessage {
-                return .failed(reason: message)
-            }
+        if let message = json?["errMsg"].string {
+            return message
         }
-        
-        if let error = response.error {
-            return .failed(reason: error.localizedDescription)
+        if let message = json?["resource_response"]["error"]["message"].string {
+            return message
         }
-        
-        return .unknown
+        if let message = json?["error"]["message"].string {
+            return message
+        }
+        return super.extractErrorMessage(from: json)
     }
 }

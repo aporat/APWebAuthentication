@@ -4,6 +4,12 @@ import Alamofire
 import AlamofireSwiftyJSON
 
 public class GitHubAPIClient: AuthClient {
+    
+    public override var accountType: AccountType {
+        AccountStore.github
+    }
+    
+    
     fileprivate var requestAdapter: GitHubRequestAdapter
     
     public convenience init(auth: Auth2Authentication) {

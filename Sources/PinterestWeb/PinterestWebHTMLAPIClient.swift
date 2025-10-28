@@ -2,6 +2,11 @@ import Foundation
 import Alamofire
 
 public final class PinterestWebHTMLAPIClient: AuthClient {
+    
+    public override var accountType: AccountType {
+        AccountStore.pinterest
+    }
+    
     fileprivate var requestAdapter: PinterestWebHTMLRequestAdapter
 
     public required convenience init(auth: PinterestWebAuthentication) {

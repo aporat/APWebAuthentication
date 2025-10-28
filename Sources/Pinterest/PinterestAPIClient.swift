@@ -3,6 +3,11 @@ import Alamofire
 @preconcurrency import SwiftyJSON
 
 public final class PinterestAPIClient: AuthClient {
+    
+    public override var accountType: AccountType {
+        AccountStore.pinterest
+    }
+    
     fileprivate var requestAdapter: OAuth2RequestAdapter
     
     public required convenience init(auth: Auth2Authentication) {
@@ -30,31 +35,19 @@ public final class PinterestAPIClient: AuthClient {
         }
     }
     
-    public override func generateError(from response: DataResponse<JSON, AFError>) -> APWebAuthenticationError {
-        if let afError = response.error {
-            if afError.isExplicitlyCancelledError {
-                return .canceled
-            }
-            if afError.isSessionTaskError {
-                return .connectionError(reason: "Please check your network connection.")
-            }
+    public override func extractErrorMessage(from json: JSON?) -> String? {
+        if let message = json?["message"].string {
+            return message
         }
         
-        if let json = response.value {
-            let errorMessage = json["meta"]["error_message"].string ??
-            json["error_message"].string ??
-            json["message"].string
-            
-            if let message = errorMessage {
-                return .failed(reason: message)
-            }
+        // Check older patterns just in case, similar to PinterestWebAPIClient
+        if let message = json?["resource_response"]["error"]["message"].string {
+            return message
         }
-        
-        if let error = response.error {
-            return .failed(reason: error.localizedDescription)
+        if let message = json?["error"]["message"].string {
+            return message
         }
-        
-        return .unknown
+        return super.extractErrorMessage(from: json)
     }
 }
 

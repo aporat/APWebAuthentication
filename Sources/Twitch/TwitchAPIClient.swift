@@ -3,6 +3,11 @@ import Alamofire
 @preconcurrency import SwiftyJSON
 
 public class TwitchAPIClient: AuthClient {
+    
+    public override var accountType: AccountType {
+        AccountStore.twitch
+    }
+    
     fileprivate var requestAdapter: TwitchRequestAdapter
     
     public init(auth: Auth2Authentication) {
@@ -21,28 +26,4 @@ public class TwitchAPIClient: AuthClient {
         }
     }
 
-    public override func generateError(from response: DataResponse<JSON, AFError>) -> APWebAuthenticationError {
-        if let afError = response.error {
-            if afError.isExplicitlyCancelledError {
-                return .canceled
-            }
-            if afError.isSessionTaskError {
-                return .connectionError(reason: "Please check your network connection.")
-            }
-        }
-        
-        if let json = response.value {
-            let errorMessage = json["message"].string ?? json["error_message"].string
-            
-            if let message = errorMessage {
-                return .failed(reason: message)
-            }
-        }
-        
-        if let error = response.error {
-            return .failed(reason: error.localizedDescription)
-        }
-        
-        return .unknown
-    }
 }

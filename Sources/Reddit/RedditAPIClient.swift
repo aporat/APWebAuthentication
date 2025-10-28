@@ -3,6 +3,11 @@ import Alamofire
 import SwiftyJSON
 
 public final class RedditAPIClient: AuthClient {
+    
+    public override var accountType: AccountType {
+        AccountStore.reddit
+    }
+    
     fileprivate var requestAdapter: OAuth2RequestAdapter
 
     public required convenience init(auth: Auth2Authentication) {

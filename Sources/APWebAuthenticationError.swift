@@ -2,37 +2,56 @@ import Foundation
 @preconcurrency import SwiftyJSON
 
 public enum APWebAuthenticationError: Error, Sendable, Equatable {
-    case failed(reason: String?)
-    case connectionError(reason: String?)
-    case serverError(reason: String?)
-    case loginFailed(reason: String?)
-    case feedbackRequired(reason: String?)
+    case failed(reason: String?, responseJSON: JSON? = nil) // Added default
+    case connectionError(reason: String?, responseJSON: JSON? = nil) // Added default
+    case serverError(reason: String?, responseJSON: JSON? = nil) // Added default
+    case loginFailed(reason: String?, responseJSON: JSON? = nil) // Added default
+    case feedbackRequired(reason: String?, responseJSON: JSON? = nil) // Added default
+    case externalActionRequired(reason: String?, responseJSON: JSON? = nil) // Added default
+    case sessionExpired(reason: String?, responseJSON: JSON? = nil) // Added default
+    case rateLimit(reason: String?, responseJSON: JSON? = nil) // Added default
+    
     case checkPointRequired(content: JSON?)
     case checkPointNotice(content: JSON?)
-    case externalActionRequired(reason: String?)
-    case sessionExpired(reason: String?)
-    case rateLimit(reason: String?)
     case canceled
     case loginCanceled
     case notFound
     case badRequest
     case unknown
     case timeout
-
+    
     // App API Errors
-    case appSessionExpired(reason: String?)
+    case appSessionExpired(reason: String?, responseJSON: JSON? = nil) // Added default
+    
     case appCheckPointRequired(content: JSON?)
     case appDownloadNewAppRequired(content: JSON?)
     case appUpdateRequired(content: JSON?)
-
+    
     public var content: JSON? {
         switch self {
         case let .appCheckPointRequired(content),
-             let .checkPointRequired(content),
-             let .checkPointNotice(content),
-             let .appDownloadNewAppRequired(content),
-             let .appUpdateRequired(content):
+            let .checkPointRequired(content),
+            let .checkPointNotice(content),
+            let .appDownloadNewAppRequired(content),
+            let .appUpdateRequired(content):
             return content
+        default:
+            return nil
+        }
+    }
+    
+    public var responseJSON: JSON? {
+        switch self {
+        case let .failed(_, responseJSON),
+            let .connectionError(_, responseJSON),
+            let .serverError(_, responseJSON),
+            let .loginFailed(_, responseJSON),
+            let .feedbackRequired(_, responseJSON),
+            let .externalActionRequired(_, responseJSON),
+            let .sessionExpired(_, responseJSON),
+            let .rateLimit(_, responseJSON),
+            let .appSessionExpired(_, responseJSON):
+            return responseJSON
         default:
             return nil
         }
@@ -59,26 +78,28 @@ extension APWebAuthenticationError: LocalizedError {
             return "Error"
         }
     }
-
+    
     public var errorDescription: String? {
         switch self {
-        case let .failed(reason),
-             let .serverError(reason),
-             let .feedbackRequired(reason),
-             let .externalActionRequired(reason),
-             let .sessionExpired(reason),
-             let .appSessionExpired(reason):
+            // --- UPDATED: All cases with (reason, _) ---
+        case let .failed(reason, _),
+            let .serverError(reason, _),
+            let .feedbackRequired(reason, _),
+            let .externalActionRequired(reason, _),
+            let .sessionExpired(reason, _),
+            let .appSessionExpired(reason, _):
             return reason
-             
-        case let .connectionError(reason):
+            
+        case let .connectionError(reason, _):
             return reason ?? "Check your network connection. The server could also be down."
-             
-        case let .loginFailed(reason):
+            
+        case let .loginFailed(reason, _):
             return reason ?? "Unable to login. The server could also be down."
-             
-        case let .rateLimit(reason):
+            
+        case let .rateLimit(reason, _):
             return reason ?? "You have made too many requests. Please try again later."
-             
+            // --- END UPDATED ---
+            
         default:
             return "Unable to perform this action. Please try again later."
         }
@@ -120,7 +141,7 @@ extension APWebAuthenticationError {
             return false
         }
     }
-
+    
     public var isLoginError: Bool {
         switch self {
         case .loginFailed, .sessionExpired, .appSessionExpired, .feedbackRequired:
@@ -129,7 +150,7 @@ extension APWebAuthenticationError {
             return false
         }
     }
-
+    
     public var isGenericError: Bool {
         switch self {
         case .failed, .serverError, .notFound, .badRequest:

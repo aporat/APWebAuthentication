@@ -3,71 +3,61 @@ import Alamofire
 @preconcurrency import SwiftyJSON
 
 public final class PinterestWebAPIClient: AuthClient {
+    
+    public override var accountType: AccountType {
+        AccountStore.pinterest
+    }
+    
     fileprivate var requestAdapter: PinterestWebRequestAdapter
-
+    
     public required convenience init(auth: PinterestWebAuthentication) {
         self.init(baseURLString: "https://www.pinterest.com/", auth: auth)
     }
-
+    
     public init(baseURLString: String, auth: PinterestWebAuthentication) {
         requestAdapter = PinterestWebRequestAdapter(auth: auth)
         super.init(baseURLString: baseURLString)
         requestInterceptor = Interceptor(adapters: [requestAdapter], retriers: [requestRetrier])
-
+        
         let configuration = URLSessionConfiguration.ephemeral
         configuration.httpCookieStorage = auth.cookieStorage
         sessionManager = makeSessionManager(configuration: configuration)
     }
-
+    
     public func loadSettings(_ options: JSON?) {
         if let value = options?["keep_device_settings"].bool {
             requestAdapter.auth.keepDeviceSettings = value
         }
-
+        
         if let value = ProviderBrowserMode(options?["browser_mode"].string) {
             requestAdapter.auth.browserMode = value
         }
-
+        
         if let value = options?["custom_user_agent"].string {
             requestAdapter.auth.customUserAgent = value
         }
-
+        
         if let value = options?["cookies_domain"].string {
             requestAdapter.auth.cookiesDomain = value
         }
-
+        
         if let value = options?["cookie_session_id_field"].string {
             requestAdapter.auth.cookieSessionIdField = value
         }
-
+        
         if let value = options?["app_id"].string {
             requestAdapter.auth.appId = value
         }
     }
     
-    public override func generateError(from response: DataResponse<JSON, AFError>) -> APWebAuthenticationError {
-        if let afError = response.error {
-            if afError.isExplicitlyCancelledError {
-                return .canceled
-            }
-            if afError.isSessionTaskError {
-                return .connectionError(reason: "Please check your network connection.")
-            }
+    public override func extractErrorMessage(from json: JSON?) -> String? {
+        if let message = json?["resource_response"]["error"]["message"].string {
+            return message
         }
-        
-        if let json = response.value {
-            let errorMessage = json["resource_response"]["error"]["message"].string ??
-            json["error"]["message"].string
-            
-            if let message = errorMessage {
-                return .failed(reason: message)
-            }
+        if let message = json?["error"]["message"].string {
+            return message
         }
-        
-        if let error = response.error {
-            return .failed(reason: error.localizedDescription)
-        }
-        
-        return .unknown
+        return super.extractErrorMessage(from: json)
     }
+    
 }
