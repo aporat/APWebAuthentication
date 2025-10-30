@@ -3,40 +3,84 @@ import SwiftyJSON
 
 public final class TumblrBlog: GenericUser, @unchecked Sendable {
     
-    /// The display name of the blog, which may differ from the username/URL.
     public var name: String?
-    
-    /// The total number of posts on the blog.
     public var postsCount: Int32 = 0
 
-    /// A failable initializer that creates a `TumblrBlog` from a SwiftyJSON object.
-    /// - Parameter info: The JSON object containing the blog's data.
     public required init?(info: JSON) {
-        guard let uuid = info["uuid"].string, !uuid.isEmpty else {
+        
+        // Path 1: Handle the "full" blog object (from /user/info)
+        if let uuid = info["uuid"].string, !uuid.isEmpty {
+            
+            let username = Self.parseUsername(from: info["url"].string)
+            let fullname = info["name"].string ?? info["title"].string
+            
+            var avatarURL: URL?
+            if let avatarArray = info["avatar"].array,
+               let avatar64 = avatarArray.first(where: { $0["width"].int == 64 }),
+               let avatar64UrlString = avatar64["url"].string {
+                avatarURL = URL(string: avatar64UrlString)
+            } else {
+                avatarURL = URL(string: "https://api.tumblr.com/v2/blog/\(uuid)/avatar")
+            }
+            
+            super.init(userId: uuid,
+                       username: username,
+                       fullname: fullname,
+                       avatarPicture: avatarURL)
+            
+            self.postsCount = info["posts"].int32 ?? 0
+            self.followersCount = info["followers"].int32 ?? 0
+            
+        }
+        // Path 2: Handle the "lite" user object (from /followers)
+        else if let name = info["name"].string, !name.isEmpty, let urlString = info["url"].string {
+            
+            let userId = name
+            let username = name
+            let fullname = name
+            
+            var avatarURL: URL?
+            if let host = URL(string: urlString)?.host {
+                avatarURL = URL(string: "https://api.tumblr.com/v2/blog/\(host)/avatar")
+            }
+
+            super.init(userId: userId,
+                       username: username,
+                       fullname: fullname,
+                       avatarPicture: avatarURL)
+            
+            self.postsCount = 0
+            self.followersCount = 0
+            
+        }
+        // If neither, it's invalid
+        else {
             return nil
         }
         
-        let username = Self.parseUsername(from: info["url"].string)
-        let fullname = info["name"].string ?? info["title"].string
-        let avatarURL = URL(string: "https://api.tumblr.com/v2/blog/\(uuid)/avatar")
-
-        super.init(userId: uuid,
-                   username: username,
-                   fullname: fullname,
-                   avatarPicture: avatarURL)
-        
-        self.postsCount = info["posts"].int32 ?? 0
-        self.followersCount = info["followers"].int32 ?? 0
+        self.name = info["name"].string ?? info["title"].string
     }
     
-    /// A helper function to parse the blog's username from its URL string.
     private static func parseUsername(from urlString: String?) -> String? {
         guard let urlString else { return nil }
         
+        if let url = URL(string: urlString) {
+            // Handle "https://www.tumblr.com/blog/view/thedashedspace"
+            if url.host?.contains("www.tumblr.com") == true, url.pathComponents.count > 2 {
+                return url.pathComponents.last
+            }
+            // Handle "https://cheezbot.tumblr.com/"
+            else if let host = url.host, host.contains(".tumblr.com") {
+                return host.replacingOccurrences(of: ".tumblr.com", with: "")
+            }
+        }
+        
+        // Fallback
         return urlString
             .replacingOccurrences(of: "https://", with: "")
             .replacingOccurrences(of: "http://", with: "")
             .replacingOccurrences(of: "www.tumblr.com/blog/view/", with: "")
             .replacingOccurrences(of: "tumblr.com/", with: "tumblr.com")
+            .split(separator: ".").first.map(String.init)
     }
 }

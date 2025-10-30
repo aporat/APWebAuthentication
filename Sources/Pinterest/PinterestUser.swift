@@ -11,7 +11,9 @@ public final class PinterestUser: GenericUser, @unchecked Sendable {
         let avatarPicture = info["profile_image"].url
         
         let constructedFullname: String?
-        if let firstName = info["first_name"].string, let lastName = info["last_name"].string {
+        if let fullname = info["display_name"].string {
+            constructedFullname = fullname
+        } else if let firstName = info["first_name"].string, let lastName = info["last_name"].string {
             constructedFullname = firstName + " " + lastName
         } else {
             constructedFullname = nil

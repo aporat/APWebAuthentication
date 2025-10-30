@@ -66,7 +66,7 @@ public extension URL {
         // Check for various error keys used in OAuth and other APIs.
         let errorReason = params["error_description"] ?? params["error_message"] ?? params["error"]
         
-        if let reason = errorReason?.removingPercentEncoding {
+        if let reason = errorReason?.replacingOccurrences(of: "+", with: " ").removingPercentEncoding {
             if params["error_type"] == "login_failed" {
                 return .failure(.loginFailed(reason: reason))
             }
