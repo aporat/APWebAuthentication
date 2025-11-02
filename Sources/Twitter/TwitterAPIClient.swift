@@ -1,7 +1,6 @@
 import Foundation
 import Alamofire
 @preconcurrency import SwiftyJSON
-import AlamofireSwiftyJSON
 
 public final class TwitterAPIClient: OAuth1Client {
     

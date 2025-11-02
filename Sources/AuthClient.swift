@@ -2,7 +2,6 @@ import Foundation
 @preconcurrency import Alamofire
 import CryptoKit
 @preconcurrency import SwiftyJSON
-import AlamofireSwiftyJSON
 import HTTPStatusCodes
 
 public enum ProviderAuthMode: String {
@@ -74,7 +73,7 @@ open class AuthClient {
         
         let dataTask = sessionManager.request(url, method: method, parameters: parameters, encoding: encoding, headers: headers)
             .validate()
-            .serializingResponse(using: SwiftyJSONResponseSerializer())
+            .serializingDecodable(JSON.self)
         
         let response = await dataTask.response
         
@@ -98,7 +97,7 @@ open class AuthClient {
         
         let dataTask = sessionManager.request(url, method: method, parameters: parameters, encoding: encoding, headers: headers)
             .validate()
-            .serializingResponse(using: SwiftyJSONResponseSerializer())
+            .serializingDecodable(JSON.self)
         
         let response = await dataTask.response
         

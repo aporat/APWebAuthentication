@@ -25,8 +25,7 @@ let package = Package(
         .package(url: "https://github.com/SwiftyJSON/SwiftyJSON.git", from: "5.0.0"),
         .package(url: "https://github.com/sunshinejr/SwiftyUserDefaults.git", from: "5.0.0"),
         .package(url: "https://github.com/devicekit/DeviceKit.git", from: "5.0.0"),
-        .package(path: "../APUserAgentGenerator"),
-        .package(path: "../AlamofireSwiftyJSON")
+        .package(path: "../APUserAgentGenerator")
     ],
     targets: [
         .target(
@@ -41,7 +40,6 @@ let package = Package(
                 "SFSafeSymbols",
                 "SwifterSwift",
                 "SwiftyJSON",
-                "AlamofireSwiftyJSON",
                 "SwiftyUserDefaults",
                 "DeviceKit",
                 "APUserAgentGenerator"
