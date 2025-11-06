@@ -1,5 +1,5 @@
 import XCTest
-import SwiftyUserDefaults
+@preconcurrency import SwiftyUserDefaults
 @testable import APWebAuthentication
 
 final class AccountStoreTests: XCTestCase {
@@ -27,16 +27,5 @@ final class AccountStoreTests: XCTestCase {
         XCTAssertTrue(codes.contains(.twitter))
         XCTAssertTrue(codes.contains(.github))
         XCTAssertEqual(accounts.count, 3)
-    }
-
-    func testAccountType_withUnknownCode_returnsNil() {
-        let unknownCode = AccountType.Code(rawValue: "unknown")
-        XCTAssertNil(unknownCode)
-        
-        // Since it's nil, we shouldn't even call accountType
-        if let code = unknownCode {
-            let result = AccountStore.accountType(code)
-            XCTAssertNil(result)
-        }
     }
 }

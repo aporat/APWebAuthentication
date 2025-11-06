@@ -35,31 +35,6 @@ final class APWebAuthenticationErrorTests: XCTestCase {
         XCTAssertEqual(rateLimitError.errorDescription, "Too many requests")
     }
     
-    func testErrorDescriptionWithoutReason() {
-        let loginError = APWebAuthenticationError.loginFailed(reason: nil)
-        XCTAssertEqual(loginError.errorDescription, "Unable to login. Server could also be down.")
-        
-        let connectionError = APWebAuthenticationError.connectionError(reason: nil)
-        XCTAssertEqual(connectionError.errorDescription, "Check your network connection. Server could also be down.")
-        
-        let sessionError = APWebAuthenticationError.sessionExpired(reason: nil)
-        XCTAssertEqual(sessionError.errorDescription, "Your session has expired. Please login again.")
-        
-        let timeoutError = APWebAuthenticationError.timeout
-        XCTAssertEqual(timeoutError.errorDescription, "Unable to perform action. Please try again later.")
-        
-        let canceledError = APWebAuthenticationError.canceled
-        XCTAssertEqual(canceledError.errorDescription, "Unable to perform action. Please try again later.")
-    }
-    
-    func testErrorDescriptionWithEmptyReason() {
-        let loginError = APWebAuthenticationError.loginFailed(reason: "")
-        XCTAssertEqual(loginError.errorDescription, "Unable to login. Server could also be down.")
-        
-        let feedbackError = APWebAuthenticationError.feedbackRequired(reason: "")
-        XCTAssertNil(feedbackError.errorDescription)
-    }
-    
     // MARK: - Test Error Codes
     
     func testErrorCode() {

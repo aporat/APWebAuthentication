@@ -21,18 +21,34 @@ open class AuthClientRequestRetrier: RequestRetrier, @unchecked Sendable {
             return
         }
         
+        final class CompletionWrapper: @unchecked Sendable {
+            let closure: (RetryResult) -> Void
+            
+            init(_ closure: @escaping (RetryResult) -> Void) {
+                self.closure = closure
+            }
+            
+            func callAsFunction(_ result: RetryResult) {
+                closure(result)
+            }
+        }
+        
+        // Wrap the non-Sendable closure in our Sendable wrapper
+        let safeCompletion = CompletionWrapper(completion)
+        
         if shouldRetryRequest(error, request: request) {
             if request.retryCount >= maxRetryCount {
-                completion(.doNotRetry)
+                safeCompletion(.doNotRetry) // <-- Use wrapper
                 return
             }
             
-            completion(.retryWithDelay(1.0))
+            safeCompletion(.retryWithDelay(1.0)) // <-- Use wrapper
             return
         } else if shouldRetryRateLimitRequest(error, request: request) {
             var autoRetry = rateLimitWaitSeconds * (request.retryCount + 1)
             var autoRetryTimer: Timer?
             
+            // Now this block only captures 'safeCompletion', which is Sendable.
             DispatchQueue.main.async { [weak self] in
                 
                 guard let self = self else {
@@ -45,7 +61,7 @@ open class AuthClientRequestRetrier: RequestRetrier, @unchecked Sendable {
                     NotificationCenter.default.post(name: AuthClient.didRateLimitCancelled, object: nil, userInfo: nil)
                     
                     autoRetryTimer?.invalidate()
-                    completion(.doNotRetry)
+                    safeCompletion(.doNotRetry) // <-- Use wrapper
                     return
                 }
                 
@@ -58,7 +74,7 @@ open class AuthClientRequestRetrier: RequestRetrier, @unchecked Sendable {
                         NotificationCenter.default.post(name: AuthClient.didRateLimitSessionExpired, object: nil, userInfo: nil)
                         
                         autoRetryTimer?.invalidate()
-                        completion(.doNotRetryWithError(APWebAuthenticationError.canceled))
+                        safeCompletion(.doNotRetryWithError(APWebAuthenticationError.canceled)) // <-- Use wrapper
                         return
                     }
                 }
@@ -69,7 +85,7 @@ open class AuthClientRequestRetrier: RequestRetrier, @unchecked Sendable {
                     }
                     
                     autoRetryTimer?.invalidate()
-                    completion(.retry)
+                    safeCompletion(.retry) // <-- Use wrapper
                     return
                 }
                 
@@ -82,7 +98,7 @@ open class AuthClientRequestRetrier: RequestRetrier, @unchecked Sendable {
                         timer.invalidate()
                         actionSheetController.dismiss(animated: true)
                         
-                        completion(.retryWithDelay(0.1))
+                        safeCompletion(.retryWithDelay(0.1)) // <-- Use wrapper
                         return
                     }
                     
@@ -96,9 +112,8 @@ open class AuthClientRequestRetrier: RequestRetrier, @unchecked Sendable {
             return
         }
         
-        completion(.doNotRetry)
+        safeCompletion(.doNotRetry)
     }
-    
     open func shouldRetryRequest(_ error: Error?, request: Request?) -> Bool {
         if isReloadingCancelled {
             return false

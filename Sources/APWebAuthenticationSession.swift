@@ -43,14 +43,12 @@ public class APWebAuthenticationSession {
             return try await withCheckedThrowingContinuation { continuation in
                 
                 self.loginViewController?.completionHandler = { result in
-                    switch result {
-                    case .success(let params):
-                        continuation.resume(returning: params)
-                    case .failure(let error):
-                        if let authError = error as? APWebAuthenticationError {
-                            continuation.resume(throwing: authError)
-                        } else {
-                            continuation.resume(throwing: APWebAuthenticationError.failed(reason: error.localizedDescription))
+                    Task { @MainActor in
+                        switch result {
+                        case .success(let params):
+                            continuation.resume(returning: params)
+                        case .failure(let error):
+                            continuation.resume(throwing: error)
                         }
                     }
                 }

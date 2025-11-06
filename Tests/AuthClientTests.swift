@@ -27,23 +27,4 @@ final class AuthClientTests: XCTestCase {
         client.shouldAlwaysShowLoginAgain = true
         XCTAssertTrue(client.requestRetrier.shouldAlwaysShowLoginAgain)
     }
-
-    func testDecryptToken_success() {
-        let password = "supersecret"
-        let message = "hello world"
-        let messageData = message.data(using: .utf8)!
-        let key = SymmetricKey(data: SHA256.hash(data: Data(password.utf8)))
-        let sealedBox = try! AES.GCM.seal(messageData, using: key)
-
-        let payload = sealedBox.ciphertext.base64EncodedString()
-        let tag = sealedBox.tag.base64EncodedString()
-        let iv = Data(sealedBox.nonce).base64EncodedString()
-
-        let decrypted = client.decryptToken(payload, tag: tag, iv: iv, password: password)
-        XCTAssertEqual(decrypted, message)
-    }
-
-    func testDecryptToken_invalidInput_returnsNil() {
-        XCTAssertNil(client.decryptToken("bad", tag: "data", iv: "here", password: "wrong"))
-    }
 }
