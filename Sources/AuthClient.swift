@@ -4,7 +4,7 @@ import CryptoKit
 @preconcurrency import SwiftyJSON
 import HTTPStatusCodes
 
-public enum ProviderAuthMode: String {
+public enum ProviderAuthMode: String, Sendable {
     case `private`
     case explicit
     case implicit
@@ -149,7 +149,6 @@ open class AuthClient {
     
     open func generateError(from response: DataResponse<JSON, AFError>) -> APWebAuthenticationError {
         
-        // 1. Check for Cancellation/Connection Errors
         if let afError = response.error {
             if afError.isExplicitlyCancelledError { return .canceled }
             if afError.isSessionTaskError {
@@ -159,13 +158,11 @@ open class AuthClient {
             }
         }
         
-        // 2. Parse JSON & Extract Messages
         let json = parseJson(from: response)
         let jsonErrorMessage = extractErrorMessage(from: json) // Calls potentially overridden method
         let underlyingErrorMessage = extractUnderlyingErrorMessage(from: response)
         let reason = jsonErrorMessage ?? underlyingErrorMessage // Best available message
         
-        // 3. Check Specific Error Conditions using Overridable Helpers
         if isServerError(response: response, json: json) {
             let serverReason = underlyingErrorMessage ?? String(format: "Internal server error. %@ might be down.", accountType.description)
             return .serverError(reason: serverReason, responseJSON: json)
@@ -184,22 +181,17 @@ open class AuthClient {
             return .sessionExpired(reason: reason, responseJSON: json)
         }
         
-        // 4. Fallback using Parsed JSON Message
         if let message = jsonErrorMessage {
             return .failed(reason: message, responseJSON: json)
         }
         
-        // 5. Fallback using Underlying AFError Message
         if let message = underlyingErrorMessage {
             return .failed(reason: message, responseJSON: json)
         }
         
-        // 6. Final Fallback
         return .failed(reason: "Unknown error.", responseJSON: json)
     }
-    
-    // --- Overridable Helper Functions ---
-    
+        
     /// Checks if the response indicates a server-side error (typically 5xx).
     open func isServerError(response: DataResponse<JSON, AFError>, json: JSON?) -> Bool {
         return response.response?.statusCodeValue?.isServerError ?? false

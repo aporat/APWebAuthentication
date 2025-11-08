@@ -8,7 +8,6 @@ public class GitHubAPIClient: AuthClient {
         AccountStore.github
     }
     
-    
     fileprivate var requestAdapter: GitHubRequestAdapter
     
     public convenience init(auth: Auth2Authentication) {
