@@ -10,14 +10,25 @@ public class TwitchAPIClient: AuthClient {
     
     fileprivate var requestAdapter: TwitchRequestAdapter
     
-    public init(auth: Auth2Authentication) {
-        requestAdapter = TwitchRequestAdapter(auth: auth)
-        super.init(baseURLString: "https://api.twitch.tv/helix/")
-        requestInterceptor = Interceptor(adapters: [requestAdapter], retriers: [requestRetrier])
+    public convenience init(auth: Auth2Authentication) {
+        let requestAdapter = TwitchRequestAdapter(auth: auth)
+        let retrier = AuthClientRequestRetrier()
+        let interceptor = Interceptor(adapters: [requestAdapter], retriers: [retrier])
         
-        let configuration = URLSessionConfiguration.ephemeral
-        configuration.httpShouldSetCookies = false
-        sessionManager = makeSessionManager(configuration: configuration)
+        self.init(baseURLString: "https://api.twitch.tv/helix/", requestInterceptor: interceptor)
+        
+        self.requestRetrier = retrier
+    }
+    
+    public override init(baseURLString: String, requestInterceptor: RequestInterceptor) {
+        guard let interceptor = requestInterceptor as? Interceptor,
+              let adapter = interceptor.adapters.first as? TwitchRequestAdapter
+        else {
+            fatalError("Failed to extract RequestInterceptor from requestInterceptor.")
+        }
+        
+        self.requestAdapter = adapter
+        super.init(baseURLString: baseURLString, requestInterceptor: requestInterceptor)
     }
     
     public func loadSettings(_ options: JSON?) {
@@ -25,5 +36,5 @@ public class TwitchAPIClient: AuthClient {
             requestAdapter.auth.clientId = clientId
         }
     }
-
+    
 }

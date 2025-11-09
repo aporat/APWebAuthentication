@@ -11,19 +11,27 @@ public final class FoursquareAPIClient: AuthClient {
     fileprivate var requestAdapter: FoursquareRequestAdapter
     
     public convenience init(auth: Auth2Authentication) {
-        self.init(baseURLString: "https://api.foursquare.com/v2/", auth: auth)
+        let requestAdapter = FoursquareRequestAdapter(auth: auth)
+        requestAdapter.tokenParamName = "oauth_token"
+        
+        let retrier = AuthClientRequestRetrier()
+        let interceptor = Interceptor(adapters: [requestAdapter], retriers: [retrier])
+        
+        self.init(baseURLString: "https://api.foursquare.com/v2/", requestInterceptor: interceptor)
+        
+        self.requestAdapter = requestAdapter
+        self.requestRetrier = retrier
     }
     
-    public init(baseURLString: String, auth: Auth2Authentication) {
-        requestAdapter = FoursquareRequestAdapter(auth: auth)
-        requestAdapter.tokenParamName = "oauth_token"
-        super.init(baseURLString: baseURLString)
+    public override init(baseURLString: String, requestInterceptor: RequestInterceptor) {
+        guard let interceptor = requestInterceptor as? Interceptor,
+              let adapter = interceptor.adapters.first as? FoursquareRequestAdapter
+        else {
+            fatalError("Failed to extract RequestInterceptor from requestInterceptor.")
+        }
         
-        requestInterceptor = Interceptor(adapters: [requestAdapter], retriers: [requestRetrier])
-        
-        let configuration = URLSessionConfiguration.ephemeral
-        configuration.httpShouldSetCookies = false
-        sessionManager = makeSessionManager(configuration: configuration)
+        self.requestAdapter = adapter
+        super.init(baseURLString: baseURLString, requestInterceptor: requestInterceptor)
     }
     
     public func loadSettings(_ options: JSON?) {

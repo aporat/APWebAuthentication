@@ -1,6 +1,6 @@
 import Foundation
 import Alamofire
-import SwiftyJSON
+@preconcurrency import SwiftyJSON
 
 public final class RedditAPIClient: AuthClient {
     
@@ -11,19 +11,26 @@ public final class RedditAPIClient: AuthClient {
     fileprivate var requestAdapter: OAuth2RequestAdapter
 
     public required convenience init(auth: Auth2Authentication) {
-        self.init(baseURLString: "https://oauth.reddit.com/api/v1/", auth: auth)
+        let requestAdapter = OAuth2RequestAdapter(auth: auth)
+        requestAdapter.tokenLocation = .authorizationHeader
+        
+        let retrier = AuthClientRequestRetrier()
+        let interceptor = Interceptor(adapters: [requestAdapter], retriers: [retrier])
+
+        self.init(baseURLString: "https://oauth.reddit.com/api/v1/", requestInterceptor: interceptor)
+        
+        self.requestRetrier = retrier
     }
 
-    public init(baseURLString: String, auth: Auth2Authentication) {
-        requestAdapter = OAuth2RequestAdapter(auth: auth)
-        requestAdapter.tokenLocation = .authorizationHeader
-        super.init(baseURLString: baseURLString)
-
-        requestInterceptor = Interceptor(adapters: [requestAdapter], retriers: [requestRetrier])
-
-        let configuration = URLSessionConfiguration.ephemeral
-        configuration.httpShouldSetCookies = false
-        sessionManager = makeSessionManager(configuration: configuration)
+    public override init(baseURLString: String, requestInterceptor: RequestInterceptor) {
+        guard let interceptor = requestInterceptor as? Interceptor,
+              let adapter = interceptor.adapters.first as? OAuth2RequestAdapter
+        else {
+            fatalError("Failed to extract RequestInterceptor from requestInterceptor.")
+        }
+        
+        self.requestAdapter = adapter
+        super.init(baseURLString: baseURLString, requestInterceptor: requestInterceptor)
     }
 
     public func loadSettings(_ options: JSON?) {

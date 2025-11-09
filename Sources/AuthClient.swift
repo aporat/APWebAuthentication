@@ -28,9 +28,13 @@ public extension AuthClient {
 
 open class AuthClient {
     public var baseURLString: String
-    open var sessionManager: Session!
+    
+    open lazy var sessionManager: Session = self.makeSessionManager(
+        configuration: self.makeSessionConfiguration()
+    )
+    
     open var requestRetrier = AuthClientRequestRetrier()
-    open var requestInterceptor: RequestInterceptor!
+    public let requestInterceptor: RequestInterceptor
     
     open var accountType: AccountType {
         fatalError("Subclasses must override the accountType property.")
@@ -38,6 +42,12 @@ open class AuthClient {
     
     open func makeSessionManager(configuration: URLSessionConfiguration) -> Session {
         Session(configuration: configuration, delegate: SessionDelegate(), interceptor: requestInterceptor)
+    }
+    
+    open func makeSessionConfiguration() -> URLSessionConfiguration {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.httpShouldSetCookies = false
+        return configuration
     }
     
     public var isReloadingCancelled: Bool = false {
@@ -58,8 +68,9 @@ open class AuthClient {
         }
     }
     
-    public init(baseURLString: String) {
+    public init(baseURLString: String, requestInterceptor: RequestInterceptor) {
         self.baseURLString = baseURLString
+        self.requestInterceptor = requestInterceptor
     }
     
     public func request(
@@ -191,7 +202,7 @@ open class AuthClient {
         
         return .failed(reason: "Unknown error.", responseJSON: json)
     }
-        
+    
     /// Checks if the response indicates a server-side error (typically 5xx).
     open func isServerError(response: DataResponse<JSON, AFError>, json: JSON?) -> Bool {
         return response.response?.statusCodeValue?.isServerError ?? false

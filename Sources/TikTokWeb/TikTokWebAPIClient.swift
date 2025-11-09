@@ -10,14 +10,25 @@ public class TikTokWebAPIClient: AuthClient {
     
     fileprivate var requestAdapter: TikTokWebRequestAdapter
     
-    public init(auth: TikTokWebAuthentication) {
-        requestAdapter = TikTokWebRequestAdapter(auth: auth)
-        super.init(baseURLString: "https://www.tiktok.com/")
-        requestInterceptor = Interceptor(adapters: [requestAdapter], retriers: [requestRetrier])
+    public convenience init(auth: TikTokWebAuthentication) {
+        let requestAdapter = TikTokWebRequestAdapter(auth: auth)
+        let retrier = AuthClientRequestRetrier()
+        let interceptor = Interceptor(adapters: [requestAdapter], retriers: [retrier])
         
-        let configuration = URLSessionConfiguration.ephemeral
-        configuration.httpShouldSetCookies = false
-        sessionManager = makeSessionManager(configuration: configuration)
+        self.init(baseURLString: "https://www.tiktok.com/", requestInterceptor: interceptor)
+        
+        self.requestRetrier = retrier
+    }
+    
+    public override init(baseURLString: String, requestInterceptor: RequestInterceptor) {
+        guard let interceptor = requestInterceptor as? Interceptor,
+              let adapter = interceptor.adapters.first as? TikTokWebRequestAdapter
+        else {
+            fatalError("Failed to extract RequestInterceptor from requestInterceptor.")
+        }
+        
+        self.requestAdapter = adapter
+        super.init(baseURLString: baseURLString, requestInterceptor: requestInterceptor)
     }
     
     public func loadSettings(_ options: JSON?) {

@@ -11,17 +11,24 @@ public class GitHubAPIClient: AuthClient {
     fileprivate var requestAdapter: GitHubRequestAdapter
     
     public convenience init(auth: Auth2Authentication) {
-        self.init(baseURLString: "https://api.github.com/", auth: auth)
+        let requestAdapter = GitHubRequestAdapter(auth: auth)
+        let retrier = AuthClientRequestRetrier()
+        let interceptor = Interceptor(adapters: [requestAdapter], retriers: [retrier])
+        
+        self.init(baseURLString: "https://api.github.com/", requestInterceptor: interceptor)
+        
+        self.requestRetrier = retrier
     }
     
-    public init(baseURLString: String, auth: Auth2Authentication) {
-        requestAdapter = GitHubRequestAdapter(auth: auth)
-        super.init(baseURLString: baseURLString)
-        requestInterceptor = Interceptor(adapters: [requestAdapter], retriers: [requestRetrier])
+    public override init(baseURLString: String, requestInterceptor: RequestInterceptor) {
+        guard let interceptor = requestInterceptor as? Interceptor,
+              let adapter = interceptor.adapters.first as? GitHubRequestAdapter
+        else {
+            fatalError("Failed to extract RequestInterceptor from requestInterceptor.")
+        }
         
-        let configuration = URLSessionConfiguration.ephemeral
-        configuration.httpShouldSetCookies = false
-        sessionManager = makeSessionManager(configuration: configuration)
+        self.requestAdapter = adapter
+        super.init(baseURLString: baseURLString, requestInterceptor: requestInterceptor)
     }
     
     public func loadSettings(_ options: JSON?) {
@@ -33,6 +40,5 @@ public class GitHubAPIClient: AuthClient {
             requestAdapter.auth.customUserAgent = value
         }
     }
-    
     
 }
