@@ -2,14 +2,14 @@ import Foundation
 @preconcurrency import SwiftyJSON
 
 public enum APWebAuthenticationError: Error, Sendable, Equatable {
-    case failed(reason: String?, responseJSON: JSON? = nil) // Added default
-    case connectionError(reason: String?, responseJSON: JSON? = nil) // Added default
-    case serverError(reason: String?, responseJSON: JSON? = nil) // Added default
-    case loginFailed(reason: String?, responseJSON: JSON? = nil) // Added default
-    case feedbackRequired(reason: String?, responseJSON: JSON? = nil) // Added default
-    case externalActionRequired(reason: String?, responseJSON: JSON? = nil) // Added default
-    case sessionExpired(reason: String?, responseJSON: JSON? = nil) // Added default
-    case rateLimit(reason: String?, responseJSON: JSON? = nil) // Added default
+    case failed(reason: String?, responseJSON: JSON? = nil)
+    case connectionError(reason: String?, responseJSON: JSON? = nil)
+    case serverError(reason: String?, responseJSON: JSON? = nil)
+    case loginFailed(reason: String?, responseJSON: JSON? = nil)
+    case feedbackRequired(reason: String?, responseJSON: JSON? = nil)
+    case externalActionRequired(reason: String?, responseJSON: JSON? = nil)
+    case sessionExpired(reason: String?, responseJSON: JSON? = nil)
+    case rateLimit(reason: String?, responseJSON: JSON? = nil)
     
     case checkPointRequired(content: JSON?)
     case checkPointNotice(content: JSON?)
@@ -20,8 +20,7 @@ public enum APWebAuthenticationError: Error, Sendable, Equatable {
     case unknown
     case timeout
     
-    // App API Errors
-    case appSessionExpired(reason: String?, responseJSON: JSON? = nil) // Added default
+    case appSessionExpired(reason: String?, responseJSON: JSON? = nil)
     
     case appCheckPointRequired(content: JSON?)
     case appDownloadNewAppRequired(content: JSON?)
@@ -81,7 +80,6 @@ extension APWebAuthenticationError: LocalizedError {
     
     public var errorDescription: String? {
         switch self {
-            // --- UPDATED: All cases with (reason, _) ---
         case let .failed(reason, _),
             let .serverError(reason, _),
             let .feedbackRequired(reason, _),
