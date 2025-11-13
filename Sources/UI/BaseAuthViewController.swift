@@ -206,9 +206,7 @@ open class BaseAuthViewController: UIViewController, WKNavigationDelegate {
         
         activityIndicator.style = .medium
         
-        // Register for changes to the userInterfaceStyle
         self.registerForTraitChanges([UITraitUserInterfaceStyle.self]) { (self: Self, previousTraitCollection: UITraitCollection) in
-            // The handler is called only when the userInterfaceStyle changes
             if self.appearanceStyle == .safari, let currentNavigationController = self.navigationController {
                 let newNavBarAppearance = UINavigationBarAppearance()
                 newNavBarAppearance.configureWithOpaqueBackground()
