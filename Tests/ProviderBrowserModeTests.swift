@@ -1,22 +1,22 @@
 import XCTest
 @testable import APWebAuthentication
 
-final class ProviderBrowserModeTests: XCTestCase {
+final class UserAgentModeTests: XCTestCase {
 
     func testInitWithValidRawValue() {
-        XCTAssertEqual(ProviderBrowserMode("webview"), .webView)
-        XCTAssertEqual(ProviderBrowserMode("ios-chrome"), .iosChrome)
-        XCTAssertEqual(ProviderBrowserMode("desktop-firefox"), .desktopFirefox)
+        XCTAssertEqual(UserAgentMode("webview"), .webView)
+        XCTAssertEqual(UserAgentMode("ios-chrome"), .iosChrome)
+        XCTAssertEqual(UserAgentMode("desktop-firefox"), .desktopFirefox)
     }
 
     func testInitWithInvalidRawValue() {
-        XCTAssertNil(ProviderBrowserMode("not-a-real-mode"))
-        XCTAssertNil(ProviderBrowserMode(nil))
+        XCTAssertNil(UserAgentMode("not-a-real-mode"))
+        XCTAssertNil(UserAgentMode(nil))
     }
 
     func testRawValues() {
-        XCTAssertEqual(ProviderBrowserMode.webView.rawValue, "webview")
-        XCTAssertEqual(ProviderBrowserMode.iosChrome.rawValue, "ios-chrome")
-        XCTAssertEqual(ProviderBrowserMode.default.rawValue, "default")
+        XCTAssertEqual(UserAgentMode.webView.rawValue, "webview")
+        XCTAssertEqual(UserAgentMode.iosChrome.rawValue, "ios-chrome")
+        XCTAssertEqual(UserAgentMode.default.rawValue, "default")
     }
 }

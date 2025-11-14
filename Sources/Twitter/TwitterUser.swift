@@ -26,6 +26,5 @@ public final class TwitterUser: GenericUser, @unchecked Sendable {
                    avatarPicture: constructedAvatarPicture,
                    privateProfile: privateProfile,
                    verified: isVerified)
-        
     }
 }

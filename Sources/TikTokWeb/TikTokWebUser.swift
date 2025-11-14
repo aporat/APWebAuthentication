@@ -24,12 +24,10 @@ public final class TikTokWebUser: GenericUser, @unchecked Sendable {
         } else {
             avatarPicture = nil
         }
-
+        
         super.init(userId: userId,
                    username: username,
                    fullname: fullname,
                    avatarPicture: avatarPicture)
-        
-      //  self.verified = info["verified"].boolValue
     }
 }

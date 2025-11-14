@@ -16,13 +16,13 @@ open class OAuth1Client: AuthClient {
         self.requestRetrier = retrier
     }
     
-    public func loadSettings(_ options: JSON?) {
-        if let value = ProviderBrowserMode(options?["browser_mode"].string) {
-            requestAdapter.auth.browserMode = value
+    public func loadSettings(_ options: JSON?) async {
+        if let value = UserAgentMode(options?["browser_mode"].string) {
+            requestAdapter.auth.setBrowserMode(value)
         }
         
         if let value = options?["custom_user_agent"].string {
-            requestAdapter.auth.customUserAgent = value
+            requestAdapter.auth.setCustomUserAgent(value)
         }
     }
 }

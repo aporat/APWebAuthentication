@@ -2,6 +2,7 @@ import Foundation
 import Alamofire
 @preconcurrency import SwiftyJSON
 
+@MainActor
 public final class PinterestWebAPIClient: AuthClient {
     
     public override var accountType: AccountType {
@@ -38,7 +39,7 @@ public final class PinterestWebAPIClient: AuthClient {
             requestAdapter.auth.keepDeviceSettings = value
         }
         
-        if let value = ProviderBrowserMode(options?["browser_mode"].string) {
+        if let value = UserAgentMode(options?["browser_mode"].string) {
             requestAdapter.auth.browserMode = value
         }
         

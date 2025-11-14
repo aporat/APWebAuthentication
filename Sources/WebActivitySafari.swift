@@ -2,14 +2,19 @@ import UIKit
 
 public final class WebActivitySafari: UIActivity, @unchecked Sendable {
     
-    private var urlToOpen: URL?
+    private var _urlToOpen: URL?
+    private let urlLock = NSLock()
+    private var urlToOpen: URL? {
+        get { urlLock.withLock { _urlToOpen } }
+        set { urlLock.withLock { _urlToOpen = newValue } }
+    }
     
     override public class var activityCategory: UIActivity.Category {
         .action
     }
     
     override public var activityImage: UIImage? {
-        UIImage(systemName: "safari")
+        UIImage(systemName: "safari.fill") ?? UIImage(systemName: "globe")
     }
     
     override public var activityTitle: String {
@@ -38,16 +43,15 @@ public final class WebActivitySafari: UIActivity, @unchecked Sendable {
     
     override public func perform() {
         guard let url = urlToOpen else {
-            DispatchQueue.main.async { [weak self] in
-                self?.activityDidFinish(false)
+            DispatchQueue.main.async {
+                self.activityDidFinish(false)
             }
             return
         }
         
-        UIApplication.shared.open(url, options: [:]) { success in
-            
-            DispatchQueue.main.async { [weak self] in
-                self?.activityDidFinish(success)
+        DispatchQueue.main.async {
+            UIApplication.shared.open(url, options: [:]) { success in
+                self.activityDidFinish(success)
             }
         }
     }

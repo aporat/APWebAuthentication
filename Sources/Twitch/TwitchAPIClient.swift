@@ -2,6 +2,7 @@ import Foundation
 import Alamofire
 @preconcurrency import SwiftyJSON
 
+@MainActor
 public class TwitchAPIClient: AuthClient {
     
     public override var accountType: AccountType {

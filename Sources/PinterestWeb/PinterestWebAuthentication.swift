@@ -1,17 +1,19 @@
 import Foundation
 
+@MainActor
 public final class PinterestWebAuthentication: SessionAuthentication {
-    private struct AuthSettings: Codable {
+    
+    private struct AuthSettings: Codable, Sendable {
         var cookiesDomain: String?
         var cookieSessionIdField: String?
-        var browserMode: ProviderBrowserMode?
+        var browserMode: UserAgentMode?
         var customUserAgent: String?
         var appId: String?
         var sessionId: String?
         var csrfToken: String?
         var username: String?
         var isAuthenticated: Bool
-  }
+    }
     
     var appId = "ad0e169"
     public var username: String?
@@ -45,7 +47,7 @@ public final class PinterestWebAuthentication: SessionAuthentication {
     
     // MARK: - Auth Settings
     
-    override public func storeAuthSettings() {
+    override public func storeAuthSettings() async {
         let settings = AuthSettings(
             cookiesDomain: cookiesDomain,
             cookieSessionIdField: cookieSessionIdField,
@@ -58,42 +60,45 @@ public final class PinterestWebAuthentication: SessionAuthentication {
             isAuthenticated: isAuthenticated
         )
         
-        if let authSettingsURL = authSettingsURL {
-            let encoder = PropertyListEncoder()
-            do {
-                let data = try encoder.encode(settings)
+        guard let authSettingsURL = authSettingsURL else { return }
+        
+        do {
+            let data = try PropertyListEncoder().encode(settings)
+            
+            try await Task.detached {
                 try data.write(to: authSettingsURL)
-            } catch {
-                print("⚠️ Failed to store Pinterest settings: \(error)")
-            }
+            }.value
+        } catch {
+            print("⚠️ Failed to store Pinterest settings: \(error)")
         }
         
-        storeCookiesSettings()
+        await storeCookiesSettings()
     }
     
-    override public func loadAuthSettings() {
-            if let authSettingsURL = authSettingsURL,
-               let data = try? Data(contentsOf: authSettingsURL) {
-                
-                let decoder = PropertyListDecoder()
-                do {
-                    let settings = try decoder.decode(AuthSettings.self, from: data)
-                    
-                    cookiesDomain = settings.cookiesDomain ?? cookiesDomain
-                    cookieSessionIdField = settings.cookieSessionIdField ?? cookieSessionIdField
-                    browserMode = settings.browserMode ?? browserMode
-                    customUserAgent = settings.customUserAgent ?? customUserAgent
-                    appId = settings.appId ?? appId
-                    sessionId = settings.sessionId ?? sessionId
-                    csrfToken = settings.csrfToken ?? csrfToken
-                    username = settings.username ?? username
-                    isAuthenticated = settings.isAuthenticated
-
-                } catch {
-                    print("⚠️ Failed to load Pinterest settings: \(error)")
-                }
-            }
+    override public func loadAuthSettings() async {
+        guard let authSettingsURL = authSettingsURL else { return }
+        
+        do {
+            let data = try await Task.detached {
+                try Data(contentsOf: authSettingsURL)
+            }.value
             
-            loadCookiesSettings()
+            let settings = try PropertyListDecoder().decode(AuthSettings.self, from: data)
+            
+            cookiesDomain = settings.cookiesDomain ?? cookiesDomain
+            cookieSessionIdField = settings.cookieSessionIdField ?? cookieSessionIdField
+            browserMode = settings.browserMode ?? browserMode
+            customUserAgent = settings.customUserAgent ?? customUserAgent
+            appId = settings.appId ?? appId
+            sessionId = settings.sessionId ?? sessionId
+            csrfToken = settings.csrfToken ?? csrfToken
+            username = settings.username ?? username
+            isAuthenticated = settings.isAuthenticated
+            
+        } catch {
+            print("⚠️ Failed to load Pinterest settings: \(error)")
         }
+        
+        await loadCookiesSettings()
+    }
 }

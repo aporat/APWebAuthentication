@@ -28,7 +28,7 @@ public extension String {
     var urlUnescaped: String {
         self.removingPercentEncoding ?? self
     }
-
+    
     /// Parses the string as a URL query string (e.g., "key=value&key2=value2")
     /// and returns its key-value pairs in a dictionary.
     var urlQueryParameters: [String: String] {

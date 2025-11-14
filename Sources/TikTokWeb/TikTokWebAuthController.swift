@@ -1,7 +1,8 @@
 import Foundation
 import WebKit
 
-public final class TikTokWebAuthViewController: AuthViewController {
+public final class TikTokWebAuthViewController: WebAuthViewController {
+
     // MARK: - Data
 
     fileprivate var auth: TikTokWebAuthentication
@@ -9,7 +10,7 @@ public final class TikTokWebAuthViewController: AuthViewController {
 
     // MARK: - UIViewController
 
-    public init(auth: TikTokWebAuthentication, authURL: URL?, redirectURL: URL?, completionHandler: AuthViewController.CompletionHandler? = nil) {
+    public init(auth: TikTokWebAuthentication, authURL: URL?, redirectURL: URL?, completionHandler: WebAuthViewController.CompletionHandler? = nil) {
         self.auth = auth
         super.init(authURL: authURL, redirectURL: redirectURL, completionHandler: completionHandler)
     }
@@ -20,7 +21,7 @@ public final class TikTokWebAuthViewController: AuthViewController {
 
     // MARK: - WKNavigationDelegate
 
-    override public func webView(_: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+    override public func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, preferences: WKWebpagePreferences, decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void) {
         if redirectURL == nil {
             checkForAuthTokens()
         }
@@ -31,6 +32,7 @@ public final class TikTokWebAuthViewController: AuthViewController {
                 loggedIn = true
 
                 // make sure we dont get stuck loading
+                // This is fine, as `asyncAfter` runs on the main queue.
                 DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(3)) {
                     self.hideHUD()
                     self.loadRequest()
@@ -38,7 +40,7 @@ public final class TikTokWebAuthViewController: AuthViewController {
             }
         }
 
-        decisionHandler(.allow)
+        decisionHandler(.allow, preferences)
     }
 
     override public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
@@ -59,12 +61,11 @@ public final class TikTokWebAuthViewController: AuthViewController {
             if self.auth.isAuthorized {
                 self.didStopLoading()
 
-                let result = ["cookies": cookies]
-                DispatchQueue.main.async {
-                    self.dismiss(animated: true) {
-                        self.completionHandler?(.success(result))
-                        self.completionHandler = nil
-                    }
+                let result: [String: String] = [:]
+                
+                self.dismiss(animated: true) {
+                    self.completionHandler?(.success(result))
+                    self.completionHandler = nil
                 }
             }
         }

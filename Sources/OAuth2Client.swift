@@ -4,7 +4,7 @@ import SwiftyJSON
 
 open class OAuth2Client: AuthClient {
     var requestAdapter: OAuth2RequestAdapter
-
+    
     public convenience init(baseURLString: String, auth: Auth2Authentication) {
         let requestAdapter = OAuth2RequestAdapter(auth: auth)
         let retrier = AuthClientRequestRetrier()
@@ -26,14 +26,14 @@ open class OAuth2Client: AuthClient {
         self.requestAdapter = adapter
         super.init(baseURLString: baseURLString, requestInterceptor: requestInterceptor)
     }
-
-    public func loadSettings(_ options: JSON?) {
-        if let value = ProviderBrowserMode(options?["browser_mode"].string) {
-            requestAdapter.auth.browserMode = value
+    
+    public func loadSettings(_ options: JSON?) async {
+        if let value = UserAgentMode(options?["browser_mode"].string) {
+            requestAdapter.auth.setBrowserMode(value)
         }
-
+        
         if let value = options?["custom_user_agent"].string {
-            requestAdapter.auth.customUserAgent = value
+            requestAdapter.auth.setCustomUserAgent(value)
         }
     }
 }

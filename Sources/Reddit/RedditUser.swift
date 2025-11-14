@@ -10,7 +10,7 @@ public final class RedditUser: GenericUser, @unchecked Sendable {
         let name = info["name"].string
         let avatarPicture = info["icon_img"].url
         let isVerified = info["verified"].boolValue
-
+        
         super.init(userId: id,
                    username: name,
                    fullname: name,

@@ -51,7 +51,7 @@ auth.accountIdentifier = "github"
 
 let client = GitHubAPIClient(auth: auth)
 
-let session = APWebAuthenticationSession(accountType: AccountStore.github) { result in
+let session = APWebAuthSession(accountType: AccountStore.github) { result in
     switch result {
     case .success(let params):
         print("Access token:", params?["access_token"] ?? "")
@@ -68,11 +68,11 @@ session.start(url: loginURL, callbackURL: redirectURL)
 
 ## 🛠 Architecture
 
-- `APWebAuthenticationSession` – UI + login flow
+- `APWebAuthSession` – UI + login flow
 - `OAuth1Client`, `OAuth2Client` – Auth-aware clients
 - `AuthClientRequestRetrier` – Retry logic & UI
 - `BaseUser`, `MediaItem` – Common model interfaces
-- `AuthViewController`, `WebTokensViewController` – Web UI
+- `WebAuthViewController`, `WebTokenInterceptorViewController` – Web UI
 
 ---
 

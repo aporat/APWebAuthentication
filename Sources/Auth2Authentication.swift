@@ -1,8 +1,9 @@
 import Foundation
 
-public final class Auth2Authentication: Authentication, @unchecked Sendable {
+@MainActor
+public final class Auth2Authentication: Authentication {
     
-    private struct AuthSettings: Codable {
+    private struct AuthSettings: Codable, Sendable {
         let accessToken: String?
         let refreshToken: String?
         let clientId: String?
@@ -14,6 +15,14 @@ public final class Auth2Authentication: Authentication, @unchecked Sendable {
     
     public required init() {}
     
+    func setBrowserMode(_ mode: UserAgentMode) {
+        self.browserMode = mode
+    }
+    
+    func setCustomUserAgent(_ agent: String) {
+        self.customUserAgent = agent
+    }
+    
     public var isAuthorized: Bool {
         if let currentAccessToken = accessToken, !currentAccessToken.isEmpty {
             return true
@@ -23,42 +32,45 @@ public final class Auth2Authentication: Authentication, @unchecked Sendable {
     
     // MARK: - Auth Settings
     
-    override public func storeAuthSettings() {
+    override public func storeAuthSettings() async {
         let settings = AuthSettings(
             accessToken: self.accessToken,
             refreshToken: self.refreshToken,
             clientId: self.clientId
         )
         
-        if let authSettingsURL = authSettingsURL {
-            let encoder = PropertyListEncoder()
-            do {
-                let data = try encoder.encode(settings)
-                try data.write(to: authSettingsURL)
-            } catch {
-                print("⚠️ Failed to store Auth2 settings: \(error)")
-            }
-        }
-    }
-    
-    override public func loadAuthSettings() {
-        if let authSettingsURL = authSettingsURL,
-           let data = try? Data(contentsOf: authSettingsURL) {
+        guard let authSettingsURL = authSettingsURL else { return }
+        
+        do {
+            let data = try PropertyListEncoder().encode(settings)
             
-            let decoder = PropertyListDecoder()
-            do {
-                let settings = try decoder.decode(AuthSettings.self, from: data)
-                self.accessToken = settings.accessToken
-                self.refreshToken = settings.refreshToken
-                self.clientId = settings.clientId
-            } catch {
-                print("⚠️ Failed to load Auth2 settings: \(error)")
-            }
+            try await Task.detached {
+                try data.write(to: authSettingsURL)
+            }.value
+        } catch {
+            print("⚠️ Failed to store Auth2 settings: \(error)")
         }
     }
     
-    override public func clearAuthSettings() {
-        super.clearAuthSettings()
+    override public func loadAuthSettings() async {
+        guard let authSettingsURL = authSettingsURL else { return }
+        
+        do {
+            let data = try await Task.detached {
+                try Data(contentsOf: authSettingsURL)
+            }.value
+            
+            let settings = try PropertyListDecoder().decode(AuthSettings.self, from: data)
+            self.accessToken = settings.accessToken
+            self.refreshToken = settings.refreshToken
+            self.clientId = settings.clientId
+        } catch {
+            print("⚠️ Failed to load Auth2 settings: \(error)")
+        }
+    }
+    
+    override public func clearAuthSettings() async {
+        await super.clearAuthSettings()
         accessToken = nil
         refreshToken = nil
         clientId = nil

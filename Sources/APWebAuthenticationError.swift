@@ -1,7 +1,13 @@
 import Foundation
 @preconcurrency import SwiftyJSON
 
+// REFACTOR: Reverted to use `JSON?` instead of `Data?` to support
+// the original SwiftyJSON-based model layer.
 public enum APWebAuthenticationError: Error, Sendable, Equatable {
+    
+    // MARK: - Cases
+    
+    // REVERTED: Associated value is back to `responseJSON: JSON?`
     case failed(reason: String?, responseJSON: JSON? = nil)
     case connectionError(reason: String?, responseJSON: JSON? = nil)
     case serverError(reason: String?, responseJSON: JSON? = nil)
@@ -10,46 +16,51 @@ public enum APWebAuthenticationError: Error, Sendable, Equatable {
     case externalActionRequired(reason: String?, responseJSON: JSON? = nil)
     case sessionExpired(reason: String?, responseJSON: JSON? = nil)
     case rateLimit(reason: String?, responseJSON: JSON? = nil)
+    case appSessionExpired(reason: String?, responseJSON: JSON? = nil)
     
+    // REVERTED: Associated value is back to `content: JSON?`
     case checkPointRequired(content: JSON?)
     case checkPointNotice(content: JSON?)
+    case appCheckPointRequired(content: JSON?)
+    case appDownloadNewAppRequired(content: JSON?)
+    case appUpdateRequired(content: JSON?)
+    
+    // Unchanged cases
     case canceled
     case loginCanceled
     case notFound
     case badRequest
     case unknown
     case timeout
-    
-    case appSessionExpired(reason: String?, responseJSON: JSON? = nil)
-    
-    case appCheckPointRequired(content: JSON?)
-    case appDownloadNewAppRequired(content: JSON?)
-    case appUpdateRequired(content: JSON?)
-    
+
+    // MARK: - Public JSON Computed Properties
+
+    /// The JSON content associated with checkpoint/notice errors.
     public var content: JSON? {
         switch self {
         case let .appCheckPointRequired(content),
-            let .checkPointRequired(content),
-            let .checkPointNotice(content),
-            let .appDownloadNewAppRequired(content),
-            let .appUpdateRequired(content):
+             let .checkPointRequired(content),
+             let .checkPointNotice(content),
+             let .appDownloadNewAppRequired(content),
+             let .appUpdateRequired(content):
             return content
         default:
             return nil
         }
     }
     
+    /// The full JSON response associated with the error.
     public var responseJSON: JSON? {
         switch self {
         case let .failed(_, responseJSON),
-            let .connectionError(_, responseJSON),
-            let .serverError(_, responseJSON),
-            let .loginFailed(_, responseJSON),
-            let .feedbackRequired(_, responseJSON),
-            let .externalActionRequired(_, responseJSON),
-            let .sessionExpired(_, responseJSON),
-            let .rateLimit(_, responseJSON),
-            let .appSessionExpired(_, responseJSON):
+             let .connectionError(_, responseJSON),
+             let .serverError(_, responseJSON),
+             let .loginFailed(_, responseJSON),
+             let .feedbackRequired(_, responseJSON),
+             let .externalActionRequired(_, responseJSON),
+             let .sessionExpired(_, responseJSON),
+             let .rateLimit(_, responseJSON),
+             let .appSessionExpired(_, responseJSON):
             return responseJSON
         default:
             return nil
@@ -59,6 +70,9 @@ public enum APWebAuthenticationError: Error, Sendable, Equatable {
 
 // MARK: - LocalizedError
 extension APWebAuthenticationError: LocalizedError {
+    
+    // This extension remains unchanged as it only accesses `String` properties.
+    
     public var errorTitle: String {
         switch self {
         case .loginFailed:
@@ -81,11 +95,11 @@ extension APWebAuthenticationError: LocalizedError {
     public var errorDescription: String? {
         switch self {
         case let .failed(reason, _),
-            let .serverError(reason, _),
-            let .feedbackRequired(reason, _),
-            let .externalActionRequired(reason, _),
-            let .sessionExpired(reason, _),
-            let .appSessionExpired(reason, _):
+             let .serverError(reason, _),
+             let .feedbackRequired(reason, _),
+             let .externalActionRequired(reason, _),
+             let .sessionExpired(reason, _),
+             let .appSessionExpired(reason, _):
             return reason
             
         case let .connectionError(reason, _):
@@ -96,7 +110,6 @@ extension APWebAuthenticationError: LocalizedError {
             
         case let .rateLimit(reason, _):
             return reason ?? "You have made too many requests. Please try again later."
-            // --- END UPDATED ---
             
         default:
             return "Unable to perform this action. Please try again later."
@@ -130,6 +143,8 @@ extension APWebAuthenticationError: LocalizedError {
 
 // MARK: - Convenience Properties
 extension APWebAuthenticationError {
+    
+    // This extension also remains unchanged.
     
     public var isAppError: Bool {
         switch self {

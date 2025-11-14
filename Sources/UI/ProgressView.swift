@@ -42,6 +42,7 @@ public final class ProgressView: UIView {
 
     override public func layoutSubviews() {
         super.layoutSubviews()
+        // Update constraint constant based on current bounds and progress
         barWidthConstraint.constant = bounds.width * CGFloat(progress)
     }
 
@@ -107,4 +108,3 @@ public final class ProgressView: UIView {
         ])
     }
 }
-

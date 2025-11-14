@@ -2,6 +2,7 @@ import Foundation
 import Alamofire
 @preconcurrency import SwiftyJSON
 
+@MainActor
 public class TikTokWebAPIClient: AuthClient {
     
     public override var accountType: AccountType {
@@ -9,30 +10,38 @@ public class TikTokWebAPIClient: AuthClient {
     }
     
     fileprivate var requestAdapter: TikTokWebRequestAdapter
+    fileprivate let auth: TikTokWebAuthentication
     
     public convenience init(auth: TikTokWebAuthentication) {
         let requestAdapter = TikTokWebRequestAdapter(auth: auth)
         let retrier = AuthClientRequestRetrier()
         let interceptor = Interceptor(adapters: [requestAdapter], retriers: [retrier])
         
-        self.init(baseURLString: "https://www.tiktok.com/", requestInterceptor: interceptor)
+        self.init(baseURLString: "https://www.tiktok.com/", auth: auth, requestInterceptor: interceptor)
         
         self.requestRetrier = retrier
     }
     
-    public override init(baseURLString: String, requestInterceptor: RequestInterceptor) {
+    public init(baseURLString: String, auth: TikTokWebAuthentication, requestInterceptor: RequestInterceptor) {
+        self.auth = auth
         guard let interceptor = requestInterceptor as? Interceptor,
               let adapter = interceptor.adapters.first as? TikTokWebRequestAdapter
         else {
-            fatalError("Failed to extract RequestInterceptor from requestInterceptor.")
+            fatalError("Failed to extract TikTokWebRequestAdapter from requestInterceptor.")
         }
         
         self.requestAdapter = adapter
         super.init(baseURLString: baseURLString, requestInterceptor: requestInterceptor)
     }
     
+    public override func makeSessionConfiguration() -> URLSessionConfiguration {
+        let configuration = super.makeSessionConfiguration()
+        configuration.httpCookieStorage = auth.cookieStorage
+        return configuration
+    }
+    
     public func loadSettings(_ options: JSON?) {
-        if let value = ProviderBrowserMode(options?["browser_mode"].string) {
+        if let value = UserAgentMode(options?["browser_mode"].string) {
             requestAdapter.auth.browserMode = value
         }
         

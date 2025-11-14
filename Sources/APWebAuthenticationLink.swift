@@ -15,6 +15,7 @@ public struct APWebAuthenticationLink: Equatable, Hashable, Sendable {
 
     public func hash(into hasher: inout Hasher) {
         hasher.combine(uri)
+        hasher.combine(parameters)
     }
 
     public static func == (lhs: APWebAuthenticationLink, rhs: APWebAuthenticationLink) -> Bool {
@@ -94,7 +95,6 @@ extension APWebAuthenticationLink {
 /// - parameter header: Full RFC 5988 link header string. (e.g., `</page=3>; rel="next", </page=1>; rel="prev"`)
 /// - returns: An array of `APWebAuthenticationLink` structs.
 public func parseLinkHeader(_ header: String) -> [APWebAuthenticationLink] {
-    // 5. Use `compactMap` with the new failable initializer for a clean and safe parsing implementation.
     header.components(separatedBy: ",").compactMap { APWebAuthenticationLink(header: $0) }
 }
 
@@ -118,7 +118,6 @@ extension HTTPURLResponse {
     /// Finds a link that has a set of matching parameters.
     /// - parameter parameters: A dictionary of parameters to match (e.g., `["rel": "next"]`).
     public func findLink(where parameters: [String: String]) -> APWebAuthenticationLink? {
-        // 6. Replaced the custom `~=` operator with a clearer, standard `first(where:)` loop.
         links.first { link in
             parameters.allSatisfy { key, value in
                 link.parameters[key] == value

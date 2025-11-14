@@ -1,8 +1,7 @@
 import Foundation
 import SwifterSwift
 
-private struct CodableHTTPCookie: Codable {
-    // Properties of HTTPCookie that we need to preserve
+private struct CodableHTTPCookie: Codable, Sendable {
     let name: String
     let value: String
     let domain: String
@@ -35,6 +34,7 @@ private struct CodableHTTPCookie: Codable {
     }
 }
 
+@MainActor
 open class SessionAuthentication: Authentication {
     public var keepDeviceSettings = true
     public var cookieSessionIdField = "session_id"
@@ -52,11 +52,11 @@ open class SessionAuthentication: Authentication {
 
     // MARK: - Auth Settings
 
-    override open func clearAuthSettings() {
-        super.clearAuthSettings()
+    override open func clearAuthSettings() async {
+        await super.clearAuthSettings()
         sessionId = nil
         csrfToken = nil
-        clearCookiesSettings()
+        await clearCookiesSettings()
     }
 
     // MARK: - Cookies Settings
@@ -78,51 +78,55 @@ open class SessionAuthentication: Authentication {
         return storage
     }()
 
-    open func storeCookiesSettings() {
-        if let cookiesURL = cookiesURL, let cookies = cookieStorage.cookies {
-            // Convert the array of HTTPCookie objects to our Codable wrapper type
-            let codableCookies = cookies.compactMap { CodableHTTPCookie(from: $0) }
+    open func storeCookiesSettings() async {
+        guard let cookiesURL = cookiesURL, let cookies = cookieStorage.cookies else { return }
+        
+        let codableCookies = cookies.compactMap { CodableHTTPCookie(from: $0) }
+        let encoder = PropertyListEncoder()
+        
+        do {
+            let data = try encoder.encode(codableCookies)
             
-            let encoder = PropertyListEncoder()
-            do {
-                let data = try encoder.encode(codableCookies)
+            try await Task.detached {
                 try data.write(to: cookiesURL)
-            } catch {
-                print("⚠️ Failed to store cookies settings: \(error)")
-            }
+            }.value
+        } catch {
+            print("⚠️ Failed to store cookies settings: \(error)")
         }
     }
     
     @discardableResult
-    open func loadCookiesSettings() -> [HTTPCookie]? {
-        if let cookiesURL = cookiesURL,
-           let data = try? Data(contentsOf: cookiesURL) {
+    open func loadCookiesSettings() async -> [HTTPCookie]? {
+        guard let cookiesURL = cookiesURL else { return nil }
+        
+        do {
+            let data = try await Task.detached {
+                try Data(contentsOf: cookiesURL)
+            }.value
             
             let decoder = PropertyListDecoder()
-            do {
-                // Decode the data into our array of Codable wrappers
-                let codableCookies = try decoder.decode([CodableHTTPCookie].self, from: data)
-                
-                // Convert the wrappers back to real HTTPCookie objects
-                let cookies = codableCookies.compactMap { $0.httpCookie }
-                
-                cookies.forEach { cookie in
-                    if cookiesDomain.isEmpty || cookie.domain.hasSuffix(cookiesDomain) {
-                        cookieStorage.setCookie(cookie)
-                    }
+            let codableCookies = try decoder.decode([CodableHTTPCookie].self, from: data)
+            let cookies = codableCookies.compactMap { $0.httpCookie }
+            
+            cookies.forEach { cookie in
+                if cookiesDomain.isEmpty || cookie.domain.hasSuffix(cookiesDomain) {
+                    cookieStorage.setCookie(cookie)
                 }
-                return cookies
-            } catch {
-                print("⚠️ Failed to load cookies settings: \(error)")
             }
+            return cookies
+        } catch {
+            print("⚠️ Failed to load cookies settings: \(error)")
         }
+        
         return nil
     }
 
-    public func clearCookiesSettings() {
-        if let cookiesURL = cookiesURL {
-            try? FileManager.default.removeItem(at: cookiesURL)
-        }
+    public func clearCookiesSettings() async {
+        guard let cookiesURL = cookiesURL else { return }
+        
+        try? await Task.detached {
+            try FileManager.default.removeItem(at: cookiesURL)
+        }.value
     }
 
     public func clearCookies() {

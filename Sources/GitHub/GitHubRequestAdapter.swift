@@ -7,7 +7,7 @@ final class GitHubRequestAdapter: OAuth2RequestAdapter, @unchecked Sendable {
         tokenLocation = .authorizationHeader
     }
 
-    override func adapt(_ urlRequest: URLRequest, for session: Session, completion: @escaping (Result<URLRequest, Error>) -> Void) {
+    override func adapt(_ urlRequest: URLRequest, for session: Session, completion: @escaping @Sendable (Result<URLRequest, any Error>) -> Void) {
         var urlRequest = urlRequest
 
         urlRequest.headers.add(.accept("application/vnd.github+json"))

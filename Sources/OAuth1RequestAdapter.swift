@@ -4,7 +4,7 @@ import CryptoSwift
 
 // MARK: - OAuth1Error
 /// Defines errors specific to the OAuth1 request adaptation process.
-public enum OAuth1Error: Error {
+public enum OAuth1Error: Error, Sendable { // Added Sendable
     case missingURLInRequest
     case requestBodyNotUTF8Encodable
     case signatureGenerationFailed
@@ -12,62 +12,76 @@ public enum OAuth1Error: Error {
 
 // MARK: - OAuth1RequestAdapter
 /// An Alamofire `RequestAdapter` that applies an OAuth 1.0a signature to outgoing requests.
-/// This implementation is thread-safe and designed for modern Swift concurrency.
-public final class OAuth1RequestAdapter: RequestAdapter {
+public final class OAuth1RequestAdapter: RequestAdapter, @unchecked Sendable { // Added @unchecked Sendable
     private let consumerKey: String
     private let consumerSecret: String
+    
+    // This is @MainActor-isolated
+    @MainActor
     public let auth: Auth1Authentication
 
+    @MainActor
     public init(consumerKey: String, consumerSecret: String, auth: Auth1Authentication) {
         self.consumerKey = consumerKey
         self.consumerSecret = consumerSecret
         self.auth = auth
     }
 
-    public func adapt(_ urlRequest: URLRequest, for session: Session, completion: @escaping (Result<URLRequest, Error>) -> Void) {
-        guard let url = urlRequest.url else {
-            return completion(.failure(OAuth1Error.missingURLInRequest))
-        }
-
-        let authToken = auth.token
-        let authSecret = auth.secret
-        let userAgent = auth.userAgent
+    // REFACTOR: The `completion` handler is now correctly marked `@Sendable`
+    // and uses `any Error` to match the `RequestAdapter` protocol.
+    public func adapt(_ urlRequest: URLRequest, for session: Session, completion: @escaping @Sendable (Result<URLRequest, any Error>) -> Void) {
         
-        var adaptedRequest = urlRequest
-        var formParameters: [String: String] = [:]
-
-        if adaptedRequest.method == .post, let httpBody = adaptedRequest.httpBody {
-            guard let bodyString = String(data: httpBody, encoding: .utf8) else {
-                return completion(.failure(OAuth1Error.requestBodyNotUTF8Encodable))
+        // REFACTOR: Wrap all logic in a `Task` to safely access
+        // @MainActor-isolated properties from `auth`.
+        Task {
+            guard let url = urlRequest.url else {
+                completion(.failure(OAuth1Error.missingURLInRequest))
+                return
             }
-            // Use URLComponents for robust query string parsing. This resolves the compiler error.
-            if let components = URLComponents(string: "?\(bodyString)") {
-                formParameters = components.queryItems?.reduce(into: [String: String]()) { result, item in
-                    result[item.name] = item.value ?? ""
-                } ?? [:]
+
+            // Access `@MainActor` properties via `await`.
+            let authToken = await auth.token
+            let authSecret = await auth.secret
+            let userAgent = await auth.userAgent
+            
+            var adaptedRequest = urlRequest
+            var formParameters: [String: String] = [:]
+
+            if adaptedRequest.method == .post, let httpBody = adaptedRequest.httpBody {
+                guard let bodyString = String(data: httpBody, encoding: .utf8) else {
+                    completion(.failure(OAuth1Error.requestBodyNotUTF8Encodable))
+                    return
+                }
+                // Use URLComponents for robust query string parsing.
+                if let components = URLComponents(string: "?\(bodyString)") {
+                    formParameters = components.queryItems?.reduce(into: [String: String]()) { result, item in
+                        result[item.name] = item.value ?? ""
+                    } ?? [:]
+                }
             }
-        }
-        
-        do {
-            let authHeader = try authorizationHeader(
-                for: url,
-                method: adaptedRequest.httpMethod ?? "GET",
-                formParameters: formParameters,
-                authToken: authToken,
-                authSecret: authSecret
-            )
-            adaptedRequest.headers.add(.authorization(authHeader))
-        } catch {
-            return completion(.failure(error))
-        }
+            
+            do {
+                let authHeader = try authorizationHeader(
+                    for: url,
+                    method: adaptedRequest.httpMethod ?? "GET",
+                    formParameters: formParameters,
+                    authToken: authToken,
+                    authSecret: authSecret
+                )
+                adaptedRequest.headers.add(.authorization(authHeader))
+            } catch {
+                completion(.failure(error))
+                return
+            }
 
-        if let userAgent = userAgent, !userAgent.isEmpty {
-            adaptedRequest.headers.add(.userAgent(userAgent))
-        }
-        
-        adaptedRequest.headers.add(.accept("application/json"))
+            if let userAgent = userAgent, !userAgent.isEmpty {
+                adaptedRequest.headers.add(.userAgent(userAgent))
+            }
+            
+            adaptedRequest.headers.add(.accept("application/json"))
 
-        completion(.success(adaptedRequest))
+            completion(.success(adaptedRequest))
+        }
     }
 }
 

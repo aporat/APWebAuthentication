@@ -1,9 +1,8 @@
 import Foundation
 import SwiftyJSON
 
-/// A concrete user model for a Tumblr user, including their blogs.
 public final class TumblrUser: User, Sendable {
-
+    
     public let userId: String
     public let username: String?
     public let fullname: String?
@@ -13,7 +12,7 @@ public final class TumblrUser: User, Sendable {
     
     /// A list of the user's blogs.
     public let blogs: [TumblrBlog]
-
+    
     /// A failable initializer that creates a `TumblrUser` from a SwiftyJSON object.
     /// - Parameter info: The JSON object containing the user's data.
     public required init?(info: JSON) {

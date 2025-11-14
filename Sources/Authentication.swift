@@ -1,6 +1,7 @@
 import Foundation
 import APUserAgentGenerator
 
+@MainActor
 open class Authentication {
     public var accountIdentifier: String?
 
@@ -17,7 +18,7 @@ open class Authentication {
 
     // MARK: - User Agent
 
-    open var browserMode: ProviderBrowserMode?
+    open var browserMode: UserAgentMode?
     open var customUserAgent: String?
 
     open var userAgent: String? {
@@ -72,20 +73,17 @@ open class Authentication {
 
     // MARK: - Auth
 
-    open func loadAuthSettings() {}
+    open func loadAuthSettings() async {}
 
-    open func storeAuthSettings() {}
+    open func storeAuthSettings() async {}
 
-    public func clearAuthSettings() {
-        guard let currentAccountIdentifier = accountIdentifier,
-              let documentsURL = FileManager.documentsDirectoryURL else {
+    public func clearAuthSettings() async {
+        guard let url = authSettingsURL else {
             return
         }
         
-        let fileName = currentAccountIdentifier + ".settings"
-        
-        let url = documentsURL.appendingPathComponent(fileName)
-        
-        try? FileManager.default.removeItem(at: url)
+        try? await Task.detached {
+            try FileManager.default.removeItem(at: url)
+        }.value
     }
 }

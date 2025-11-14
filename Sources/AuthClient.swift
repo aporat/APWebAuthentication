@@ -4,28 +4,13 @@ import CryptoKit
 @preconcurrency import SwiftyJSON
 import HTTPStatusCodes
 
-public enum ProviderAuthMode: String, Sendable {
-    case `private`
-    case explicit
-    case implicit
-    case web
-    case browser
-    case app
-    
-    public init?(_ rawValue: String?) {
-        guard let currentRawValue = rawValue, let value = ProviderAuthMode(rawValue: currentRawValue) else {
-            return nil
-        }
-        self = value
-    }
-}
-
 public extension AuthClient {
     static let didRateLimitReached = Notification.Name(rawValue: "apwebauthentication.client.ratelimit")
     static let didRateLimitSessionExpired = Notification.Name(rawValue: "apwebauthentication.client.sessionexpired")
     static let didRateLimitCancelled = Notification.Name(rawValue: "apwebauthentication.client.ratelimit.cancelled")
 }
 
+@MainActor
 open class AuthClient {
     public var baseURLString: String
     
@@ -133,13 +118,16 @@ open class AuthClient {
     ) async throws(APWebAuthenticationError) -> Int {
         let url = try url(for: path)
         
+        // REVERT: Changed back to serializingDecodable(JSON.self)
         let dataTask = sessionManager.request(url, method: method, parameters: parameters, encoding: encoding, headers: headers)
             .validate(statusCode: 200..<600) // Validate broader range
-            .serializingData() // Use serializingData
+            .serializingDecodable(JSON.self) // <-- Corrected
         
         let response = await dataTask.response
         
         guard let httpResponse = response.response else {
+            // This part is tricky, as we have no HTTPResponse.
+            // We still need to pass a valid DataResponse<JSON, AFError> to generateError.
             if let afError = response.error {
                 let dummyDataResponse = DataResponse<JSON, AFError>(
                     request: response.request,
@@ -147,10 +135,11 @@ open class AuthClient {
                     data: response.data,
                     metrics: response.metrics,
                     serializationDuration: response.serializationDuration,
-                    result: .failure(afError)
+                    result: .failure(afError) // Pass the failure
                 )
                 throw generateError(from: dummyDataResponse)
             } else {
+                // Should be unreachable if response is nil and error is nil, but as a fallback:
                 throw APWebAuthenticationError.unknown
             }
         }
@@ -158,18 +147,21 @@ open class AuthClient {
     }
     
     
+    // REVERT: This function is now fully reverted to use JSON.
     open func generateError(from response: DataResponse<JSON, AFError>) -> APWebAuthenticationError {
+        
+        let json = parseJson(from: response)
         
         if let afError = response.error {
             if afError.isExplicitlyCancelledError { return .canceled }
             if afError.isSessionTaskError {
                 let errorJson = parseJson(from: response)
                 let reason = String(format: NSLocalizedString("Check your network connection. %@ could also be down.", comment: ""), accountType.description)
+                // Pass the original SwiftyJSON object
                 return .connectionError(reason: reason, responseJSON: errorJson)
             }
         }
         
-        let json = parseJson(from: response)
         let jsonErrorMessage = extractErrorMessage(from: json) // Calls potentially overridden method
         let underlyingErrorMessage = extractUnderlyingErrorMessage(from: response)
         let reason = jsonErrorMessage ?? underlyingErrorMessage // Best available message
@@ -180,7 +172,7 @@ open class AuthClient {
         }
         
         if isCheckpointRequired(response: response, json: json) {
-            let checkpointReason = jsonErrorMessage ?? "Checkpoint or feedback required."
+            // let checkpointReason = jsonErrorMessage ?? "Checkpoint or feedback required."
             return .checkPointRequired(content: json)
         }
         
@@ -224,7 +216,6 @@ open class AuthClient {
     
     /// Subclasses should override this to handle service-specific JSON structures.
     open func extractErrorMessage(from json: JSON?) -> String? {
-        // Default implementation checks common keys sequentially
         if let message = json?["message"].string {
             return message
         }

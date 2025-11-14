@@ -1,6 +1,7 @@
 import Foundation
 import Alamofire
 
+@MainActor
 public final class PinterestWebHTMLAPIClient: AuthClient {
     
     public override var accountType: AccountType {

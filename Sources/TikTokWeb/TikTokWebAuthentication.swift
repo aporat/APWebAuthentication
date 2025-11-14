@@ -1,12 +1,14 @@
 import Foundation
 import UIKit
 
+@MainActor
 public final class TikTokWebAuthentication: SessionAuthentication {
-    private struct AuthSettings: Codable {
+    
+    private struct AuthSettings: Codable, Sendable {
         var signatureUrl: URL?
         var cookiesDomain: String?
         var cookieSessionIdField: String?
-        var browserMode: ProviderBrowserMode?
+        var browserMode: UserAgentMode?
         var customUserAgent: String?
         var sessionId: String?
         var svWebId: String?
@@ -68,7 +70,7 @@ public final class TikTokWebAuthentication: SessionAuthentication {
     
     // MARK: - Auth Settings
     
-    override public func storeAuthSettings() {
+    override public func storeAuthSettings() async {
         let settings = AuthSettings(
             signatureUrl: signatureUrl,
             cookiesDomain: cookiesDomain,
@@ -88,50 +90,55 @@ public final class TikTokWebAuthentication: SessionAuthentication {
             timezoneName: timezoneName
         )
         
-        if let authSettingsURL = authSettingsURL {
-            let encoder = PropertyListEncoder()
-            do {
-                let data = try encoder.encode(settings)
+        guard let authSettingsURL = authSettingsURL else { return }
+        
+        do {
+            let data = try PropertyListEncoder().encode(settings)
+            
+            try await Task.detached {
                 try data.write(to: authSettingsURL)
-            } catch {
-                print("⚠️ Failed to store TikTok settings: \(error)")
-            }
+            }.value
+        } catch {
+            print("⚠️ Failed to store TikTok settings: \(error)")
         }
         
-        storeCookiesSettings()
+        await storeCookiesSettings()
     }
     
-    override public func loadAuthSettings() {
-        if let authSettingsURL = authSettingsURL,
-           let data = try? Data(contentsOf: authSettingsURL) {
-            
-            let decoder = PropertyListDecoder()
-            do {
-                let settings = try decoder.decode(AuthSettings.self, from: data)
-                
-                // Assign properties, falling back to current values if nil
-                signatureUrl = settings.signatureUrl ?? signatureUrl
-                cookiesDomain = settings.cookiesDomain ?? cookiesDomain
-                cookieSessionIdField = settings.cookieSessionIdField ?? cookieSessionIdField
-                browserMode = settings.browserMode ?? browserMode
-                customUserAgent = settings.customUserAgent ?? customUserAgent
-                sessionId = settings.sessionId ?? sessionId
-                svWebId = settings.svWebId ?? svWebId
-                sessionLastValidated = settings.sessionLastValidated ?? sessionLastValidated
-                aid = settings.aid ?? aid
-                screenWidth = settings.screenWidth ?? screenWidth
-                screenHeight = settings.screenHeight ?? screenHeight
-                browserLanguage = settings.browserLanguage ?? browserLanguage
-                browserPlatform = settings.browserPlatform ?? browserPlatform
-                browserName = settings.browserName ?? browserName
-                browserVersion = settings.browserVersion ?? browserVersion
-                timezoneName = settings.timezoneName ?? timezoneName
-                
-            } catch {
-                print("⚠️ Failed to load TikTok settings: \(error)")
-            }
+    override public func loadAuthSettings() async {
+        guard let authSettingsURL = authSettingsURL else {
+            await loadCookiesSettings()
+            return
         }
         
-        loadCookiesSettings()
+        do {
+            let data = try await Task.detached {
+                try Data(contentsOf: authSettingsURL)
+            }.value
+            
+            let settings = try PropertyListDecoder().decode(AuthSettings.self, from: data)
+            
+            signatureUrl = settings.signatureUrl ?? signatureUrl
+            cookiesDomain = settings.cookiesDomain ?? cookiesDomain
+            cookieSessionIdField = settings.cookieSessionIdField ?? cookieSessionIdField
+            browserMode = settings.browserMode ?? browserMode
+            customUserAgent = settings.customUserAgent ?? customUserAgent
+            sessionId = settings.sessionId ?? sessionId
+            svWebId = settings.svWebId ?? svWebId
+            sessionLastValidated = settings.sessionLastValidated ?? sessionLastValidated
+            aid = settings.aid ?? aid
+            screenWidth = settings.screenWidth ?? screenWidth
+            screenHeight = settings.screenHeight ?? screenHeight
+            browserLanguage = settings.browserLanguage ?? browserLanguage
+            browserPlatform = settings.browserPlatform ?? browserPlatform
+            browserName = settings.browserName ?? browserName
+            browserVersion = settings.browserVersion ?? browserVersion
+            timezoneName = settings.timezoneName ?? timezoneName
+            
+        } catch {
+            print("⚠️ Failed to load TikTok settings: \(error)")
+        }
+        
+        await loadCookiesSettings()
     }
 }

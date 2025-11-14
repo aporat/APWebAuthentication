@@ -60,6 +60,8 @@ public extension URL {
     }
 
     /// Parses the URL to determine if it represents a success or failure response.
+    /// NOTE: This code is compatible with the refactored `APWebAuthenticationError`
+    /// because the `responseData` parameter defaults to `nil`.
     func getResponse() -> Result<[String: String], APWebAuthenticationError> {
         let params = self.parameters
 
@@ -68,8 +70,10 @@ public extension URL {
         
         if let reason = errorReason?.replacingOccurrences(of: "+", with: " ").removingPercentEncoding {
             if params["error_type"] == "login_failed" {
+                // Returns .failure(.loginFailed(reason: reason, responseData: nil))
                 return .failure(.loginFailed(reason: reason))
             }
+            // Returns .failure(.failed(reason: reason, responseData: nil))
             return .failure(.failed(reason: reason))
         }
 

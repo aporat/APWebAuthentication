@@ -1,7 +1,8 @@
 import Foundation
 import WebKit
 
-public final class PinterestWebAuthController: AuthViewController {
+@MainActor
+public final class PinterestWebAuthController: WebAuthViewController {
     // MARK: - Data
 
     fileprivate var auth: PinterestWebAuthentication
@@ -9,7 +10,7 @@ public final class PinterestWebAuthController: AuthViewController {
 
     // MARK: - UIViewController
 
-    public init(auth: PinterestWebAuthentication, authURL: URL?, redirectURL: URL?, completionHandler: AuthViewController.CompletionHandler? = nil) {
+    public init(auth: PinterestWebAuthentication, authURL: URL?, redirectURL: URL?, completionHandler: WebAuthViewController.CompletionHandler? = nil) {
         self.auth = auth
         super.init(authURL: authURL, redirectURL: redirectURL, completionHandler: completionHandler)
     }
@@ -20,7 +21,8 @@ public final class PinterestWebAuthController: AuthViewController {
 
     // MARK: - WKNavigationDelegate
 
-    override public func webView(_: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+    override public func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, preferences: WKWebpagePreferences, decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void) {
+
         if redirectURL == nil {
             checkForAuthTokens()
         }
@@ -34,7 +36,6 @@ public final class PinterestWebAuthController: AuthViewController {
                 loggedIn = true
                 showHUD()
 
-                // make sure we dont get stuck loading
                 DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(3)) {
                     self.hideHUD()
                     self.loadRequest()
@@ -42,7 +43,7 @@ public final class PinterestWebAuthController: AuthViewController {
             }
         }
 
-        decisionHandler(.allow)
+        decisionHandler(.allow, preferences)
     }
 
     override public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
@@ -64,13 +65,11 @@ public final class PinterestWebAuthController: AuthViewController {
             if self.auth.isAuthorized {
                 self.didStopLoading()
 
-                let result = ["cookies": cookies]
+                let result: [String: String] = [:]
 
-                DispatchQueue.main.async {
-                    self.dismiss(animated: true) {
-                        self.completionHandler?(.success(result))
-                        self.completionHandler = nil
-                    }
+                self.dismiss(animated: true) {
+                    self.completionHandler?(.success(result))
+                    self.completionHandler = nil
                 }
             }
         }

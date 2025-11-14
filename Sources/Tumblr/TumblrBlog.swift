@@ -5,10 +5,9 @@ public final class TumblrBlog: GenericUser, @unchecked Sendable {
     
     public var name: String?
     public var postsCount: Int32 = 0
-
+    
     public required init?(info: JSON) {
         
-        // Path 1: Handle the "full" blog object (from /user/info)
         if let uuid = info["uuid"].string, !uuid.isEmpty {
             
             let username = Self.parseUsername(from: info["url"].string)
@@ -31,9 +30,7 @@ public final class TumblrBlog: GenericUser, @unchecked Sendable {
             self.postsCount = info["posts"].int32 ?? 0
             self.followersCount = info["followers"].int32 ?? 0
             
-        }
-        // Path 2: Handle the "lite" user object (from /followers)
-        else if let name = info["name"].string, !name.isEmpty, let urlString = info["url"].string {
+        } else if let name = info["name"].string, !name.isEmpty, let urlString = info["url"].string {
             
             let userId = name
             let username = name
@@ -43,7 +40,7 @@ public final class TumblrBlog: GenericUser, @unchecked Sendable {
             if let host = URL(string: urlString)?.host {
                 avatarURL = URL(string: "https://api.tumblr.com/v2/blog/\(host)/avatar")
             }
-
+            
             super.init(userId: userId,
                        username: username,
                        fullname: fullname,
@@ -52,9 +49,7 @@ public final class TumblrBlog: GenericUser, @unchecked Sendable {
             self.postsCount = 0
             self.followersCount = 0
             
-        }
-        // If neither, it's invalid
-        else {
+        } else {
             return nil
         }
         
@@ -65,17 +60,14 @@ public final class TumblrBlog: GenericUser, @unchecked Sendable {
         guard let urlString else { return nil }
         
         if let url = URL(string: urlString) {
-            // Handle "https://www.tumblr.com/blog/view/thedashedspace"
             if url.host?.contains("www.tumblr.com") == true, url.pathComponents.count > 2 {
                 return url.pathComponents.last
             }
-            // Handle "https://cheezbot.tumblr.com/"
             else if let host = url.host, host.contains(".tumblr.com") {
                 return host.replacingOccurrences(of: ".tumblr.com", with: "")
             }
         }
         
-        // Fallback
         return urlString
             .replacingOccurrences(of: "https://", with: "")
             .replacingOccurrences(of: "http://", with: "")
