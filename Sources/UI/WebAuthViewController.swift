@@ -66,31 +66,31 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
     
     // Toolbar
     fileprivate lazy var actionBarBackBarButtonItem: UIBarButtonItem = {
-        return UIBarButtonItem(image: UIImage(systemName: "chevron.left"),
-                               style: UIBarButtonItem.Style.plain,
-                               target: self,
-                               action: #selector(WebAuthViewController.goBackTapped(_:)))
+        return createToolbarButton(
+            systemName: "chevron.left",
+            selector: #selector(WebAuthViewController.goBackTapped(_:))
+        )
     }()
     
     fileprivate lazy var actionBarForwardBarButtonItem: UIBarButtonItem = {
-        return UIBarButtonItem(image: UIImage(systemName: "chevron.right"),
-                               style: UIBarButtonItem.Style.plain,
-                               target: self,
-                               action: #selector(WebAuthViewController.goForwardTapped(_:)))
+        return createToolbarButton(
+            systemName: "chevron.right",
+            selector: #selector(WebAuthViewController.goForwardTapped(_:))
+        )
     }()
     
     fileprivate lazy var actionSafariBarButtonItem: UIBarButtonItem = {
-        return UIBarButtonItem(image: UIImage(systemName: "safari"),
-                               style: UIBarButtonItem.Style.plain,
-                               target: self,
-                               action: #selector(WebAuthViewController.openInSafari(_:)))
+        return createToolbarButton(
+            systemName: "safari",
+            selector: #selector(WebAuthViewController.openInSafari(_:))
+        )
     }()
     
     fileprivate lazy var actionBarButtonItem: UIBarButtonItem = {
-        return UIBarButtonItem(image: UIImage(systemName: "square.and.arrow.up"),
-                               style: UIBarButtonItem.Style.plain,
-                               target: self,
-                               action: #selector(WebAuthViewController.actionButtonTapped(_:)))
+        return createToolbarButton(
+            systemName: "square.and.arrow.up",
+            selector: #selector(WebAuthViewController.actionButtonTapped(_:))
+        )
     }()
     
     fileprivate lazy var activityIndicator: UIActivityIndicatorView = {
@@ -159,9 +159,14 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
             dismissButtonLabel = NSLocalizedString("Done", comment: "")
         }
         
-        refreshBarButtonItem = UIBarButtonItem(image: UIImage(systemName: "arrow.clockwise")?.scaled(toWidth: 18), style: UIBarButtonItem.Style.plain, target: self, action: #selector(refresh(_:)))
-        stopBarButtonItem = UIBarButtonItem(image: UIImage(systemName: "xmark")?.scaled(toWidth: 18), style: UIBarButtonItem.Style.plain, target: self, action: #selector(stop(_:)))
-        
+        refreshBarButtonItem = createNavBarButton(
+            systemName: "arrow.clockwise",
+            selector: #selector(refresh(_:))
+        )
+        stopBarButtonItem = createNavBarButton(
+            systemName: "xmark",
+            selector: #selector(stop(_:))
+        )
         
         loadingBarButtonItems = [stopBarButtonItem]
         dismissBarButtonItem = UIBarButtonItem(title: dismissButtonLabel, style: .plain, target: self, action: #selector(dismissCancelled(_:)))
@@ -320,11 +325,13 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
         toolbarItems = [actionBarBackBarButtonItem, UIBarButtonItem.flexibleSpace, actionBarForwardBarButtonItem, UIBarButtonItem.flexibleSpace, UIBarButtonItem.flexibleSpace, actionBarButtonItem, UIBarButtonItem.flexibleSpace, actionSafariBarButtonItem]
         
         
-        let textTranformBarButtonItem = UIBarButtonItem(image: UIImage(systemName: "textformat.size")?.scaled(toWidth: 23), style: UIBarButtonItem.Style.plain, target: self, action: #selector(textTransform(_:)))
+        let textTranformButton = createToolbarButton(
+            systemName: "textformat.size",
+            selector: #selector(textTransform(_:))
+        )
         
-        completedBarButtonItems = [refreshBarButtonItem, UIBarButtonItem.fixedSpace(width: 0), textTranformBarButtonItem]
-        loadingBarButtonItems = [stopBarButtonItem, UIBarButtonItem.fixedSpace(width: 0), textTranformBarButtonItem]
-        
+        completedBarButtonItems = [refreshBarButtonItem, UIBarButtonItem.fixedSpace(width: 0), textTranformButton]
+        loadingBarButtonItems = [stopBarButtonItem, UIBarButtonItem.fixedSpace(width: 0), textTranformButton]
         
         if appearanceStyle == .safari, let currentNavigationController = navigationController {
             
@@ -383,7 +390,7 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
                     log.warning("Callback failure. Calling completionHandler with error: \(error.localizedDescription)")
                     self.completionHandler?(.failure(error))
                 }
-                self.completionHandler = nil // Clear the handler
+                self.completionHandler = nil
                 
                 log.debug("Dismissing view controller.")
                 self.dismiss(animated: true)
@@ -403,12 +410,22 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
     }
     
     open func webView(_: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-        log.warning("didFail navigation: \(error.localizedDescription)")
+        // Don't log "Frame load interrupted" as a warning, it's expected on redirects.
+        if (error as NSError).code == 102 {
+            log.debug("didFail navigation: \(error.localizedDescription)")
+        } else {
+            log.warning("didFail navigation: \(error.localizedDescription)")
+        }
         didStopLoading()
     }
     
     open func webView(_: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
-        log.warning("didFailProvisionalNavigation: \(error.localizedDescription)")
+        // Don't log "Frame load interrupted" as a warning, it's expected on redirects.
+        if (error as NSError).code == 102 {
+            log.debug("didFailProvisionalNavigation: \(error.localizedDescription)")
+        } else {
+            log.warning("didFailProvisionalNavigation: \(error.localizedDescription)")
+        }
         didStopLoading()
     }
     
@@ -471,11 +488,13 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
     }
     
     public func getCookies() async -> [HTTPCookie] {
-        await withCheckedContinuation { continuation in
+        await withCheckedContinuation { (continuation: CheckedContinuation<[HTTPCookie], Never>) in
             log.debug("Getting all cookies from WKHTTPCookieStore...")
             webView.configuration.websiteDataStore.httpCookieStore.getAllCookies { cookies in
-                log.debug("Found \(cookies.count) cookies.")
-                continuation.resume(returning: cookies)
+                Task { @MainActor in
+                    log.debug("Found \(cookies.count) cookies.")
+                    continuation.resume(returning: cookies)
+                }
             }
         }
     }
@@ -610,5 +629,27 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
     public func hideHUD() {
         log.verbose("hideHUD")
         self.loginHUD.dismiss()
+    }
+    
+    // MARK: - Button Creation Helpers
+    
+    /// Creates a UIBarButtonItem with a custom UIButton for navigation bars
+    private func createNavBarButton(systemName: String, selector: Selector) -> UIBarButtonItem {
+        let button = UIButton(type: .system)
+        button.setImage(UIImage(systemName: systemName), for: .normal)
+        button.addTarget(self, action: selector, for: .touchUpInside)
+        button.frame = CGRect(x: 0, y: 0, width: 30, height: 30) // Explicit frame
+        button.imageView?.contentMode = .scaleAspectFit
+        return UIBarButtonItem(customView: button)
+    }
+    
+    /// Creates a UIBarButtonItem with a custom UIButton for toolbars
+    private func createToolbarButton(systemName: String, selector: Selector) -> UIBarButtonItem {
+        let button = UIButton(type: .system)
+        button.setImage(UIImage(systemName: systemName), for: .normal)
+        button.addTarget(self, action: selector, for: .touchUpInside)
+        button.frame = CGRect(x: 0, y: 0, width: 40, height: 30) // Explicit frame
+        button.imageView?.contentMode = .scaleAspectFit // <-- Already set here
+        return UIBarButtonItem(customView: button)
     }
 }
