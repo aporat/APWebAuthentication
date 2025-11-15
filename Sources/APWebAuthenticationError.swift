@@ -27,7 +27,6 @@ public enum APWebAuthenticationError: Error, Sendable, Equatable {
     
     // Unchanged cases
     case canceled
-    case loginCanceled
     case notFound
     case badRequest
     case unknown
@@ -133,7 +132,6 @@ extension APWebAuthenticationError: LocalizedError {
         case .appDownloadNewAppRequired: return "app_download_new_app_required"
         case .appUpdateRequired: return "app_update_required"
         case .canceled: return "canceled"
-        case .loginCanceled: return "login_canceled"
         case .notFound: return "not_found"
         case .timeout: return "timeout"
         case .badRequest, .unknown: return "bad_request"

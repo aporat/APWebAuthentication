@@ -50,7 +50,7 @@ public extension Error {
         // Check for custom cancellation errors from your app.
         if let authError = underlyingAuthenticationError {
             switch authError {
-            case .canceled, .loginCanceled, .badRequest, .unknown:
+            case .canceled, .badRequest, .unknown:
                 return true
             default:
                 return false

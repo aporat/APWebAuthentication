@@ -1,4 +1,6 @@
 import UIKit
+import SwiftyBeaver
+import SwifterSwift
 
 extension APWebAuthSession {
     public enum AppearanceStyle: Int {
@@ -11,6 +13,8 @@ public protocol APWebAuthenticationPresentationContextProviding: NSObjectProtoco
     func presentationAnchor(for session: APWebAuthSession) -> UIViewController?
 }
 
+public let log = SwiftyBeaver.self
+
 @MainActor
 public class APWebAuthSession {
     public var statusBarStyle = UIStatusBarStyle.default
@@ -22,62 +26,84 @@ public class APWebAuthSession {
     
     public init(accountType: AccountType) {
         self.accountType = accountType
+        log.debug("APWebAuthSession init for \(accountType.description)")
     }
     
     @discardableResult
-    // REFACTOR: Changed return type from `[String: Any]?` to `[String: String]?`
-    // to match the Sendable `CompletionHandler` in `WebAuthViewController`.
     public func start(url URL: URL, callbackURL: URL) async throws(APWebAuthenticationError) -> [String: String]? {
+        log.debug("APWebAuthSession start(url:callbackURL:) called.")
         loginViewController = WebAuthViewController(authURL: URL, redirectURL: callbackURL)
         return try await start()
     }
     
     @discardableResult
-    // REFACTOR: Changed return type from `[String: Any]?` to `[String: String]?`
-    public func start() async throws(APWebAuthenticationError) -> [String: String]? {
-        do {
-            if appearanceStyle == .safari {
-                let loginRequested = await showLoginPermission()
-                guard loginRequested else {
-                    throw APWebAuthenticationError.loginCanceled
-                }
-            }
-            
-            return try await withCheckedThrowingContinuation { continuation in
-                
-                guard let loginVC = self.loginViewController else {
-                    continuation.resume(throwing: APWebAuthenticationError.loginCanceled)
-                    return
-                }
+       public func start() async throws(APWebAuthenticationError) -> [String: String]? {
+           log.debug("APWebAuthSession start() initiated.")
+           do {
+               if appearanceStyle == .safari {
+                   log.debug("Safari style. Awaiting showLoginPermission...")
+                   let loginRequested = await showLoginPermission()
+                   guard loginRequested else {
+                       log.warning("Login permission denied by user.")
+                       throw APWebAuthenticationError.canceled
+                   }
+               }
+               
+               return try await withCheckedThrowingContinuation { (continuation: (CheckedContinuation<[String: String]?, Error>)) in
+                   
+                   log.debug("withCheckedThrowingContinuation started. Awaiting completionHandler...")
+                   
+                   guard let loginVC = self.loginViewController else {
+                       log.error("loginViewController is nil before completionHandler can be set.")
+                       continuation.resume(throwing: APWebAuthenticationError.canceled)
+                       return
+                   }
 
-                // The completionHandler is already called on the @MainActor,
-                // so the extra `Task { @MainActor in ... }` is not needed.
-                loginVC.completionHandler = { result in
-                    switch result {
-                    case .success(let params):
-                        continuation.resume(returning: params)
-                    case .failure(let error):
-                        continuation.resume(throwing: error)
-                    }
-                }
-                
-                do {
-                    if appearanceStyle == .safari {
-                        try self.presentSafariStyle()
-                    } else {
-                        try self.presentNormalStyle()
-                    }
-                } catch {
-                    // Convert any presentation error into an APWebAuthenticationError
-                    let authError = (error as? APWebAuthenticationError) ?? .failed(reason: error.localizedDescription)
-                    continuation.resume(throwing: authError)
-                }
-            }
-        } catch {
-            // Re-throw the error, ensuring it's always an APWebAuthenticationError
-            throw (error as? APWebAuthenticationError) ?? .failed(reason: error.localizedDescription)
-        }
-    }
+                   loginVC.completionHandler = { [weak self] result in
+                       
+                       log.debug("completionHandler fired with result: \(result)")
+                       
+                       switch result {
+                       case .success(let params):
+                           log.info("completionHandler: Success. Resuming continuation.")
+                           continuation.resume(returning: params)
+                       case .failure(let error):
+                           log.error("completionHandler: Failure. Resuming with error: \(error.localizedDescription)")
+                           continuation.resume(throwing: error)
+                       }
+                       
+                       guard let self = self else {
+                           log.warning("APWebAuthSession was nil inside completionHandler.")
+                           return
+                       }
+                       
+                       log.debug("Dismissing loginViewController and nilling reference.")
+                       self.loginViewController?.dismiss(animated: true) {
+                           self.loginViewController = nil // Break the cycle
+                       }
+                   }
+                   
+                   do {
+                       if appearanceStyle == .safari {
+                           log.info("Presenting Safari style login.")
+                           try self.presentSafariStyle()
+                       } else {
+                           log.info("Presenting Normal style login.")
+                           try self.presentNormalStyle()
+                       }
+                   } catch {
+                       log.error("Failed to present login view controller: \(error.localizedDescription)")
+                       let authError = (error as? APWebAuthenticationError) ?? .failed(reason: error.localizedDescription)
+                       continuation.resume(throwing: authError)
+                   }
+               }
+           } catch {
+               log.error("APWebAuthSession start() threw an error: \(error.localizedDescription)")
+               self.loginViewController = nil
+               
+               throw (error as? APWebAuthenticationError) ?? .failed(reason: error.localizedDescription)
+           }
+       }
     
     private func showLoginPermission() async -> Bool {
         await withCheckedContinuation { continuation in
@@ -86,9 +112,11 @@ public class APWebAuthSession {
             let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
             
             alert.addAction(title: NSLocalizedString("Cancel", comment: ""), style: .cancel) { _ in
+                log.debug("Login permission: User tapped Cancel.")
                 continuation.resume(returning: false)
             }
             alert.addAction(title: NSLocalizedString("Continue", comment: ""), style: .default) { _ in
+                log.debug("Login permission: User tapped Continue.")
                 continuation.resume(returning: true)
             }
             alert.preferredAction = alert.actions.last
@@ -96,7 +124,7 @@ public class APWebAuthSession {
             if let vc = self.presentationContextProvider?.presentationAnchor(for: self), vc.isVisible {
                 vc.present(alert, animated: true)
             } else {
-                // Fallback to show on key window
+                log.warning("No presentation anchor found for login permission. Using fallback.")
                 alert.show(animated: true, vibrate: false)
             }
         }
@@ -104,7 +132,8 @@ public class APWebAuthSession {
     
     private func presentNormalStyle() throws {
         guard let loginViewController = loginViewController else {
-            throw APWebAuthenticationError.loginCanceled
+            log.error("presentNormalStyle: loginViewController is nil.")
+            throw APWebAuthenticationError.canceled
         }
         
         loginViewController.title = String(format: NSLocalizedString("Sign in to %@", comment: ""), accountType.description)
@@ -114,7 +143,7 @@ public class APWebAuthSession {
         let navController = UINavigationController(rootViewController: loginViewController)
         
         guard let vc = presentationContextProvider?.presentationAnchor(for: self), vc.isVisible else {
-            // Handle error: No presentation anchor found or it's not visible
+            log.error("presentNormalStyle: No presentationContextProvider or anchor VC is not visible.")
             throw APWebAuthenticationError.failed(reason: "Could not find a valid view controller to present from.")
         }
         
@@ -123,7 +152,8 @@ public class APWebAuthSession {
     
     private func presentSafariStyle() throws {
         guard let loginViewController = loginViewController else {
-            throw APWebAuthenticationError.loginCanceled
+            log.error("presentSafariStyle: loginViewController is nil.")
+            throw APWebAuthenticationError.canceled
         }
         
         let navView = AuthNavBarView()
@@ -152,7 +182,7 @@ public class APWebAuthSession {
         navController.modalPresentationStyle = .formSheet
         
         guard let vc = presentationContextProvider?.presentationAnchor(for: self), vc.isVisible else {
-            // Handle error: No presentation anchor found or it's not visible
+            log.error("presentSafariStyle: No presentationContextProvider or anchor VC is not visible.")
             throw APWebAuthenticationError.failed(reason: "Could not find a valid view controller to present from.")
         }
         

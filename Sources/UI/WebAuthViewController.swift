@@ -5,6 +5,7 @@ import SwiftyJSON
 @preconcurrency import WebKit
 import UIKit
 import JGProgressHUD
+import SwiftyBeaver
 
 extension WebAuthViewController {
     public typealias CompletionHandler = (Result<[String: String]?, APWebAuthenticationError>) -> Void
@@ -135,6 +136,7 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
         self.completionHandler = completionHandler
         
         super.init(nibName: nil, bundle: nil)
+        log.debug("WebAuthViewController init for \(authURL?.host ?? "nil URL")")
     }
     
     public required init(coder aDecoder: NSCoder) {
@@ -143,6 +145,8 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
     
     override open func viewDidLoad() {
         super.viewDidLoad()
+        
+        log.debug("WebAuthViewController viewDidLoad")
         
         webView.navigationDelegate = self
         
@@ -262,9 +266,11 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
         let dataStore = self.webView.configuration.websiteDataStore
         let allTypes = WKWebsiteDataStore.allWebsiteDataTypes()
         
+        log.debug("Clearing WKWebsiteDataStore...")
         dataStore.fetchDataRecords(ofTypes: allTypes) { [weak self] records in
             guard let self = self else { return }
             dataStore.removeData(ofTypes: allTypes, for: records) {
+                log.debug("DataStore cleared. Calling loadRequest().")
                 self.loadRequest()
             }
         }
@@ -280,6 +286,7 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
         super.viewWillAppear(animated)
         
         if !observerAdded, appearanceStyle == .safari {
+            log.debug("WebAuthVC viewWillAppear. Adding KVO observer.")
             webView.addObserver(self, forKeyPath: #keyPath(WKWebView.estimatedProgress), options: .new, context: nil)
             observerAdded = true
         }
@@ -289,6 +296,7 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
         super.viewWillDisappear(animated)
         
         if observerAdded {
+            log.debug("WebAuthVC viewWillDisappear. Removing KVO observer.")
             webView.removeObserver(self, forKeyPath: #keyPath(WKWebView.estimatedProgress))
             observerAdded = false
         }
@@ -340,6 +348,7 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
     override open func observeValue(forKeyPath keyPath: String?, of _: Any?, change _: [NSKeyValueChangeKey: Any]?, context _: UnsafeMutableRawPointer?) {
         if keyPath == "estimatedProgress" {
             Task { @MainActor in
+                log.verbose("KVO: estimatedProgress = \(self.webView.estimatedProgress)")
                 self.updateProgressBar(Float(self.webView.estimatedProgress))
             }
         }
@@ -355,60 +364,70 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
     
     // MARK: - WKNavigationDelegate
     open func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, preferences: WKWebpagePreferences, decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void) {
-
-        print(navigationAction.request.url?.absoluteString ?? "nil URL")
         
-        if let urlString = navigationAction.request.url?.absoluteString, let currentRedirectURL = redirectURL?.absoluteString, !urlString.isEmpty {
+        let urlString = navigationAction.request.url?.absoluteString ?? "nil URL"
+        log.debug("decidePolicyFor navigationAction: \(urlString)")
+        
+        if let currentRedirectURL = redirectURL?.absoluteString, !urlString.isEmpty {
             
-            print("redirectURL: \(currentRedirectURL)")
+            log.debug("Comparing against redirectURL: \(currentRedirectURL)")
             
             if urlString.hasPrefix(currentRedirectURL) {
+                log.info("Redirect URL detected. Processing callback.")
                 let result = navigationAction.request.url?.getResponse()
+                
                 if case let .success(params) = result {
-                    
-                    self.dismiss(animated: true) {
-                        self.completionHandler?(.success(params))
-                        self.completionHandler = nil
-                    }
+                    log.info("Callback success. Calling completionHandler.")
+                    self.completionHandler?(.success(params))
                 } else if case let .failure(error) = result {
-                    
-                    self.dismiss(animated: true) {
-                        self.completionHandler?(.failure(error))
-                        self.completionHandler = nil
-                    }
+                    log.warning("Callback failure. Calling completionHandler with error: \(error.localizedDescription)")
+                    self.completionHandler?(.failure(error))
                 }
+                self.completionHandler = nil // Clear the handler
+                
+                log.debug("Dismissing view controller.")
+                self.dismiss(animated: true)
                 
                 decisionHandler(.cancel, preferences)
                 return
             }
         }
         
+        log.debug("Allowing navigation.")
         decisionHandler(.allow, preferences)
     }
     
     open func webView(_: WKWebView, didStartProvisionalNavigation _: WKNavigation!) {
+        log.debug("didStartProvisionalNavigation")
         didStartLoading()
     }
     
-    open func webView(_: WKWebView, didFail _: WKNavigation!, withError _: Error) {
+    open func webView(_: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        log.warning("didFail navigation: \(error.localizedDescription)")
         didStopLoading()
     }
     
-    open func webView(_: WKWebView, didFailProvisionalNavigation _: WKNavigation!, withError _: Error) {
+    open func webView(_: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+        log.warning("didFailProvisionalNavigation: \(error.localizedDescription)")
         didStopLoading()
     }
     
     public func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse, decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
+        let urlString = navigationResponse.response.url?.absoluteString ?? "nil URL"
+        log.debug("decidePolicyFor navigationAction (JSON Check): \(urlString)")
+
         isJSONContentType = navigationResponse.response.mimeType == "application/json"
         decisionHandler(.allow)
     }
     
     open func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        log.debug("didFinish navigation.")
         initialLoaded = true
         
         didStopLoading()
         
         if isJSONContentType {
+            log.debug("Content-Type is JSON, attempting to parse...")
             Task {
                 await parseAndHandleJSONResponse()
             }
@@ -417,6 +436,7 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
     
     private func parseAndHandleJSONResponse() async {
         guard let htmlString = await loadJavascript("document.body.innerText"), !htmlString.isEmpty else {
+            log.error("Failed to get HTML string from javascript.")
             return
         }
         
@@ -429,6 +449,7 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
         else if response["status"].stringValue == "failure", let msg = response["message"].string { errorMessage = msg }
         
         if let finalMessage = errorMessage, !finalMessage.isEmpty {
+            log.warning("Found error in JSON response: \(finalMessage)")
             completionHandler?(.failure(APWebAuthenticationError.failed(reason: finalMessage)))
             dismiss(animated: true)
         }
@@ -439,6 +460,7 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
     public func storeCookies(_ cookies: [HTTPCookie]?) async {
         guard let cookies = cookies, !cookies.isEmpty else { return }
         
+        log.debug("Storing \(cookies.count) cookies...")
         await withTaskGroup(of: Void.self) { group in
             for cookie in cookies {
                 group.addTask {
@@ -450,7 +472,9 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
     
     public func getCookies() async -> [HTTPCookie] {
         await withCheckedContinuation { continuation in
+            log.debug("Getting all cookies from WKHTTPCookieStore...")
             webView.configuration.websiteDataStore.httpCookieStore.getAllCookies { cookies in
+                log.debug("Found \(cookies.count) cookies.")
                 continuation.resume(returning: cookies)
             }
         }
@@ -460,12 +484,16 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
     
     open func loadRequest() {
         if let url = authURL {
+            log.info("Loading request: \(url.absoluteString)")
             let request = URLRequest(url: url)
             webView.load(request)
+        } else {
+            log.error("loadRequest() called but authURL is nil.")
         }
     }
     
     public func didStartLoading() {
+        log.verbose("didStartLoading (UI update)")
         if appearanceStyle == .normal {
             activityIndicator.startAnimating()
             
@@ -482,6 +510,7 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
     }
     
     public func didStopLoading() {
+        log.verbose("didStopLoading (UI update)")
         if navigationItem.rightBarButtonItems != completedBarButtonItems {
             navigationItem.rightBarButtonItems = completedBarButtonItems
         }
@@ -502,24 +531,29 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
             let result = try await webView.evaluateJavaScript(javaScriptString)
             return result as? String
         } catch {
+            log.error("evaluateJavaScript failed: \(error.localizedDescription)")
             return nil
         }
     }
     
     @objc func dismissCancelled(_: Any?) {
+        log.info("dismissCancelled: User tapped cancel button.")
         self.dismiss(animated: true) {
-            self.completionHandler?(.failure(APWebAuthenticationError.loginCanceled))
+            self.completionHandler?(.failure(APWebAuthenticationError.canceled))
+            self.completionHandler = nil
         }
     }
     
     @objc open func textTransform(_: Any?) {}
     
     @objc open func refresh(_: Any?) {
+        log.debug("refresh tapped.")
         initialLoaded = false
         loadRequest()
     }
     
     @objc fileprivate func stop(_: Any?) {
+        log.debug("stop tapped.")
         initialLoaded = false
         
         webView.stopLoading()
@@ -529,20 +563,24 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
     // MARK: - Toolbar Actions
     
     @objc fileprivate func goBackTapped(_: UIBarButtonItem) {
+        log.debug("goBackTapped")
         webView.goBack()
     }
     
     @objc fileprivate func goForwardTapped(_: UIBarButtonItem) {
+        log.debug("goForwardTapped")
         webView.goForward()
     }
     
     @objc fileprivate func openInSafari(_: UIBarButtonItem) {
+        log.debug("openInSafari tapped.")
         if authURL != nil, let url: URL = ((webView.url != nil) ? webView.url : authURL) {
             UIApplication.shared.open(url, options: [:])
         }
     }
     
     @objc fileprivate func actionButtonTapped(_ sender: AnyObject) {
+        log.debug("actionButtonTapped")
         if authURL != nil, let url: URL = ((webView.url != nil) ? webView.url : authURL) {
             let activities: [UIActivity] = [WebActivitySafari()]
             
@@ -565,10 +603,12 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
     // MARK: - UI Loading
     
     public func showHUD() {
+        log.verbose("showHUD")
         self.loginHUD.show(in: self.view)
     }
     
     public func hideHUD() {
+        log.verbose("hideHUD")
         self.loginHUD.dismiss()
     }
 }

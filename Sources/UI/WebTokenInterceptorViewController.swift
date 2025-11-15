@@ -13,7 +13,6 @@ open class WebTokenInterceptorViewController: UIViewController, WKNavigationDele
     public var customUserAgent: String?
     open var isFinished = false
     
-    // REFACTOR: Use the Sendable-safe typealias from WebAuthViewController
     open var completionHandler: WebAuthViewController.CompletionHandler
     var url: URL
     var forURL: URL
@@ -33,8 +32,6 @@ open class WebTokenInterceptorViewController: UIViewController, WKNavigationDele
     
     fileprivate lazy var webViewConfiguration: WKWebViewConfiguration = {
         let config = WKWebViewConfiguration()
-        // BUG FIX: Use a non-persistent store to avoid sharing
-        // cookies/data with the main browser.
         config.websiteDataStore = WKWebsiteDataStore.nonPersistent()
         
         return config
@@ -110,8 +107,6 @@ open class WebTokenInterceptorViewController: UIViewController, WKNavigationDele
     }
     
     public func webView(_: WKWebView, didFinish _: WKNavigation!) {
-        // This class is already @MainActor, so DispatchQueue is redundant,
-        // but `asyncAfter` is a fine way to do a delay.
         DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(5)) {
             if !self.isFinished {
                 self.completionHandler(.failure(APWebAuthenticationError.unknown))
@@ -123,9 +118,6 @@ open class WebTokenInterceptorViewController: UIViewController, WKNavigationDele
     
     override open func observeValue(forKeyPath keyPath: String?, of _: Any?, change _: [NSKeyValueChangeKey: Any]?, context _: UnsafeMutableRawPointer?) {
         if keyPath == "estimatedProgress" {
-            // CONCURRENCY FIX: KVO callbacks are not guaranteed to be on the
-            // main thread. We must hop to the @MainActor to safely
-            // call the delegate.
             Task { @MainActor in
                 self.delegate?.didStepLoaded(Float(self.webView.estimatedProgress))
             }
@@ -163,15 +155,13 @@ open class WebTokenInterceptorViewController: UIViewController, WKNavigationDele
     open func requestLoaded(_: URL, forURL _: URL) async {
         guard !isFinished else { return }
         isFinished = true
-        completionHandler(.success(nil)) // nil is valid for [String: String]?
+        completionHandler(.success(nil))
         self.dismiss(animated: true, completion: nil)
     }
 }
 
 @MainActor
 extension WebTokenInterceptorViewController: WKScriptMessageHandler {
-    // This delegate method is guaranteed to be on the main thread,
-    // so it's safe to access all @MainActor properties.
     public func userContentController(_: WKUserContentController, didReceive message: WKScriptMessage) {
         if let results = message.body as? [String: Any], let responseUrl = results["responseURL"] as? String {
             if responseUrl.contains(forURL.absoluteString), let url = URL(string: responseUrl) {

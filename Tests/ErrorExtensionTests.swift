@@ -36,9 +36,6 @@ final class ErrorExtensionTests: XCTestCase {
         let afCancel = AFError.explicitlyCancelled
         XCTAssertTrue(afCancel.isCancelledError)
 
-        let authError = APWebAuthenticationError.loginCanceled
-        XCTAssertTrue(authError.isCancelledError)
-
         let wrapped = AFError.sessionTaskFailed(error: authError)
         XCTAssertTrue(wrapped.isCancelledError)
     }
