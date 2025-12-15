@@ -365,6 +365,7 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
     open func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, preferences: WKWebpagePreferences, decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void) {
         
         let urlString = navigationAction.request.url?.absoluteString ?? "nil URL"
+        log.debug("🕸 WKWebView Navigation Action: \(urlString)")
         
         if checkForRedirect(url: navigationAction.request.url) {
             decisionHandler(.cancel, preferences)
@@ -376,6 +377,7 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
     
     public func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse, decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
         let urlString = navigationResponse.response.url?.absoluteString ?? "nil URL"
+        log.debug("🕸 WKWebView Navigation Response: \(urlString) | MIME: \(navigationResponse.response.mimeType ?? "unknown")")
         
         if checkForRedirect(url: navigationResponse.response.url) {
             decisionHandler(.cancel)
@@ -396,8 +398,10 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
             return false
         }
         
+        log.debug("🔍 Checking Redirect: URL: \(url.absoluteString) vs Redirect: \(currentRedirectURL)")
+        
         if url.absoluteString.hasPrefix(currentRedirectURL) {
-            log.info("Redirect URL detected: \(url.absoluteString)")
+            log.info("✅ Redirect URL MATCH detected: \(url.absoluteString)")
             
             let result = url.getResponse()
             
@@ -419,13 +423,17 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
     }
     
     open func webView(_: WKWebView, didStartProvisionalNavigation _: WKNavigation!) {
+        log.debug("🚀 WKWebView Started Provisional Navigation")
         didStartLoading()
     }
     
     open func webView(_: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
         let nsError = error as NSError
         
+        log.error("❌ WKWebView Navigation Failed: \(error.localizedDescription)")
+        
         if let failingURL = nsError.userInfo[NSURLErrorFailingURLErrorKey] as? URL {
+            log.debug("❌ Failing URL: \(failingURL.absoluteString)")
             if checkForRedirect(url: failingURL) {
                 return
             }
@@ -437,16 +445,20 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
     open func webView(_: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
         let nsError = error as NSError
         
-            if let failingURL = nsError.userInfo[NSURLErrorFailingURLErrorKey] as? URL {
-                if checkForRedirect(url: failingURL) {
-                    return
-                }
+        log.error("❌ WKWebView Provisional Navigation Failed: \(error.localizedDescription)")
+        
+        if let failingURL = nsError.userInfo[NSURLErrorFailingURLErrorKey] as? URL {
+            log.debug("❌ Provisional Failing URL: \(failingURL.absoluteString)")
+            if checkForRedirect(url: failingURL) {
+                return
             }
- 
+        }
+        
         didStopLoading()
     }
     
     open func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        log.debug("🏁 WKWebView Finished Navigation")
         initialLoaded = true
         didStopLoading()
         
@@ -504,6 +516,7 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
     
     open func loadRequest() {
         if let url = authURL {
+            log.debug("🌐 Loading Request: \(url.absoluteString)")
             let request = URLRequest(url: url)
             webView.load(request)
         }
@@ -624,7 +637,7 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
         let button = UIButton(type: .system)
         button.setImage(UIImage(systemName: systemName), for: .normal)
         button.addTarget(self, action: selector, for: .touchUpInside)
-        button.frame = CGRect(x: 0, y: 0, width: 30, height: 30) // Explicit frame
+        button.frame = CGRect(x: 0, y: 0, width: 30, height: 30)
         button.imageView?.contentMode = .scaleAspectFit
         return UIBarButtonItem(customView: button)
     }
@@ -634,8 +647,8 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
         let button = UIButton(type: .system)
         button.setImage(UIImage(systemName: systemName), for: .normal)
         button.addTarget(self, action: selector, for: .touchUpInside)
-        button.frame = CGRect(x: 0, y: 0, width: 40, height: 30) // Explicit frame
-        button.imageView?.contentMode = .scaleAspectFit // <-- Already set here
+        button.frame = CGRect(x: 0, y: 0, width: 40, height: 30)
+        button.imageView?.contentMode = .scaleAspectFit
         return UIBarButtonItem(customView: button)
     }
 }

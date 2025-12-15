@@ -14,5 +14,8 @@ public final class PinterestWebUser: GenericUser, @unchecked Sendable {
                    username: username,
                    fullname: fullname,
                    avatarPicture: avatarPicture)
+        
+        followersCount = info["follower_count"].int32
+        followingCount = info["following_count"].int32
     }
 }
