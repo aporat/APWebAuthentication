@@ -10,6 +10,6 @@ public protocol StoryItem: Sendable {
     var shortcode: String? { get }
     var dateTaken: Date { get }
     var dateExpiring: Date? { get }
-    var views: Int32 { get }
+    var views: Int { get }
     var viewers: [GenericUser] { get }
 }

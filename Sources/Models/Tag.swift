@@ -7,7 +7,7 @@ import SwiftyJSON
 public protocol Tag: Sendable {
     var tagId: String { get }
     var title: String { get }
-    var mediaCount: Int32 { get }
+    var mediaCount: Int { get }
 
     /// A failable initializer to create a tag from a JSON object.
     init?(info: JSON)

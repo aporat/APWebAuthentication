@@ -27,10 +27,10 @@ public protocol MediaItem: Sendable {
     var thumbnail: URL? { get }
     var url: URL? { get }
     var dateTaken: Date { get }
-    var commentsCount: Int32 { get }
-    var likesCount: Int32 { get }
-    var viewsCount: Int32 { get }
+    var commentsCount: Int { get }
+    var likesCount: Int { get }
+    var viewsCount: Int { get }
     var user: User? { get }
     var text: String? { get }
-    var totalCount: Int32 { get }
+    var totalCount: Int { get }
 }

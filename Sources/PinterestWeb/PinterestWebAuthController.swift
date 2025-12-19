@@ -1,77 +1,107 @@
 import Foundation
 import WebKit
+import SwiftyBeaver
 
 @MainActor
 public final class PinterestWebAuthController: WebAuthViewController {
+    
     // MARK: - Data
-
+    
     fileprivate var auth: PinterestWebAuthentication
-    fileprivate var loggedIn = false
-
-    // MARK: - UIViewController
-
+    
+    /// Prevents multiple checks from firing simultaneously (e.g. rapid redirects)
+    fileprivate var isVerifying = false
+    
+    // MARK: - Initialization
+    
     public init(auth: PinterestWebAuthentication, authURL: URL?, redirectURL: URL?, completionHandler: WebAuthViewController.CompletionHandler? = nil) {
         self.auth = auth
         super.init(authURL: authURL, redirectURL: redirectURL, completionHandler: completionHandler)
     }
-
+    
     required init(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
-    // MARK: - WKNavigationDelegate
-
-    override public func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, preferences: WKWebpagePreferences, decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void) {
-
-        if redirectURL == nil {
-            checkForAuthTokens()
+    
+    // MARK: - Redirect Logic Override
+    
+    override func checkForRedirect(url: URL?) -> Bool {
+        guard let url = url else { return false }
+        let urlString = url.absoluteString
+        
+        log.debug("Pinterest Check Redirect: \(urlString)")
+        
+        if let currentRedirectURL = redirectURL?.absoluteString, !currentRedirectURL.isEmpty, urlString.hasPrefix(currentRedirectURL) {
+            log.info("✅ Redirect URL MATCH detected: \(urlString)")
+            attemptAuthVerification()
+            return true
         }
-
-        if let urlString = navigationAction.request.url?.absoluteString, let currentRedirectURL = redirectURL?.absoluteString, !urlString.isEmpty {
-
-            if urlString == "https://www.pinterest.com/me/" ||
-                urlString == "https://www.pinterest.com/" ||
-                urlString == currentRedirectURL
-            {
-                loggedIn = true
-                showHUD()
-
-                DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(3)) {
-                    self.hideHUD()
-                    self.loadRequest()
-                }
-            }
+        
+        if urlString.contains("pinterest.com/settings/") ||
+            urlString.contains("pinterest.com/me/") ||
+            urlString == "https://www.pinterest.com/" {
+            
+            log.info("✅ Pinterest Success Page Detected: \(urlString)")
+            attemptAuthVerification()
+            
+            return true
         }
-
-        decisionHandler(.allow, preferences)
+        
+        return false
     }
-
-    override public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        if loggedIn {
-            checkForAuthTokens()
-        }
-
-        super.webView(webView, didFinish: navigation)
-    }
-
-    fileprivate func checkForAuthTokens() {
+    
+    // MARK: - Verification Logic
+    
+    fileprivate func attemptAuthVerification() {
+        guard !isVerifying else { return }
+        isVerifying = true
+        
+        showHUD()
+        
         Task {
+            let success = await retryCookieCheck(maxRetries: 5, delaySeconds: 0.5)
             
-            let cookies = await self.getCookies()
+            self.hideHUD()
+            self.didStopLoading()
             
-            self.auth.setCookies(cookies)
-            self.auth.loadAuthTokens(forceLoad: true)
-
-            if self.auth.isAuthorized {
-                self.didStopLoading()
-
-                let result: [String: String] = [:]
+            if success {
+                log.info("🔐 Pinterest Authorization Successful")
 
                 self.dismiss(animated: true) {
-                    self.completionHandler?(.success(result))
+                    self.completionHandler?(.success([:]))
+                    self.completionHandler = nil
+                }
+            } else {
+                log.error("❌ Pinterest Authorization Failed: Cookies not found after retries")
+                
+                let error = APWebAuthenticationError.loginFailed(reason: "Login detected, but session cookies could not be retrieved. Please try again.")
+                
+                self.dismiss(animated: true) {
+                    self.completionHandler?(.failure(error))
                     self.completionHandler = nil
                 }
             }
+            
+            self.isVerifying = false
         }
+    }
+    
+    /// Polls for cookies. Returns true if authorized, false if timed out.
+    private func retryCookieCheck(maxRetries: Int, delaySeconds: Double) async -> Bool {
+        for attempt in 1...maxRetries {
+            log.debug("🍪 Checking cookies (Attempt \(attempt)/\(maxRetries))...")
+            
+            let cookies = await self.getCookies()
+            self.auth.setCookies(cookies)
+            self.auth.loadAuthTokens(forceLoad: true)
+            
+            if self.auth.isAuthorized {
+                return true
+            }
+            
+            try? await Task.sleep(nanoseconds: UInt64(delaySeconds * 1_000_000_000))
+        }
+        
+        return false
     }
 }

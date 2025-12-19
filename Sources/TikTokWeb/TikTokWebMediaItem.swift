@@ -9,9 +9,9 @@ public final class TikTokWebMediaItem: MediaItem, Hashable, @unchecked Sendable 
     public var thumbnail: URL?
     public var url: URL?
     public var dateTaken: Date
-    public var commentsCount: Int32
-    public var likesCount: Int32
-    public var viewsCount: Int32
+    public var commentsCount: Int
+    public var likesCount: Int
+    public var viewsCount: Int
     public var user: User?
     public var text: String?
     
@@ -30,9 +30,9 @@ public final class TikTokWebMediaItem: MediaItem, Hashable, @unchecked Sendable 
             thumbnail = info["video"]["cover"].url
         }
         
-        commentsCount = info["stats"]["commentCount"].int32Number ?? 0
-        likesCount = info["stats"]["diggCount"].int32Number ?? 0
-        viewsCount = info["stats"]["playCount"].int32Number ?? 0
+        commentsCount = info["stats"]["commentCount"].int ?? 0
+        likesCount = info["stats"]["diggCount"].int ?? 0
+        viewsCount = info["stats"]["playCount"].int ?? 0
     }
     
     public func hash(into hasher: inout Hasher) {
@@ -43,7 +43,7 @@ public final class TikTokWebMediaItem: MediaItem, Hashable, @unchecked Sendable 
         lhs.mediaId == rhs.mediaId
     }
     
-    public var totalCount: Int32 {
-        Int32(likesCount + commentsCount)
+    public var totalCount: Int {
+        Int(likesCount + commentsCount)
     }
 }

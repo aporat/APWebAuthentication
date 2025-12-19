@@ -180,13 +180,20 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
             newNavBarAppearance.largeTitleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor(named: "TintColor")!]
             newNavBarAppearance.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor(named: "TintColor")!]
             
+            refreshBarButtonItem.setTitleTextAttributes([.foregroundColor: UIColor.black], for: .normal)
+            activityBarButtonItem.setTitleTextAttributes([.foregroundColor: UIColor.black], for: .normal)
+            dismissBarButtonItem.setTitleTextAttributes([.foregroundColor: UIColor.black], for: .normal)
+            
             self.navigationController?.navigationBar.standardAppearance = newNavBarAppearance
             self.navigationController?.navigationBar.scrollEdgeAppearance = newNavBarAppearance
             self.navigationController?.navigationBar.compactAppearance = newNavBarAppearance
             self.navigationController?.navigationBar.compactScrollEdgeAppearance = newNavBarAppearance
         } else {
+            
             let newNavBarAppearance = UINavigationBarAppearance()
             newNavBarAppearance.configureWithOpaqueBackground()
+            
+            self.navigationController?.navigationBar.isTranslucent = false
             
             if let currentNavigationController = navigationController, currentNavigationController.traitCollection.userInterfaceStyle == .dark {
                 newNavBarAppearance.backgroundColor = UIColor(hex: 0x565656)!
@@ -194,13 +201,13 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
                 newNavBarAppearance.backgroundColor = UIColor(hex: 0xF8F8F8)!
             }
             
-            newNavBarAppearance.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor(hex: 0x0079FF)!]
+            newNavBarAppearance.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.label]
+            newNavBarAppearance.largeTitleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.label]
             
             self.navigationController?.navigationBar.standardAppearance = newNavBarAppearance
             self.navigationController?.navigationBar.scrollEdgeAppearance = newNavBarAppearance
             self.navigationController?.navigationBar.compactAppearance = newNavBarAppearance
             self.navigationController?.navigationBar.compactScrollEdgeAppearance = newNavBarAppearance
-            
             let newToolbarBarAppearance = UIToolbarAppearance()
             newToolbarBarAppearance.configureWithOpaqueBackground()
             
@@ -231,7 +238,7 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
                     newNavBarAppearance.backgroundColor = UIColor(hex: 0xF8F8F8)!
                 }
                 
-                newNavBarAppearance.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor(hex: 0x0079FF)!]
+                newNavBarAppearance.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.label]
                 currentNavigationController.navigationBar.standardAppearance = newNavBarAppearance
                 currentNavigationController.navigationBar.scrollEdgeAppearance = newNavBarAppearance
                 currentNavigationController.navigationBar.compactAppearance = newNavBarAppearance
@@ -304,7 +311,7 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
         super.updateViewConstraints()
         
         webView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
+            make.edges.equalTo(view.safeAreaLayoutGuide)
         }
     }
     
@@ -393,7 +400,7 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
     
     // MARK: - Helper Logic
     
-    private func checkForRedirect(url: URL?) -> Bool {
+    func checkForRedirect(url: URL?) -> Bool {
         guard let url = url, let currentRedirectURL = redirectURL?.absoluteString, !currentRedirectURL.isEmpty else {
             return false
         }
@@ -419,13 +426,17 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
             
             return true
         }
+        
         return false
     }
     
-    open func webView(_: WKWebView, didStartProvisionalNavigation _: WKNavigation!) {
-        log.debug("🚀 WKWebView Started Provisional Navigation")
+    open func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
+        let urlString = webView.url?.absoluteString ?? "nil URL"
+        log.debug("🚀 WKWebView Started Provisional Navigation: \(urlString)")
+        
         didStartLoading()
     }
+    
     
     open func webView(_: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
         let nsError = error as NSError
@@ -458,9 +469,15 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
     }
     
     open func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        log.debug("🏁 WKWebView Finished Navigation")
+        let urlString = webView.url?.absoluteString ?? "nil URL"
+        log.debug("🏁 WKWebView Finished Navigation: \(urlString)")
+        
         initialLoaded = true
         didStopLoading()
+        
+        if checkForRedirect(url: webView.url) {
+            return
+        }
         
         if isJSONContentType {
             Task {
