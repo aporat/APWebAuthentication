@@ -8,7 +8,7 @@ import JGProgressHUD
 import SwiftyBeaver
 
 extension WebAuthViewController {
-    public typealias CompletionHandler = (Result<[String: String]?, APWebAuthenticationError>) -> Void
+    public typealias CompletionHandler = (Result<[String: Any]?, APWebAuthenticationError>) -> Void
 }
 
 extension WebAuthViewController {

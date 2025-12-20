@@ -37,7 +37,6 @@ private struct CodableHTTPCookie: Codable, Sendable {
 @MainActor
 open class SessionAuthentication: Authentication {
     public var keepDeviceSettings = true
-    public var cookieSessionIdField = "session_id"
     public var sessionId: String?
     public var csrfToken: String?
     public var cookiesDomain = ""

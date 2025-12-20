@@ -51,10 +51,6 @@ public final class PinterestWebAPIClient: AuthClient {
             requestAdapter.auth.cookiesDomain = value
         }
         
-        if let value = options?["cookie_session_id_field"].string {
-            requestAdapter.auth.cookieSessionIdField = value
-        }
-        
         if let value = options?["app_id"].string {
             requestAdapter.auth.appId = value
         }

@@ -7,7 +7,6 @@ public final class TikTokWebAuthentication: SessionAuthentication {
     private struct AuthSettings: Codable, Sendable {
         var signatureUrl: URL?
         var cookiesDomain: String?
-        var cookieSessionIdField: String?
         var browserMode: UserAgentMode?
         var customUserAgent: String?
         var sessionId: String?
@@ -40,11 +39,6 @@ public final class TikTokWebAuthentication: SessionAuthentication {
     public var browserVersion: String = "5.0+(iPhone;+CPU+iPhone+OS+13_2_3+like+Mac+OS+X)+AppleWebKit/605.1.15+(KHTML,+like+Gecko)+Version/13.0.3+Mobile/15E148+Safari/604.1"
     public var timezoneName: String = "America/Chicago"
     
-    public required init() {
-        super.init()
-        cookieSessionIdField = "sessionid"
-    }
-    
     override public var isAuthorized: Bool {
         if let currentSessionId = sessionId, !currentSessionId.isEmpty { return true }
         return false
@@ -60,7 +54,7 @@ public final class TikTokWebAuthentication: SessionAuthentication {
                         self.ttWebId = $0.value
                     } else if $0.name == "uid_tt", !$0.value.isEmpty {
                         self.uidtt = $0.value
-                    } else if $0.name == cookieSessionIdField, !$0.value.isEmpty {
+                    } else if $0.name == "sessionid", !$0.value.isEmpty {
                         self.sessionId = $0.value
                     }
                 }
@@ -74,7 +68,6 @@ public final class TikTokWebAuthentication: SessionAuthentication {
         let settings = AuthSettings(
             signatureUrl: signatureUrl,
             cookiesDomain: cookiesDomain,
-            cookieSessionIdField: cookieSessionIdField,
             browserMode: browserMode,
             customUserAgent: customUserAgent,
             sessionId: sessionId,
@@ -120,7 +113,6 @@ public final class TikTokWebAuthentication: SessionAuthentication {
             
             signatureUrl = settings.signatureUrl ?? signatureUrl
             cookiesDomain = settings.cookiesDomain ?? cookiesDomain
-            cookieSessionIdField = settings.cookieSessionIdField ?? cookieSessionIdField
             browserMode = settings.browserMode ?? browserMode
             customUserAgent = settings.customUserAgent ?? customUserAgent
             sessionId = settings.sessionId ?? sessionId

@@ -2,6 +2,13 @@ import UIKit
 import SwiftyBeaver
 import SwifterSwift
 
+// MARK: - Helper Wrapper
+/// A wrapper to transport [String: Any] safely across async boundaries.
+public struct APWebAuthResult: @unchecked Sendable {
+    public let data: [String: Any]
+    public init(_ data: [String: Any]) { self.data = data }
+}
+
 extension APWebAuthSession {
     public enum AppearanceStyle: Int {
         case normal
@@ -29,13 +36,13 @@ public class APWebAuthSession {
     }
     
     @discardableResult
-    public func start(url URL: URL, callbackURL: URL) async throws(APWebAuthenticationError) -> [String: String]? {
+    public func start(url URL: URL, callbackURL: URL) async throws(APWebAuthenticationError) -> APWebAuthResult? {
         loginViewController = WebAuthViewController(authURL: URL, redirectURL: callbackURL)
         return try await start()
     }
     
     @discardableResult
-    public func start() async throws(APWebAuthenticationError) -> [String: String]? {
+    public func start() async throws(APWebAuthenticationError) -> APWebAuthResult? {
         do {
             if appearanceStyle == .safari {
                 let loginRequested = await showLoginPermission()
@@ -43,34 +50,40 @@ public class APWebAuthSession {
                     throw APWebAuthenticationError.canceled
                 }
             }
-                
-            return try await withCheckedThrowingContinuation { (continuation: (CheckedContinuation<[String: String]?, Error>)) in
+            
+            return try await withCheckedThrowingContinuation { (continuation: (CheckedContinuation<APWebAuthResult?, Error>)) in
                 
                 guard let loginVC = self.loginViewController else {
                     log.error("loginViewController is nil before completionHandler can be set.")
                     continuation.resume(throwing: APWebAuthenticationError.canceled)
                     return
                 }
-
-                loginVC.completionHandler = { [weak self] result in
+                
+                loginVC.completionHandler = { [weak self] (result: Result<[String: Any]?, APWebAuthenticationError>) in
                     
                     switch result {
                     case .success(let params):
-                        continuation.resume(returning: params)
+                        if let params = params {
+                            let safeResult = APWebAuthResult(params)
+                            continuation.resume(returning: safeResult)
+                        } else {
+                            continuation.resume(returning: nil)
+                        }
+                        
                     case .failure(let error):
                         log.error("completionHandler: Failure. Resuming with error: \(error.localizedDescription)")
                         continuation.resume(throwing: error)
                     }
-                        
+                    
                     guard let self = self else {
                         return
                     }
-                        
+                    
                     self.loginViewController?.dismiss(animated: true) {
-                        self.loginViewController = nil // Break the cycle
+                        self.loginViewController = nil
                     }
                 }
-                    
+                
                 do {
                     if appearanceStyle == .safari {
                         try self.presentSafariStyle()
@@ -86,7 +99,7 @@ public class APWebAuthSession {
         } catch {
             log.error("APWebAuthSession start() threw an error: \(error.localizedDescription)")
             self.loginViewController = nil
-                
+            
             throw (error as? APWebAuthenticationError) ?? .failed(reason: error.localizedDescription)
         }
     }
