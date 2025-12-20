@@ -13,6 +13,7 @@ public class TwitchAPIClient: AuthClient {
     
     public convenience init(auth: Auth2Authentication) {
         let requestAdapter = TwitchRequestAdapter(auth: auth)
+        requestAdapter.tokenLocation = .authorizationHeader
         let retrier = AuthClientRequestRetrier()
         let interceptor = Interceptor(adapters: [requestAdapter], retriers: [retrier])
         

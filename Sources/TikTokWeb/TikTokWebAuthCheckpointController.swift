@@ -4,6 +4,7 @@ import WebKit
 public final class TikTokWebAuthCheckpointController: WebTokenInterceptorViewController {
     // MARK: - Data
 
+    /*
     fileprivate var auth: TikTokWebAuthentication
 
     // MARK: - UIViewController
@@ -21,5 +22,5 @@ public final class TikTokWebAuthCheckpointController: WebTokenInterceptorViewCon
             await storeCookies(auth.getCookies())
             super.loadRequest()
         }
-    }
+    }*/
 }

@@ -4,7 +4,7 @@ import WebKit
 public final class TikTokWebSignatureController: WebTokenInterceptorViewController {
     
     // MARK: - Data
-    
+    /*
     fileprivate var auth: TikTokWebAuthentication
     
     // MARK: - UIViewController
@@ -55,5 +55,5 @@ public final class TikTokWebSignatureController: WebTokenInterceptorViewControll
                 isFinished = true
             }
         }
-    }
+    }*/
 }

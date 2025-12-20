@@ -13,7 +13,8 @@ open class WebTokenInterceptorViewController: UIViewController, WKNavigationDele
     public var customUserAgent: String?
     open var isFinished = false
     
-    open var completionHandler: WebAuthViewController.CompletionHandler
+    private var continuation: CheckedContinuation<Void, Error>?
+    
     var url: URL
     var forURL: URL
     
@@ -33,7 +34,6 @@ open class WebTokenInterceptorViewController: UIViewController, WKNavigationDele
     fileprivate lazy var webViewConfiguration: WKWebViewConfiguration = {
         let config = WKWebViewConfiguration()
         config.websiteDataStore = WKWebsiteDataStore.nonPersistent()
-        
         return config
     }()
     
@@ -43,14 +43,12 @@ open class WebTokenInterceptorViewController: UIViewController, WKNavigationDele
         view.isMultipleTouchEnabled = true
         view.autoresizesSubviews = true
         view.scrollView.alwaysBounceVertical = true
-        
         return view
     }()
     
-    public init(url: URL, forURL: URL, completionHandler: @escaping WebAuthViewController.CompletionHandler) {
+    public init(url: URL, forURL: URL) {
         self.url = url
         self.forURL = forURL
-        self.completionHandler = completionHandler
         
         super.init(nibName: nil, bundle: nil)
         
@@ -59,7 +57,6 @@ open class WebTokenInterceptorViewController: UIViewController, WKNavigationDele
         webViewConfiguration.userContentController.add(self, name: "handler")
         
         webView.navigationDelegate = self
-        webView.addObserver(self, forKeyPath: #keyPath(WKWebView.estimatedProgress), options: .new, context: nil)
         view.addSubview(webView)
     }
     
@@ -67,11 +64,14 @@ open class WebTokenInterceptorViewController: UIViewController, WKNavigationDele
         fatalError("init(coder:) has not been implemented")
     }
     
-    @objc public func didCancel() {
+    public func start() async throws {
         guard !isFinished else { return }
-        isFinished = true
-        completionHandler(.failure(APWebAuthenticationError.canceled))
-        self.dismiss(animated: true, completion: nil)
+        
+        return try await withCheckedThrowingContinuation { continuation in
+            self.continuation = continuation
+            
+            self.loadRequest()
+        }
     }
     
     open func loadRequest() {
@@ -85,7 +85,6 @@ open class WebTokenInterceptorViewController: UIViewController, WKNavigationDele
     public func stopLoading() {
         webView.stopLoading()
         
-        // Safely remove observer
         webView.removeObserver(self, forKeyPath: #keyPath(WKWebView.estimatedProgress))
         webViewConfiguration.userContentController.removeScriptMessageHandler(forName: XMLHttpRequestInjectCodeHandler)
         webViewConfiguration.userContentController.removeAllUserScripts()
@@ -107,19 +106,13 @@ open class WebTokenInterceptorViewController: UIViewController, WKNavigationDele
     }
     
     public func webView(_: WKWebView, didFinish _: WKNavigation!) {
-        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(5)) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(5)) { [weak self] in
+            guard let self = self else { return }
+            
             if !self.isFinished {
-                self.completionHandler(.failure(APWebAuthenticationError.unknown))
-            }
-        }
-    }
-    
-    // MARK: - KVO
-    
-    override open func observeValue(forKeyPath keyPath: String?, of _: Any?, change _: [NSKeyValueChangeKey: Any]?, context _: UnsafeMutableRawPointer?) {
-        if keyPath == "estimatedProgress" {
-            Task { @MainActor in
-                self.delegate?.didStepLoaded(Float(self.webView.estimatedProgress))
+                self.isFinished = true
+                self.continuation?.resume(throwing: APWebAuthenticationError.unknown)
+                self.continuation = nil
             }
         }
     }
@@ -155,7 +148,10 @@ open class WebTokenInterceptorViewController: UIViewController, WKNavigationDele
     open func requestLoaded(_: URL, forURL _: URL) async {
         guard !isFinished else { return }
         isFinished = true
-        completionHandler(.success(nil))
+        
+        continuation?.resume(returning: ())
+        continuation = nil
+        
         self.dismiss(animated: true, completion: nil)
     }
 }
