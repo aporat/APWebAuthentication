@@ -9,14 +9,13 @@ public final class PinterestWebAuthController: WebAuthViewController {
     
     fileprivate var auth: PinterestWebAuthentication
     
-    /// Prevents multiple checks from firing simultaneously (e.g. rapid redirects)
     fileprivate var isVerifying = false
     
     // MARK: - Initialization
     
-    public init(auth: PinterestWebAuthentication, authURL: URL?, redirectURL: URL?, completionHandler: WebAuthViewController.CompletionHandler? = nil) {
+    public init(auth: PinterestWebAuthentication, authURL: URL?, redirectURL: URL?) {
         self.auth = auth
-        super.init(authURL: authURL, redirectURL: redirectURL, completionHandler: completionHandler)
+        super.init(authURL: authURL, redirectURL: redirectURL)
     }
     
     required init(coder _: NSCoder) {

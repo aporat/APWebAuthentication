@@ -10,9 +10,9 @@ public final class TikTokWebAuthViewController: WebAuthViewController {
 
     // MARK: - UIViewController
 
-    public init(auth: TikTokWebAuthentication, authURL: URL?, redirectURL: URL?, completionHandler: WebAuthViewController.CompletionHandler? = nil) {
+    public init(auth: TikTokWebAuthentication, authURL: URL?, redirectURL: URL?) {
         self.auth = auth
-        super.init(authURL: authURL, redirectURL: redirectURL, completionHandler: completionHandler)
+        super.init(authURL: authURL, redirectURL: redirectURL)
     }
 
     required init(coder _: NSCoder) {

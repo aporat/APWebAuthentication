@@ -20,16 +20,30 @@ open class WebTokenInterceptorViewController: UIViewController, WKNavigationDele
     
     fileprivate let XMLHttpRequestInjectCodeHandler = "handler"
     fileprivate let XMLHttpRequestInjectCode = """
-    var open = XMLHttpRequest.prototype.open;
-    XMLHttpRequest.prototype.open = function() {
-        this.addEventListener("load", function() {
-            var message = {"status" : this.status, "responseURL" : this.responseURL}
-            webkit.messageHandlers.handler.postMessage(message);
-        });
-    
-        open.apply(this, arguments);
-    };
-    """
+        var open = XMLHttpRequest.prototype.open;
+        var setRequestHeader = XMLHttpRequest.prototype.setRequestHeader;
+        
+        XMLHttpRequest.prototype.open = function() {
+            this._headers = {};
+            this.addEventListener("load", function() {
+                var message = {
+                    "status" : this.status, 
+                    "responseURL" : this.responseURL,
+                    "requestHeaders" : this._headers,
+                    "responseHeaders" : this.getAllResponseHeaders()
+                };
+                webkit.messageHandlers.handler.postMessage(message);
+            });
+        
+            open.apply(this, arguments);
+        };
+        
+        XMLHttpRequest.prototype.setRequestHeader = function(header, value) {
+            if (!this._headers) this._headers = {};
+            this._headers[header] = value;
+            setRequestHeader.apply(this, arguments);
+        };
+        """
     
     fileprivate lazy var webViewConfiguration: WKWebViewConfiguration = {
         let config = WKWebViewConfiguration()
@@ -85,7 +99,6 @@ open class WebTokenInterceptorViewController: UIViewController, WKNavigationDele
     public func stopLoading() {
         webView.stopLoading()
         
-        webView.removeObserver(self, forKeyPath: #keyPath(WKWebView.estimatedProgress))
         webViewConfiguration.userContentController.removeScriptMessageHandler(forName: XMLHttpRequestInjectCodeHandler)
         webViewConfiguration.userContentController.removeAllUserScripts()
         webViewConfiguration.userContentController.removeAllContentRuleLists()
@@ -122,6 +135,7 @@ open class WebTokenInterceptorViewController: UIViewController, WKNavigationDele
     @discardableResult
     public func loadJavascript(_ javaScriptString: String) async -> String? {
         let result = try? await webView.evaluateJavaScript(javaScriptString)
+        log.debug(result)
         return result as? String
     }
     
@@ -145,13 +159,12 @@ open class WebTokenInterceptorViewController: UIViewController, WKNavigationDele
         }
     }
     
-    open func requestLoaded(_: URL, forURL _: URL) async {
+    open func requestLoaded(_: URL, forURL _: URL, requestHeaders: [String: Any]?, responseHeaders: String?) async {
+
         guard !isFinished else { return }
         isFinished = true
-        
         continuation?.resume(returning: ())
         continuation = nil
-        
         self.dismiss(animated: true, completion: nil)
     }
 }
@@ -159,10 +172,19 @@ open class WebTokenInterceptorViewController: UIViewController, WKNavigationDele
 @MainActor
 extension WebTokenInterceptorViewController: WKScriptMessageHandler {
     public func userContentController(_: WKUserContentController, didReceive message: WKScriptMessage) {
-        if let results = message.body as? [String: Any], let responseUrl = results["responseURL"] as? String {
+        // Ensure we can cast the body to a Dictionary
+        if let results = message.body as? [String: Any],
+           let responseUrl = results["responseURL"] as? String {
+            
+            log.debug(results)
+
             if responseUrl.contains(forURL.absoluteString), let url = URL(string: responseUrl) {
+                let requestHeaders = results["requestHeaders"] as? [String: Any]
+                
+                let responseHeaders = results["responseHeaders"] as? String
+
                 Task {
-                    await requestLoaded(url, forURL: forURL)
+                    await requestLoaded(url, forURL: forURL, requestHeaders: requestHeaders, responseHeaders: responseHeaders)
                 }
             }
         }

@@ -130,10 +130,9 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
     
     // MARK: - UIViewController
     
-    public init(authURL: URL?, redirectURL: URL?, completionHandler: WebAuthViewController.CompletionHandler? = nil) {
+    public init(authURL: URL?, redirectURL: URL?) {
         self.authURL = authURL
         self.redirectURL = redirectURL
-        self.completionHandler = completionHandler
         
         super.init(nibName: nil, bundle: nil)
     }
