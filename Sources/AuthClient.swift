@@ -147,7 +147,6 @@ open class AuthClient {
     }
     
     
-    // REVERT: This function is now fully reverted to use JSON.
     open func generateError(from response: DataResponse<JSON, AFError>) -> APWebAuthenticationError {
         
         let json = parseJson(from: response)
@@ -157,14 +156,14 @@ open class AuthClient {
             if afError.isSessionTaskError {
                 let errorJson = parseJson(from: response)
                 let reason = String(format: NSLocalizedString("Check your network connection. %@ could also be down.", comment: ""), accountType.description)
-                // Pass the original SwiftyJSON object
+
                 return .connectionError(reason: reason, responseJSON: errorJson)
             }
         }
         
-        let jsonErrorMessage = extractErrorMessage(from: json) // Calls potentially overridden method
+        let jsonErrorMessage = extractErrorMessage(from: json)
         let underlyingErrorMessage = extractUnderlyingErrorMessage(from: response)
-        let reason = jsonErrorMessage ?? underlyingErrorMessage // Best available message
+        let reason = jsonErrorMessage ?? underlyingErrorMessage
         
         if isServerError(response: response, json: json) {
             let serverReason = underlyingErrorMessage ?? String(format: "Internal server error. %@ might be down.", accountType.description)
@@ -172,7 +171,6 @@ open class AuthClient {
         }
         
         if isCheckpointRequired(response: response, json: json) {
-            // let checkpointReason = jsonErrorMessage ?? "Checkpoint or feedback required."
             return .checkPointRequired(content: json)
         }
         
