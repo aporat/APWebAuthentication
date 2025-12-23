@@ -9,14 +9,20 @@ public protocol WebTokensDelegate: AnyObject {
 
 @MainActor
 open class WebTokenInterceptorViewController: UIViewController, WKNavigationDelegate {
+    
+    // MARK: - Properties
+    
     public weak var delegate: WebTokensDelegate?
     public var customUserAgent: String?
     open var isFinished = false
+    public var isInteractive = false
     
     private var continuation: CheckedContinuation<Void, Error>?
     
     var url: URL
-    var forURL: URL
+    public var forURL: URL?
+    
+    // MARK: - JS Injection
     
     fileprivate let XMLHttpRequestInjectCodeHandler = "handler"
     fileprivate let XMLHttpRequestInjectCode = """
@@ -45,6 +51,8 @@ open class WebTokenInterceptorViewController: UIViewController, WKNavigationDele
         };
         """
     
+    // MARK: - UI Components
+    
     fileprivate lazy var webViewConfiguration: WKWebViewConfiguration = {
         let config = WKWebViewConfiguration()
         config.websiteDataStore = WKWebsiteDataStore.nonPersistent()
@@ -59,6 +67,8 @@ open class WebTokenInterceptorViewController: UIViewController, WKNavigationDele
         view.scrollView.alwaysBounceVertical = true
         return view
     }()
+    
+    // MARK: - Initialization
     
     public init(url: URL, forURL: URL) {
         self.url = url
@@ -78,6 +88,19 @@ open class WebTokenInterceptorViewController: UIViewController, WKNavigationDele
         fatalError("init(coder:) has not been implemented")
     }
     
+    // MARK: - Lifecycle
+    
+    open override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        navigationItem.leftBarButtonItem = UIBarButtonItem(
+            title: NSLocalizedString("Cancel", comment: ""),
+            style: .plain,
+            target: self,
+            action: #selector(didCancel)
+        )
+    }
+    
     public func start() async throws {
         guard !isFinished else { return }
         
@@ -88,11 +111,22 @@ open class WebTokenInterceptorViewController: UIViewController, WKNavigationDele
         }
     }
     
+    @objc public func didCancel() {
+        log.debug("User cancelled WebView authentication")
+        
+        isFinished = true
+        continuation?.resume(throwing: APWebAuthenticationError.canceled)
+        continuation = nil
+        
+        self.dismiss(animated: true, completion: nil)
+    }
+    
     open func loadRequest() {
         if let userAgent = customUserAgent {
             webView.customUserAgent = userAgent
         }
         
+        log.debug("Loading Request: \(url.absoluteString)")
         webView.load(URLRequest(url: url))
     }
     
@@ -108,25 +142,47 @@ open class WebTokenInterceptorViewController: UIViewController, WKNavigationDele
         super.updateViewConstraints()
         
         webView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
+            make.top.equalTo(view.safeAreaLayoutGuide.snp.top)
+            
+            make.left.right.bottom.equalToSuperview()
         }
     }
     
     // MARK: - WKNavigationDelegate
     
-    public func webView(_: WKWebView, decidePolicyFor _: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+    public func webView(_: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+        if let url = navigationAction.request.url {
+            log.debug("WebView Navigating to: \(url.absoluteString)")
+        }
         decisionHandler(.allow)
     }
     
-    public func webView(_: WKWebView, didFinish _: WKNavigation!) {
-        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(5)) { [weak self] in
-            guard let self = self else { return }
-            
-            if !self.isFinished {
-                self.isFinished = true
-                self.continuation?.resume(throwing: APWebAuthenticationError.unknown)
-                self.continuation = nil
+    open func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
+        log.debug("WebView Started Loading: \(webView.url?.absoluteString ?? "nil")")
+    }
+    
+    open func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        log.debug("WebView Navigation Failed: \(error.localizedDescription)")
+    }
+    
+    open func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        log.debug("WebView Finished Loading: \(webView.url?.absoluteString ?? "nil")")
+        
+        if !isInteractive {
+            DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(5)) { [weak self] in
+                guard let self = self else { return }
+                
+                if !self.isFinished {
+                    log.debug("WebView Timeout Reached")
+                    self.isFinished = true
+                    self.continuation?.resume(throwing: APWebAuthenticationError.unknown)
+                    self.continuation = nil
+                    
+                    self.dismiss(animated: true)
+                }
             }
+        } else {
+            log.debug("WebView finished loading, waiting for user interaction...")
         }
     }
     
@@ -135,7 +191,7 @@ open class WebTokenInterceptorViewController: UIViewController, WKNavigationDele
     @discardableResult
     public func loadJavascript(_ javaScriptString: String) async -> String? {
         let result = try? await webView.evaluateJavaScript(javaScriptString)
-        log.debug(result)
+        log.debug("JS Result: \(String(describing: result))")
         return result as? String
     }
     
@@ -147,7 +203,7 @@ open class WebTokenInterceptorViewController: UIViewController, WKNavigationDele
         }
     }
     
-    public func storeCookies(_ cookies: [HTTPCookie]?) async {
+    public func loadCookiesToWebView(_ cookies: [HTTPCookie]?) async {
         guard let cookies = cookies, !cookies.isEmpty else { return }
         
         await withTaskGroup(of: Void.self) { group in
@@ -159,32 +215,42 @@ open class WebTokenInterceptorViewController: UIViewController, WKNavigationDele
         }
     }
     
-    open func requestLoaded(_: URL, forURL _: URL, requestHeaders: [String: Any]?, responseHeaders: String?) async {
-
+    open func requestLoaded(_: URL, forURL _: URL?, requestHeaders: [String: Any]?, responseHeaders: String?) async {
         guard !isFinished else { return }
         isFinished = true
         continuation?.resume(returning: ())
         continuation = nil
         self.dismiss(animated: true, completion: nil)
     }
+    
+    open func shouldIntercept(responseURL: URL) -> Bool {
+        
+        if let forURL = forURL {
+            return responseURL.absoluteString.contains(forURL.absoluteString)
+        }
+        
+        return false
+    }
+    
 }
 
 @MainActor
 extension WebTokenInterceptorViewController: WKScriptMessageHandler {
     public func userContentController(_: WKUserContentController, didReceive message: WKScriptMessage) {
-        // Ensure we can cast the body to a Dictionary
         if let results = message.body as? [String: Any],
-           let responseUrl = results["responseURL"] as? String {
+           let responseUrlString = results["responseURL"] as? String,
+           let responseUrl = URL(string: responseUrlString) {
             
-            log.debug(results)
+            log.debug("Intercepted Target AJAX: \(responseUrlString)")
 
-            if responseUrl.contains(forURL.absoluteString), let url = URL(string: responseUrl) {
-                let requestHeaders = results["requestHeaders"] as? [String: Any]
+            if shouldIntercept(responseURL: responseUrl) {
+                log.debug("Intercepted Target AJAX: \(responseUrlString)")
                 
+                let requestHeaders = results["requestHeaders"] as? [String: Any]
                 let responseHeaders = results["responseHeaders"] as? String
-
+                
                 Task {
-                    await requestLoaded(url, forURL: forURL, requestHeaders: requestHeaders, responseHeaders: responseHeaders)
+                    await requestLoaded(responseUrl, forURL: forURL, requestHeaders: requestHeaders, responseHeaders: responseHeaders)
                 }
             }
         }

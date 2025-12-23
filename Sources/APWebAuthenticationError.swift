@@ -1,13 +1,10 @@
 import Foundation
 @preconcurrency import SwiftyJSON
 
-// REFACTOR: Reverted to use `JSON?` instead of `Data?` to support
-// the original SwiftyJSON-based model layer.
 public enum APWebAuthenticationError: Error, Sendable, Equatable {
     
     // MARK: - Cases
     
-    // REVERTED: Associated value is back to `responseJSON: JSON?`
     case failed(reason: String?, responseJSON: JSON? = nil)
     case connectionError(reason: String?, responseJSON: JSON? = nil)
     case serverError(reason: String?, responseJSON: JSON? = nil)
@@ -18,9 +15,7 @@ public enum APWebAuthenticationError: Error, Sendable, Equatable {
     case rateLimit(reason: String?, responseJSON: JSON? = nil)
     case appSessionExpired(reason: String?, responseJSON: JSON? = nil)
     
-    // REVERTED: Associated value is back to `content: JSON?`
     case checkPointRequired(content: JSON?)
-    case checkPointNotice(content: JSON?)
     case appCheckPointRequired(content: JSON?)
     case appDownloadNewAppRequired(content: JSON?)
     case appUpdateRequired(content: JSON?)
@@ -39,7 +34,6 @@ public enum APWebAuthenticationError: Error, Sendable, Equatable {
         switch self {
         case let .appCheckPointRequired(content),
              let .checkPointRequired(content),
-             let .checkPointNotice(content),
              let .appDownloadNewAppRequired(content),
              let .appUpdateRequired(content):
             return content
@@ -122,7 +116,6 @@ extension APWebAuthenticationError: LocalizedError {
         case .serverError: return "server_error"
         case .loginFailed: return "login_failed"
         case .checkPointRequired: return "checkpoint_required"
-        case .checkPointNotice: return "checkpoint_notice"
         case .feedbackRequired: return "feedback_required"
         case .externalActionRequired: return "external_action_required"
         case .sessionExpired: return "session_expired"
@@ -155,7 +148,7 @@ extension APWebAuthenticationError {
     
     public var isLoginError: Bool {
         switch self {
-        case .loginFailed, .sessionExpired, .appSessionExpired, .feedbackRequired:
+        case .loginFailed, .sessionExpired, .appSessionExpired, .feedbackRequired, .checkPointRequired:
             return true
         default:
             return false
