@@ -5,11 +5,10 @@ import HTTPStatusCodes
 
 open class AuthClientRequestRetrier: RequestRetrier, @unchecked Sendable {
     
-    // REFACTOR: Use a lock to protect all mutable state.
-    // This class is nonisolated and can be called from any thread,
-    // so we must prevent data races on its properties.
     private let stateLock = NSLock()
-
+    
+    private var _isRateLimitAlertVisible = false
+    
     private var _maxRetryCount: UInt = 5
     fileprivate var maxRetryCount: UInt {
         get { stateLock.withLock { _maxRetryCount } }
@@ -27,19 +26,19 @@ open class AuthClientRequestRetrier: RequestRetrier, @unchecked Sendable {
         get { stateLock.withLock { _rateLimitWaitSeconds } }
         set { stateLock.withLock { _rateLimitWaitSeconds = newValue } }
     }
-
+    
     private var _isReloadingCancelled = false
     open var isReloadingCancelled: Bool {
         get { stateLock.withLock { _isReloadingCancelled } }
         set { stateLock.withLock { _isReloadingCancelled = newValue } }
     }
-
+    
     private var _shouldRetryRateLimit = false
     open var shouldRetryRateLimit: Bool {
         get { stateLock.withLock { _shouldRetryRateLimit } }
         set { stateLock.withLock { _shouldRetryRateLimit = newValue } }
     }
-
+    
     private var _shouldAlwaysShowLoginAgain = false
     var shouldAlwaysShowLoginAgain: Bool {
         get { stateLock.withLock { _shouldAlwaysShowLoginAgain } }
@@ -50,16 +49,13 @@ open class AuthClientRequestRetrier: RequestRetrier, @unchecked Sendable {
         
     }
     
-    // This method is nonisolated.
     open func retry(_ request: Request, for _: Session, dueTo error: Error, completion: @escaping (RetryResult) -> Void) {
         
-        // Property access is now thread-safe via the lock.
         if isReloadingCancelled {
             completion(.doNotRetry)
             return
         }
         
-        // This wrapper is a great solution for the Sendable warning.
         final class CompletionWrapper: @unchecked Sendable {
             let closure: (RetryResult) -> Void
             
@@ -72,99 +68,112 @@ open class AuthClientRequestRetrier: RequestRetrier, @unchecked Sendable {
             }
         }
         
-        // Wrap the non-Sendable closure in our Sendable wrapper
         let safeCompletion = CompletionWrapper(completion)
         
-        // Method calls are now thread-safe as they use the locked properties.
         if shouldRetryRequest(error, request: request) {
             
-            // Property access is now thread-safe.
             if request.retryCount >= maxRetryCount {
-                safeCompletion(.doNotRetry) // <-- Use wrapper
+                safeCompletion(.doNotRetry)
                 return
             }
             
-            // BUG FIX: Use the `retryWaitSeconds` variable instead of 1.0
-            safeCompletion(.retryWithDelay(retryWaitSeconds)) // <-- Use wrapper
+            safeCompletion(.retryWithDelay(retryWaitSeconds))
             return
             
         } else if shouldRetryRateLimitRequest(error, request: request) {
             
-            // Property access is now thread-safe.
+            stateLock.lock()
+            if _isRateLimitAlertVisible {
+                stateLock.unlock()
+                safeCompletion(.retryWithDelay(1.0))
+                return
+            }
+            _isRateLimitAlertVisible = true
+            stateLock.unlock()
+            
             let initialAutoRetry = rateLimitWaitSeconds * (Int(request.retryCount) + 1)
             
-            // REFACTOR: Use a single @MainActor Task for all UI and async logic.
-            // This replaces the `DispatchQueue.main.async` and `Timer`.
             Task { @MainActor [weak self] in
                 guard let self = self else { return }
-
+                
                 var autoRetry = initialAutoRetry
-                var countdownTask: Task<Void, Error>? = nil // Task handle to cancel
+                var countdownTask: Task<Void, Error>? = nil
+                
+                let cleanup = {
+                    self.stateLock.withLock { self._isRateLimitAlertVisible = false }
+                }
                 
                 let title = NSLocalizedString("Rate Limit Exceeded", comment: "")
                 let message = String(format: "You have made too many requests. If you do nothing, the app will retry automatically in %d seconds.", autoRetry)
                 let actionSheetController = UIAlertController(title: title, message: message, preferredStyle: .alert)
                 
                 actionSheetController.addAction(title: NSLocalizedString("Cancel", comment: ""), style: .cancel) { _ in
+                    cleanup()
                     NotificationCenter.default.post(name: AuthClient.didRateLimitCancelled, object: nil, userInfo: nil)
                     
-                    countdownTask?.cancel() // Cancel the countdown task
-                    safeCompletion(.doNotRetry) // <-- Use wrapper
+                    countdownTask?.cancel()
+                    safeCompletion(.doNotRetry)
                     return
                 }
                 
-                // All property access here is now thread-safe via the lock.
                 if request.retryCount >= 3 || self.shouldAlwaysShowLoginAgain {
                     actionSheetController.addAction(title: NSLocalizedString("Login Again", comment: ""), style: .default) { [weak self] _ in
+                        cleanup()
                         guard let self = self, !self.isReloadingCancelled else {
                             return
                         }
                         
                         NotificationCenter.default.post(name: AuthClient.didRateLimitSessionExpired, object: nil, userInfo: nil)
                         
-                        countdownTask?.cancel() // Cancel the countdown task
-                        safeCompletion(.doNotRetryWithError(APWebAuthenticationError.canceled)) // <-- Use wrapper
+                        countdownTask?.cancel()
+                        safeCompletion(.doNotRetryWithError(APWebAuthenticationError.canceled))
                         return
                     }
                 }
                 
                 actionSheetController.addAction(title: NSLocalizedString("Retry Now", comment: ""), style: .default) { [weak self] _ in
+                    cleanup()
                     guard let self = self, !self.isReloadingCancelled else {
                         return
                     }
                     
-                    countdownTask?.cancel() // Cancel the countdown task
-                    safeCompletion(.retry) // <-- Use wrapper
+                    countdownTask?.cancel()
+                    safeCompletion(.retry)
                     return
                 }
                 
                 actionSheetController.preferredAction = actionSheetController.actions[actionSheetController.actions.count - 1]
                 
-                if let rootVC = UIApplication.shared.keyWindow?.rootViewController, rootVC.presentedViewController == nil {
-                     rootVC.present(actionSheetController, animated: true)
+                if let keyWindow = UIApplication.shared.keyWindow,
+                   var topController = keyWindow.rootViewController {
+                    
+                    while let presented = topController.presentedViewController {
+                        if presented.isBeingDismissed { break }
+                        topController = presented
+                    }
+                    
+                    topController.present(actionSheetController, animated: true)
+                    
                 } else {
                     print("⚠️ AuthClientRequestRetrier: Could not present rate limit alert.")
+                    cleanup()
+                    safeCompletion(.doNotRetry) // Fail safely if UI cannot appear
+                    return
                 }
                 
-                // REFACTOR: This is the new async countdown loop, replacing the Timer.
-                // It is fully @MainActor-isolated and safe.
                 countdownTask = Task { @MainActor in
                     while autoRetry > 0 {
-                        // 1. Wait for 1 second
                         try await Task.sleep(nanoseconds: 1_000_000_000)
                         
-                        // 2. Check if a button press cancelled the task
                         try Task.checkCancellation()
                         
-                        // 3. Decrement and update UI
                         autoRetry -= 1
                         
                         if autoRetry == 0 {
-                            // This is now safe, as we are on the MainActor
+                            cleanup()
                             actionSheetController.dismiss(animated: true)
-                            safeCompletion(.retryWithDelay(0.1)) // <-- Use wrapper
+                            safeCompletion(.retryWithDelay(0.1))
                         } else {
-                            // This is also safe
                             actionSheetController.message = String(format: "You have made too many requests. If you do nothing, the app will retry automatically in %d seconds.", autoRetry)
                         }
                     }
@@ -177,14 +186,11 @@ open class AuthClientRequestRetrier: RequestRetrier, @unchecked Sendable {
         safeCompletion(.doNotRetry)
     }
     
-    // This method is nonisolated.
     open func shouldRetryRequest(_ error: Error?, request: Request?) -> Bool {
-        // Property access is now thread-safe.
         if isReloadingCancelled {
             return false
         }
         
-        // This logic is clean and uses the `isConnectionError` extension.
         if error?.isConnectionError == true {
             return true
         }
@@ -196,14 +202,12 @@ open class AuthClientRequestRetrier: RequestRetrier, @unchecked Sendable {
         }
         
         if let httpResponse = request?.response {
-            // 4xx
             if httpResponse.statusCodeValue == HTTPStatusCode.notFound ||
                 httpResponse.statusCodeValue == HTTPStatusCode.gone
             {
                 return true
             }
             
-            // 5xx
             if httpResponse.statusCodeValue == HTTPStatusCode.internalServerError ||
                 httpResponse.statusCodeValue == HTTPStatusCode.notImplemented ||
                 httpResponse.statusCodeValue == HTTPStatusCode.badGateway ||
@@ -217,9 +221,7 @@ open class AuthClientRequestRetrier: RequestRetrier, @unchecked Sendable {
         return false
     }
     
-    // This method is nonisolated.
     open func shouldRetryRateLimitRequest(_: Error?, request: Request?) -> Bool {
-        // Property access is now thread-safe.
         if isReloadingCancelled || !shouldRetryRateLimit {
             return false
         }
@@ -234,8 +236,6 @@ open class AuthClientRequestRetrier: RequestRetrier, @unchecked Sendable {
     }
 }
 
-// REFACTOR: `UIApplication.shared.keyWindow` is deprecated.
-// This extension provides a modern, safe way to get the active window scene.
 @MainActor
 private extension UIApplication {
     var keyWindow: UIWindow? {

@@ -81,7 +81,6 @@ open class AuthClient {
         }
     }
     
-    /// Performs a network request and returns both the JSON and the full HTTPURLResponse.
     public func requestWithResponse(
         _ path: String,
         method: HTTPMethod = .get,
@@ -118,16 +117,13 @@ open class AuthClient {
     ) async throws(APWebAuthenticationError) -> Int {
         let url = try url(for: path)
         
-        // REVERT: Changed back to serializingDecodable(JSON.self)
         let dataTask = sessionManager.request(url, method: method, parameters: parameters, encoding: encoding, headers: headers)
-            .validate(statusCode: 200..<600) // Validate broader range
-            .serializingDecodable(JSON.self) // <-- Corrected
+            .validate(statusCode: 200..<600)
+            .serializingDecodable(JSON.self)
         
         let response = await dataTask.response
         
         guard let httpResponse = response.response else {
-            // This part is tricky, as we have no HTTPResponse.
-            // We still need to pass a valid DataResponse<JSON, AFError> to generateError.
             if let afError = response.error {
                 let dummyDataResponse = DataResponse<JSON, AFError>(
                     request: response.request,
@@ -135,11 +131,10 @@ open class AuthClient {
                     data: response.data,
                     metrics: response.metrics,
                     serializationDuration: response.serializationDuration,
-                    result: .failure(afError) // Pass the failure
+                    result: .failure(afError)
                 )
                 throw generateError(from: dummyDataResponse)
             } else {
-                // Should be unreachable if response is nil and error is nil, but as a fallback:
                 throw APWebAuthenticationError.unknown
             }
         }
@@ -156,7 +151,7 @@ open class AuthClient {
             if afError.isSessionTaskError {
                 let errorJson = parseJson(from: response)
                 let reason = String(format: NSLocalizedString("Check your network connection. %@ could also be down.", comment: ""), accountType.description)
-
+                
                 return .connectionError(reason: reason, responseJSON: errorJson)
             }
         }
@@ -193,17 +188,14 @@ open class AuthClient {
         return .failed(reason: "Unknown error.", responseJSON: json)
     }
     
-    /// Checks if the response indicates a server-side error (typically 5xx).
     open func isServerError(response: DataResponse<JSON, AFError>, json: JSON?) -> Bool {
         return response.response?.statusCodeValue?.isServerError ?? false
     }
     
-    /// Checks if the response indicates a rate limit error (typically 429).
     open func isRateLimitError(response: DataResponse<JSON, AFError>, json: JSON?) -> Bool {
         return response.response?.statusCodeValue == .tooManyRequests
     }
     
-    /// Checks if the response indicates a session/authentication error (typically 401).
     open func isSessionExpiredError(response: DataResponse<JSON, AFError>, json: JSON?) -> Bool {
         return response.response?.statusCodeValue == .unauthorized
     }
@@ -212,7 +204,6 @@ open class AuthClient {
         return false
     }
     
-    /// Subclasses should override this to handle service-specific JSON structures.
     open func extractErrorMessage(from json: JSON?) -> String? {
         if let message = json?["message"].string {
             return message
@@ -232,12 +223,9 @@ open class AuthClient {
         if let message = json?["error_title"].string {
             return message
         }
-        // If none of the keys yielded a string, return nil
         return nil
     }
     
-    // --- Internal Helper Functions ---
-    /// Attempts to get JSON from response.value or manually parses response.data.
     internal func parseJson(from response: DataResponse<JSON, AFError>) -> JSON? {
         if let jsonValue = response.value {
             return jsonValue
@@ -247,7 +235,6 @@ open class AuthClient {
         return nil
     }
     
-    /// Extracts the localized description from the underlying AFError, if present.
     internal func extractUnderlyingErrorMessage(from response: DataResponse<JSON, AFError>) -> String? {
         if let error = response.error?.asAFError?.underlyingError?.localizedDescription {
             return error
