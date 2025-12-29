@@ -19,7 +19,7 @@ open class WebTokenInterceptorViewController: UIViewController, WKNavigationDele
     
     private var continuation: CheckedContinuation<Void, Error>?
     
-    var url: URL
+    public var url: URL
     public var forURL: URL?
     
     // MARK: - JS Injection
@@ -101,15 +101,21 @@ open class WebTokenInterceptorViewController: UIViewController, WKNavigationDele
         )
     }
     
-    public func start() async throws {
-        guard !isFinished else { return }
-        
-        return try await withCheckedThrowingContinuation { continuation in
-            self.continuation = continuation
+    public func start() async throws(APWebAuthenticationError) {
+            guard !isFinished else { return }
             
-            self.loadRequest()
+            do {
+                try await withCheckedThrowingContinuation { continuation in
+                    self.continuation = continuation
+                    
+                    self.loadRequest()
+                }
+            } catch let error as APWebAuthenticationError {
+                throw error
+            } catch {
+                throw APWebAuthenticationError.unknown
+            }
         }
-    }
     
     @objc public func didCancel() {
         log.debug("User cancelled WebView authentication")
@@ -169,7 +175,7 @@ open class WebTokenInterceptorViewController: UIViewController, WKNavigationDele
         log.debug("WebView Finished Loading: \(webView.url?.absoluteString ?? "nil")")
         
         if !isInteractive {
-            DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(5)) { [weak self] in
+            DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(60)) { [weak self] in
                 guard let self = self else { return }
                 
                 if !self.isFinished {
