@@ -5,6 +5,7 @@ public enum AuthenticationMode: String, Sendable {
     case explicit
     case implicit
     case web
+    case bloks
     case browser
     case app
     
