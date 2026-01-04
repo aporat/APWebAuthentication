@@ -12,13 +12,11 @@ public class GitHubAPIClient: AuthClient {
     
     public convenience init(auth: Auth2Authentication) {
         let requestAdapter = GitHubRequestAdapter(auth: auth)
-        let retrier = AuthClientRequestRetrier()
-        let interceptor = Interceptor(adapters: [requestAdapter], retriers: [retrier])
+        let interceptor = Interceptor(adapters: [requestAdapter])
         
         self.init(baseURLString: "https://api.github.com/", requestInterceptor: interceptor)
         
         self.requestAdapter = requestAdapter
-        self.requestRetrier = retrier
     }
     
     public override init(baseURLString: String, requestInterceptor: RequestInterceptor) {

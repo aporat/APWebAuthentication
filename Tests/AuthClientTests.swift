@@ -21,7 +21,7 @@ final class AuthClientTests: XCTestCase {
         client.isReloadingCancelled = true
         XCTAssertTrue(client.requestRetrier.isReloadingCancelled)
 
-        client.shouldRetryRateLimit = true
+        client.shouldRetryRateLimit = false
         XCTAssertTrue(client.requestRetrier.shouldRetryRateLimit)
 
         client.shouldAlwaysShowLoginAgain = true

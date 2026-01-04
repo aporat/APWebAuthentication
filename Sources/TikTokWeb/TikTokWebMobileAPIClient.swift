@@ -14,12 +14,9 @@ public class TikTokWebMobileAPIClient: AuthClient {
     
     public convenience init(auth: TikTokWebAuthentication) {
         let requestAdapter = TikTokWebRequestAdapter(auth: auth)
-        let retrier = AuthClientRequestRetrier()
-        let interceptor = Interceptor(adapters: [requestAdapter], retriers: [retrier])
+        let interceptor = Interceptor(adapters: [requestAdapter])
         
         self.init(baseURLString: "https://m.tiktok.com/", auth: auth, requestInterceptor: interceptor)
-        
-        self.requestRetrier = retrier
     }
     
     public init(baseURLString: String, auth: TikTokWebAuthentication, requestInterceptor: RequestInterceptor) {

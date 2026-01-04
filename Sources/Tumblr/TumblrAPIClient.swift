@@ -15,12 +15,9 @@ public final class TumblrAPIClient: AuthClient {
         let requestAdapter = OAuth2RequestAdapter(auth: auth)
         requestAdapter.tokenLocation = .authorizationHeader // Use Bearer token
         
-        let retrier = AuthClientRequestRetrier()
-        let interceptor = Interceptor(adapters: [requestAdapter], retriers: [retrier])
+        let interceptor = Interceptor(adapters: [requestAdapter])
         
         self.init(baseURLString: "https://api.tumblr.com/v2/", requestInterceptor: interceptor)
-        
-        self.requestRetrier = retrier
     }
     
     public override init(baseURLString: String, requestInterceptor: RequestInterceptor) {

@@ -14,13 +14,11 @@ public final class FoursquareAPIClient: AuthClient {
         let requestAdapter = FoursquareRequestAdapter(auth: auth)
         requestAdapter.tokenParamName = "oauth_token"
         
-        let retrier = AuthClientRequestRetrier()
-        let interceptor = Interceptor(adapters: [requestAdapter], retriers: [retrier])
+        let interceptor = Interceptor(adapters: [requestAdapter])
         
         self.init(baseURLString: "https://api.foursquare.com/v2/", requestInterceptor: interceptor)
         
         self.requestAdapter = requestAdapter
-        self.requestRetrier = retrier
     }
     
     public override init(baseURLString: String, requestInterceptor: RequestInterceptor) {

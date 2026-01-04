@@ -15,12 +15,9 @@ public final class RedditAPIClient: AuthClient {
         let requestAdapter = OAuth2RequestAdapter(auth: auth)
         requestAdapter.tokenLocation = .authorizationHeader
         
-        let retrier = AuthClientRequestRetrier()
-        let interceptor = Interceptor(adapters: [requestAdapter], retriers: [retrier])
+        let interceptor = Interceptor(adapters: [requestAdapter])
         
         self.init(baseURLString: "https://oauth.reddit.com/api/v1/", requestInterceptor: interceptor)
-        
-        self.requestRetrier = retrier
     }
     
     public override init(baseURLString: String, requestInterceptor: RequestInterceptor) {

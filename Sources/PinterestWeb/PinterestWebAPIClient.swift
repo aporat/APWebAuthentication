@@ -14,12 +14,9 @@ public final class PinterestWebAPIClient: AuthClient {
     
     public required convenience init(auth: PinterestWebAuthentication) {
         let requestAdapter = PinterestWebRequestAdapter(auth: auth)
-        let retrier = AuthClientRequestRetrier()
-        let interceptor = Interceptor(adapters: [requestAdapter], retriers: [retrier])
+        let interceptor = Interceptor(adapters: [requestAdapter])
         
         self.init(baseURLString: "https://www.pinterest.com/", auth: auth, requestInterceptor: interceptor)
-        
-        self.requestRetrier = retrier
     }
     
     public init(baseURLString: String, auth: PinterestWebAuthentication, requestInterceptor: RequestInterceptor) {

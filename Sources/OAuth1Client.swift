@@ -7,13 +7,11 @@ open class OAuth1Client: AuthClient {
     
     public init(baseURLString: String, consumerKey: String, consumerSecret: String, auth: Auth1Authentication) {
         let requestAdapter = OAuth1RequestAdapter(consumerKey: consumerKey, consumerSecret: consumerSecret, auth: auth)
-        let retrier = AuthClientRequestRetrier()
-        let interceptor = Interceptor(adapters: [requestAdapter], retriers: [retrier])
+        let interceptor = Interceptor(adapters: [requestAdapter])
         
         self.requestAdapter = requestAdapter
         super.init(baseURLString: baseURLString, requestInterceptor: interceptor)
         
-        self.requestRetrier = retrier
     }
     
     public func loadSettings(_ options: JSON?) async {

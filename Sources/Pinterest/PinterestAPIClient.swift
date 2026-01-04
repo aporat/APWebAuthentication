@@ -14,13 +14,11 @@ public final class PinterestAPIClient: AuthClient {
         let requestAdapter = OAuth2RequestAdapter(auth: auth)
         requestAdapter.tokenLocation = .authorizationHeader
         
-        let retrier = AuthClientRequestRetrier()
-        let interceptor = Interceptor(adapters: [requestAdapter], retriers: [retrier])
+        let interceptor = Interceptor(adapters: [requestAdapter])
         
         self.init(baseURLString: "https://api.pinterest.com/v5/", requestInterceptor: interceptor)
         
         self.requestAdapter = requestAdapter
-        self.requestRetrier = retrier
     }
     
     public override init(baseURLString: String, requestInterceptor: RequestInterceptor) {

@@ -7,13 +7,11 @@ open class OAuth2Client: AuthClient {
     
     public convenience init(baseURLString: String, auth: Auth2Authentication) {
         let requestAdapter = OAuth2RequestAdapter(auth: auth)
-        let retrier = AuthClientRequestRetrier()
-        let interceptor = Interceptor(adapters: [requestAdapter], retriers: [retrier])
+        let interceptor = Interceptor(adapters: [requestAdapter])
         
         self.init(baseURLString: baseURLString, requestInterceptor: interceptor)
         
         self.requestAdapter = requestAdapter
-        self.requestRetrier = retrier
     }
     
     public override init(baseURLString: String, requestInterceptor: RequestInterceptor) {

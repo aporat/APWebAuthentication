@@ -15,47 +15,39 @@ public enum APWebAuthenticationError: Error, Sendable, Equatable {
     case rateLimit(reason: String?, responseJSON: JSON? = nil)
     case appSessionExpired(reason: String?, responseJSON: JSON? = nil)
     
-    case checkPointRequired(content: JSON?)
-    case appCheckPointRequired(content: JSON?)
-    case appDownloadNewAppRequired(content: JSON?)
-    case appUpdateRequired(content: JSON?)
+    case checkPointRequired(responseJSON: JSON?)
+    case appCheckPointRequired(responseJSON: JSON?)
+    case appTwoFactorRequired(responseJSON: JSON?)
+    case appDownloadNewAppRequired(responseJSON: JSON?)
+    case appUpdateRequired(responseJSON: JSON?)
     
-    // Unchanged cases
     case canceled
     case notFound
     case badRequest
     case unknown
     case timeout
     
-    // MARK: - Public JSON Computed Properties
+    // MARK: - Public Computed Property
     
-    /// The JSON content associated with checkpoint/notice errors.
-    public var content: JSON? {
-        switch self {
-        case let .appCheckPointRequired(content),
-            let .checkPointRequired(content),
-            let .appDownloadNewAppRequired(content),
-            let .appUpdateRequired(content):
-            return content
-        default:
-            return nil
-        }
-    }
-    
-    /// The full JSON response associated with the error.
     public var responseJSON: JSON? {
         switch self {
-        case let .failed(_, responseJSON),
-            let .connectionError(_, responseJSON),
-            let .serverError(_, responseJSON),
-            let .loginFailed(_, responseJSON),
-            let .feedbackRequired(_, responseJSON),
-            let .externalActionRequired(_, responseJSON),
-            let .sessionExpired(_, responseJSON),
-            let .rateLimit(_, responseJSON),
-            let .appSessionExpired(_, responseJSON):
-            return responseJSON
-        default:
+        case let .failed(_, json),
+             let .connectionError(_, json),
+             let .serverError(_, json),
+             let .loginFailed(_, json),
+             let .feedbackRequired(_, json),
+             let .externalActionRequired(_, json),
+             let .sessionExpired(_, json),
+             let .rateLimit(_, json),
+             let .appSessionExpired(_, json),
+             let .checkPointRequired(json),
+             let .appCheckPointRequired(json),
+             let .appTwoFactorRequired(json),
+             let .appDownloadNewAppRequired(json),
+             let .appUpdateRequired(json):
+            return json
+            
+        case .canceled, .notFound, .badRequest, .unknown, .timeout:
             return nil
         }
     }
@@ -66,51 +58,43 @@ extension APWebAuthenticationError: LocalizedError {
     
     public var errorTitle: String {
         switch self {
-        case .loginFailed:
-            return "Login Failed"
-        case .connectionError:
-            return "Network Error"
-        case .serverError:
-            return "Server Error"
-        case .sessionExpired, .appSessionExpired:
-            return "Session Expired"
-        case .rateLimit:
-            return "Rate Limit Reached"
-        case .feedbackRequired, .externalActionRequired:
-            return "Action Blocked"
-        case .checkPointRequired, .appCheckPointRequired:
-            return "Security Check"
-        case .appUpdateRequired:
-            return "Update Required"
-        default:
-            return "Error"
+        case .loginFailed: return "Login Failed"
+        case .connectionError: return "Network Error"
+        case .serverError: return "Server Error"
+        case .sessionExpired, .appSessionExpired: return "Session Expired"
+        case .rateLimit: return "Rate Limit Reached"
+        case .feedbackRequired, .externalActionRequired: return "Action Blocked"
+        case .checkPointRequired, .appCheckPointRequired: return "Security Check"
+        case .appTwoFactorRequired: return "Two-Factor Authentication"
+        case .appUpdateRequired: return "Update Required"
+        default: return "Error"
         }
     }
     
     public var errorDescription: String? {
         switch self {
             
-            // MARK: - Session Errors (Critical Fix)
+        // MARK: - Session Errors
         case let .sessionExpired(reason, _),
-            let .appSessionExpired(reason, _):
+             let .appSessionExpired(reason, _):
             return reason ?? "Your session has expired. Please log in again."
             
-            // MARK: - Login & Access Errors
+        // MARK: - Login & Access Errors
         case let .loginFailed(reason, _):
             return reason ?? "Unable to login. Please check your credentials and try again."
             
-        case let .checkPointRequired(content),
-            let .appCheckPointRequired(content):
-            return content?["message"].string ?? "A security checkpoint is required to continue."
+        case let .checkPointRequired(json),
+             let .appCheckPointRequired(json):
+            return json?["message"].string ?? "A security checkpoint is required to continue."
             
         case let .feedbackRequired(reason, _),
-            let .externalActionRequired(reason, _):
+             let .externalActionRequired(reason, _):
             return reason ?? "This action cannot be completed at this time. Instagram may restrict certain activities to protect the community."
             
         case let .rateLimit(reason, _):
             return reason ?? "You are doing this too fast. Please try again later."
             
-            // MARK: - Network & Server Errors
+        // MARK: - Network & Server Errors
         case let .connectionError(reason, _):
             return reason ?? "The Internet connection appears to be offline."
             
@@ -120,25 +104,17 @@ extension APWebAuthenticationError: LocalizedError {
         case let .failed(reason, _):
             return reason ?? "An unknown error occurred."
             
-            // MARK: - App Updates
+        // MARK: - App Updates
         case .appUpdateRequired, .appDownloadNewAppRequired:
             return "This version of the app is no longer supported. Please update to the latest version."
             
-            // MARK: - Others
-        case .notFound:
-            return "The requested resource could not be found."
-            
-        case .timeout:
-            return "The request timed out."
-            
-        case .badRequest:
-            return "The request was invalid."
-            
-        case .canceled:
-            return "The operation was canceled."
-            
-        case .unknown:
-            return "An unexpected error occurred."
+        // MARK: - Others
+        case .notFound: return "The requested resource could not be found."
+        case .timeout: return "The request timed out."
+        case .badRequest: return "The request was invalid."
+        case .canceled: return "The operation was canceled."
+        case .unknown: return "An unexpected error occurred."
+        case .appTwoFactorRequired: return "Two-factor authentication is required."
         }
     }
     
@@ -155,6 +131,7 @@ extension APWebAuthenticationError: LocalizedError {
         case .rateLimit: return "rate_limit"
         case .appSessionExpired: return "app_session_expired"
         case .appCheckPointRequired: return "app_checkpoint_required"
+        case .appTwoFactorRequired: return "app_two_factor_required"
         case .appDownloadNewAppRequired: return "app_download_new_app_required"
         case .appUpdateRequired: return "app_update_required"
         case .canceled: return "canceled"
@@ -168,11 +145,9 @@ extension APWebAuthenticationError: LocalizedError {
 // MARK: - Convenience Properties
 extension APWebAuthenticationError {
     
-    // This extension also remains unchanged.
-    
     public var isAppError: Bool {
         switch self {
-        case .appSessionExpired, .appCheckPointRequired, .appDownloadNewAppRequired, .appUpdateRequired:
+        case .appSessionExpired, .appCheckPointRequired, .appTwoFactorRequired, .appDownloadNewAppRequired, .appUpdateRequired:
             return true
         default:
             return false

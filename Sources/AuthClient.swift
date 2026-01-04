@@ -18,7 +18,6 @@ open class AuthClient {
         configuration: self.makeSessionConfiguration()
     )
     
-    open var requestRetrier = AuthClientRequestRetrier()
     public let requestInterceptor: RequestInterceptor
     
     open var accountType: AccountType {
@@ -35,23 +34,9 @@ open class AuthClient {
         return configuration
     }
     
-    public var isReloadingCancelled: Bool = false {
-        didSet {
-            requestRetrier.isReloadingCancelled = isReloadingCancelled
-        }
-    }
+    public var isReloadingCancelled: Bool = false
     
-    public var shouldRetryRateLimit: Bool = false {
-        didSet {
-            requestRetrier.shouldRetryRateLimit = shouldRetryRateLimit
-        }
-    }
-    
-    public var shouldAlwaysShowLoginAgain: Bool = false {
-        didSet {
-            requestRetrier.shouldAlwaysShowLoginAgain = shouldAlwaysShowLoginAgain
-        }
-    }
+    public var shouldAlwaysShowLoginAgain: Bool = false
     
     public init(baseURLString: String, requestInterceptor: RequestInterceptor) {
         self.baseURLString = baseURLString
@@ -166,7 +151,7 @@ open class AuthClient {
         }
         
         if isCheckpointRequired(response: response, json: json) {
-            return .checkPointRequired(content: json)
+            return .checkPointRequired(responseJSON: json)
         }
         
         if isRateLimitError(response: response, json: json) {
