@@ -5,30 +5,30 @@ import Alamofire
 @MainActor
 public class TikTokWebAPIClient: AuthClient {
     
+    // MARK: - Properties
+    
     public override var accountType: AccountType {
         AccountStore.tiktok
     }
     
-    fileprivate var requestAdapter: TikTokWebRequestAdapter
+    fileprivate var interceptor: TikTokWebInterceptor
     fileprivate let auth: TikTokWebAuthentication
     
+    // MARK: - Initialization
+    
     public convenience init(auth: TikTokWebAuthentication) {
-        let requestAdapter = TikTokWebRequestAdapter(auth: auth)
-        let interceptor = Interceptor(adapters: [requestAdapter])
-        
+        let interceptor = TikTokWebInterceptor(auth: auth)
+        // Pass interceptor directly
         self.init(baseURLString: "https://www.tiktok.com/", auth: auth, requestInterceptor: interceptor)
-        
     }
     
     public init(baseURLString: String, auth: TikTokWebAuthentication, requestInterceptor: RequestInterceptor) {
-        self.auth = auth
-        guard let interceptor = requestInterceptor as? Interceptor,
-              let adapter = interceptor.adapters.first as? TikTokWebRequestAdapter
-        else {
-            fatalError("Failed to extract TikTokWebRequestAdapter from requestInterceptor.")
+        guard let customInterceptor = requestInterceptor as? TikTokWebInterceptor else {
+            fatalError("TikTokWebAPIClient requires a TikTokWebInterceptor.")
         }
         
-        self.requestAdapter = adapter
+        self.auth = auth
+        self.interceptor = customInterceptor
         super.init(baseURLString: baseURLString, requestInterceptor: requestInterceptor)
     }
     
@@ -38,15 +38,19 @@ public class TikTokWebAPIClient: AuthClient {
         return configuration
     }
     
+    // MARK: - Configuration
+    
     public func loadSettings(_ options: JSON?) {
         if let value = UserAgentMode(options?["browser_mode"].string) {
-            requestAdapter.auth.browserMode = value
+            interceptor.auth.browserMode = value
         }
         
         if let value = options?["custom_user_agent"].string {
-            requestAdapter.auth.customUserAgent = value
+            interceptor.auth.customUserAgent = value
         }
     }
+    
+    // MARK: - Error Handling
     
     public override func extractErrorMessage(from json: JSON?) -> String? {
         if let message = json?["status_msg"].string {

@@ -2,45 +2,31 @@ import Foundation
 import Alamofire
 @preconcurrency import SwiftyJSON
 
-public final class FoursquareAPIClient: AuthClient {
+public final class FoursquareAPIClient: OAuth2Client {
+    
+    // MARK: - Properties
     
     public override var accountType: AccountType {
         AccountStore.foursquare
     }
     
-    fileprivate var requestAdapter: FoursquareRequestAdapter
+    // MARK: - Initialization
     
     public convenience init(auth: Auth2Authentication) {
-        let requestAdapter = FoursquareRequestAdapter(auth: auth)
-        requestAdapter.tokenParamName = "oauth_token"
-        
-        let interceptor = Interceptor(adapters: [requestAdapter])
-        
+        let interceptor = FoursquareInterceptor(auth: auth)
         self.init(baseURLString: "https://api.foursquare.com/v2/", requestInterceptor: interceptor)
-        
-        self.requestAdapter = requestAdapter
     }
     
     public override init(baseURLString: String, requestInterceptor: RequestInterceptor) {
-        guard let interceptor = requestInterceptor as? Interceptor,
-              let adapter = interceptor.adapters.first as? FoursquareRequestAdapter
-        else {
-            fatalError("Failed to extract RequestInterceptor from requestInterceptor.")
+        // Validate specific type
+        guard requestInterceptor is FoursquareInterceptor else {
+            fatalError("FoursquareAPIClient requires a FoursquareInterceptor.")
         }
         
-        self.requestAdapter = adapter
         super.init(baseURLString: baseURLString, requestInterceptor: requestInterceptor)
     }
-    
-    public func loadSettings(_ options: JSON?) async {
-        if let value = UserAgentMode(options?["browser_mode"].string) {
-            requestAdapter.auth.setBrowserMode(value)
-        }
-        
-        if let value = options?["custom_user_agent"].string {
-            requestAdapter.auth.setCustomUserAgent(value)
-        }
-    }
+
+    // MARK: - Error Handling
     
     public override func extractErrorMessage(from json: JSON?) -> String? {
         if let message = json?["meta"]["errorDetail"].string {

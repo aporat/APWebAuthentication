@@ -3,37 +3,39 @@ import Alamofire
 @preconcurrency import SwiftyJSON
 
 @MainActor
-public class TwitchAPIClient: AuthClient {
+public class TwitchAPIClient: OAuth2Client {
+    
+    // MARK: - Properties
     
     public override var accountType: AccountType {
         AccountStore.twitch
     }
     
-    fileprivate var requestAdapter: TwitchRequestAdapter
+    // MARK: - Initialization
     
     public convenience init(auth: Auth2Authentication) {
-        let requestAdapter = TwitchRequestAdapter(auth: auth)
-        requestAdapter.tokenLocation = .authorizationHeader
-        let interceptor = Interceptor(adapters: [requestAdapter])
+        let interceptor = TwitchInterceptor(auth: auth)
+        interceptor.tokenLocation = .authorizationHeader
         
         self.init(baseURLString: "https://api.twitch.tv/helix/", requestInterceptor: interceptor)
     }
     
     public override init(baseURLString: String, requestInterceptor: RequestInterceptor) {
-        guard let interceptor = requestInterceptor as? Interceptor,
-              let adapter = interceptor.adapters.first as? TwitchRequestAdapter
-        else {
-            fatalError("Failed to extract RequestInterceptor from requestInterceptor.")
+        // Validate specific type
+        guard requestInterceptor is TwitchInterceptor else {
+            fatalError("TwitchAPIClient requires a TwitchInterceptor.")
         }
         
-        self.requestAdapter = adapter
         super.init(baseURLString: baseURLString, requestInterceptor: requestInterceptor)
     }
     
-    public func loadSettings(_ options: JSON?) {
+    // MARK: - Configuration
+    
+    public override func loadSettings(_ options: JSON?) async {
+        await super.loadSettings(options)
+        
         if let clientId = options?["client_id"].string {
-            requestAdapter.auth.clientId = clientId
+            interceptor.auth.clientId = clientId
         }
     }
-    
 }

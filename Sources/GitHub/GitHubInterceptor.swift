@@ -1,7 +1,8 @@
 import Foundation
 import Alamofire
 
-final class GitHubRequestAdapter: OAuth2RequestAdapter, @unchecked Sendable {
+final class GitHubInterceptor: OAuth2Interceptor, @unchecked Sendable {
+    
     override init(auth: Auth2Authentication) {
         super.init(auth: auth)
         tokenLocation = .authorizationHeader

@@ -1,7 +1,8 @@
 import Foundation
 import Alamofire
 
-final class PinterestWebHTMLRequestAdapter: RequestAdapter, @unchecked Sendable {
+final class PinterestWebHTMLInterceptor: RequestInterceptor, @unchecked Sendable {
+    
     @MainActor
     var auth: PinterestWebAuthentication
     
@@ -10,7 +11,9 @@ final class PinterestWebHTMLRequestAdapter: RequestAdapter, @unchecked Sendable 
         self.auth = auth
     }
     
-    public func adapt(_ urlRequest: URLRequest, for _: Session, completion: @escaping @Sendable (Result<URLRequest, any Error>) -> Void) {
+    // MARK: - RequestAdapter
+    
+    public func adapt(_ urlRequest: URLRequest, for session: Session, completion: @escaping @Sendable (Result<URLRequest, any Error>) -> Void) {
         
         Task {
             var urlRequest = urlRequest
@@ -24,6 +27,8 @@ final class PinterestWebHTMLRequestAdapter: RequestAdapter, @unchecked Sendable 
             
             let locale = await auth.localeWebIdentifier
             urlRequest.headers.add(.acceptLanguage(locale))
+            
+            // Standard HTML/Browser accept headers
             urlRequest.headers.add(.accept("text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"))
             urlRequest.headers.add(.acceptEncoding("gzip, deflate, sdch, br"))
             urlRequest.headers.add(HTTPHeader(name: "Connection", value: "keep-alive"))

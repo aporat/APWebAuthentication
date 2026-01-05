@@ -5,29 +5,29 @@ import Alamofire
 @MainActor
 public class TikTokWebMobileAPIClient: AuthClient {
     
+    // MARK: - Properties
+    
     public override var accountType: AccountType {
         AccountStore.tiktok
     }
     
-    fileprivate var requestAdapter: TikTokWebRequestAdapter
+    fileprivate var interceptor: TikTokWebMobileInterceptor
     fileprivate let auth: TikTokWebAuthentication
     
+    // MARK: - Initialization
+    
     public convenience init(auth: TikTokWebAuthentication) {
-        let requestAdapter = TikTokWebRequestAdapter(auth: auth)
-        let interceptor = Interceptor(adapters: [requestAdapter])
-        
+        let interceptor = TikTokWebMobileInterceptor(auth: auth)
         self.init(baseURLString: "https://m.tiktok.com/", auth: auth, requestInterceptor: interceptor)
     }
     
     public init(baseURLString: String, auth: TikTokWebAuthentication, requestInterceptor: RequestInterceptor) {
-        self.auth = auth
-        guard let interceptor = requestInterceptor as? Interceptor,
-              let adapter = interceptor.adapters.first as? TikTokWebRequestAdapter
-        else {
-            fatalError("Failed to extract TikTokWebRequestAdapter from requestInterceptor.")
+        guard let customInterceptor = requestInterceptor as? TikTokWebMobileInterceptor else {
+            fatalError("TikTokWebMobileAPIClient requires a TikTokWebMobileInterceptor.")
         }
         
-        self.requestAdapter = adapter
+        self.auth = auth
+        self.interceptor = customInterceptor
         super.init(baseURLString: baseURLString, requestInterceptor: requestInterceptor)
     }
     
@@ -36,6 +36,8 @@ public class TikTokWebMobileAPIClient: AuthClient {
         configuration.httpCookieStorage = auth.cookieStorage
         return configuration
     }
+    
+    // MARK: - Error Handling
     
     public override func extractErrorMessage(from json: JSON?) -> String? {
         if let message = json?["status_msg"].string {

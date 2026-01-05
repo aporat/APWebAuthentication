@@ -1,7 +1,7 @@
 import Foundation
 import Alamofire
 
-final class TikTokWebRequestAdapter: RequestAdapter, @unchecked Sendable {
+final class TikTokWebInterceptor: RequestInterceptor, @unchecked Sendable {
     
     @MainActor
     var auth: TikTokWebAuthentication
@@ -11,7 +11,9 @@ final class TikTokWebRequestAdapter: RequestAdapter, @unchecked Sendable {
         self.auth = auth
     }
     
-    public func adapt(_ urlRequest: URLRequest, for _: Session, completion: @escaping @Sendable (Result<URLRequest, any Error>) -> Void) {
+    // MARK: - RequestAdapter
+    
+    public func adapt(_ urlRequest: URLRequest, for session: Session, completion: @escaping @Sendable (Result<URLRequest, any Error>) -> Void) {
         
         Task {
             var urlRequest = urlRequest
@@ -19,7 +21,6 @@ final class TikTokWebRequestAdapter: RequestAdapter, @unchecked Sendable {
             urlRequest.headers.add(HTTPHeader(name: "authority", value: "www.tiktok.com"))
             urlRequest.headers.add(.accept("application/json, text/plain, */*"))
             
-            // REFACTOR: `await` @MainActor property
             if let currentUserAgent = await auth.userAgent, !currentUserAgent.isEmpty {
                 urlRequest.headers.add(.userAgent(currentUserAgent))
             }

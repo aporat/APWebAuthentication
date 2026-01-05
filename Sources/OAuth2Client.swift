@@ -3,35 +3,32 @@ import Alamofire
 import SwiftyJSON
 
 open class OAuth2Client: AuthClient {
-    var requestAdapter: OAuth2RequestAdapter
+    
+    public var interceptor: OAuth2Interceptor
     
     public convenience init(baseURLString: String, auth: Auth2Authentication) {
-        let requestAdapter = OAuth2RequestAdapter(auth: auth)
-        let interceptor = Interceptor(adapters: [requestAdapter])
+        let interceptor = OAuth2Interceptor(auth: auth)
         
         self.init(baseURLString: baseURLString, requestInterceptor: interceptor)
-        
-        self.requestAdapter = requestAdapter
     }
     
     public override init(baseURLString: String, requestInterceptor: RequestInterceptor) {
-        guard let interceptor = requestInterceptor as? Interceptor,
-              let adapter = interceptor.adapters.first as? OAuth2RequestAdapter
-        else {
-            fatalError("Failed to extract RequestInterceptor from requestInterceptor.")
+        // Direct cast validation
+        guard let customInterceptor = requestInterceptor as? OAuth2Interceptor else {
+            fatalError("OAuth2Client requires an OAuth2Interceptor (or subclass).")
         }
         
-        self.requestAdapter = adapter
+        self.interceptor = customInterceptor
         super.init(baseURLString: baseURLString, requestInterceptor: requestInterceptor)
     }
     
     public func loadSettings(_ options: JSON?) async {
         if let value = UserAgentMode(options?["browser_mode"].string) {
-            requestAdapter.auth.setBrowserMode(value)
+            interceptor.auth.setBrowserMode(value)
         }
         
         if let value = options?["custom_user_agent"].string {
-            requestAdapter.auth.setCustomUserAgent(value)
+            interceptor.auth.setCustomUserAgent(value)
         }
     }
 }

@@ -3,24 +3,29 @@ import Alamofire
 import SwiftyJSON
 
 open class OAuth1Client: AuthClient {
-    fileprivate var requestAdapter: OAuth1RequestAdapter
+    
+    // MARK: - Properties
+    
+    fileprivate var interceptor: OAuth1Interceptor
+    
+    // MARK: - Initialization
     
     public init(baseURLString: String, consumerKey: String, consumerSecret: String, auth: Auth1Authentication) {
-        let requestAdapter = OAuth1RequestAdapter(consumerKey: consumerKey, consumerSecret: consumerSecret, auth: auth)
-        let interceptor = Interceptor(adapters: [requestAdapter])
+        let interceptor = OAuth1Interceptor(consumerKey: consumerKey, consumerSecret: consumerSecret, auth: auth)
         
-        self.requestAdapter = requestAdapter
+        self.interceptor = interceptor
         super.init(baseURLString: baseURLString, requestInterceptor: interceptor)
-        
     }
+    
+    // MARK: - Configuration
     
     public func loadSettings(_ options: JSON?) async {
         if let value = UserAgentMode(options?["browser_mode"].string) {
-            requestAdapter.auth.setBrowserMode(value)
+            interceptor.auth.setBrowserMode(value)
         }
         
         if let value = options?["custom_user_agent"].string {
-            requestAdapter.auth.setCustomUserAgent(value)
+            interceptor.auth.setCustomUserAgent(value)
         }
     }
 }

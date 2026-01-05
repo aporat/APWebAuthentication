@@ -2,45 +2,33 @@ import Foundation
 import Alamofire
 @preconcurrency import SwiftyJSON
 
-public final class PinterestAPIClient: AuthClient {
+public final class PinterestAPIClient: OAuth2Client {
+    
+    // MARK: - Properties
     
     public override var accountType: AccountType {
         AccountStore.pinterest
     }
     
-    fileprivate var requestAdapter: OAuth2RequestAdapter
+    // MARK: - Initialization
     
-    public required convenience init(auth: Auth2Authentication) {
-        let requestAdapter = OAuth2RequestAdapter(auth: auth)
-        requestAdapter.tokenLocation = .authorizationHeader
-        
-        let interceptor = Interceptor(adapters: [requestAdapter])
+    public convenience init(auth: Auth2Authentication) {
+        let interceptor = OAuth2Interceptor(auth: auth)
+        interceptor.tokenLocation = .authorizationHeader
         
         self.init(baseURLString: "https://api.pinterest.com/v5/", requestInterceptor: interceptor)
-        
-        self.requestAdapter = requestAdapter
     }
     
     public override init(baseURLString: String, requestInterceptor: RequestInterceptor) {
-        guard let interceptor = requestInterceptor as? Interceptor,
-              let adapter = interceptor.adapters.first as? OAuth2RequestAdapter
-        else {
-            fatalError("Failed to extract RequestInterceptor from requestInterceptor.")
+        // Validate that we are using an OAuth2 based interceptor
+        guard requestInterceptor is OAuth2Interceptor else {
+            fatalError("PinterestAPIClient requires an OAuth2Interceptor.")
         }
         
-        self.requestAdapter = adapter
         super.init(baseURLString: baseURLString, requestInterceptor: requestInterceptor)
     }
     
-    public func loadSettings(_ options: JSON?) async {
-        if let value = UserAgentMode(options?["browser_mode"].string) {
-            requestAdapter.auth.setBrowserMode(value)
-        }
-        
-        if let value = options?["custom_user_agent"].string {
-            requestAdapter.auth.setCustomUserAgent(value)
-        }
-    }
+    // MARK: - Error Handling
     
     public override func extractErrorMessage(from json: JSON?) -> String? {
         if let message = json?["message"].string {
@@ -54,6 +42,7 @@ public final class PinterestAPIClient: AuthClient {
         if let message = json?["error"]["message"].string {
             return message
         }
+        
         return super.extractErrorMessage(from: json)
     }
 }

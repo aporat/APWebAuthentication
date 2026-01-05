@@ -5,23 +5,30 @@ import Alamofire
 @MainActor
 public final class PinterestWebAPIClient: AuthClient {
     
+    // MARK: - Properties
+    
     public override var accountType: AccountType {
         AccountStore.pinterest
     }
     
-    fileprivate var requestAdapter: PinterestWebRequestAdapter
+    fileprivate var interceptor: PinterestWebInterceptor
     fileprivate let auth: PinterestWebAuthentication
     
+    // MARK: - Initialization
+    
     public required convenience init(auth: PinterestWebAuthentication) {
-        let requestAdapter = PinterestWebRequestAdapter(auth: auth)
-        let interceptor = Interceptor(adapters: [requestAdapter])
-        
+        let interceptor = PinterestWebInterceptor(auth: auth)
+        // Pass the interceptor directly, no wrapper needed
         self.init(baseURLString: "https://www.pinterest.com/", auth: auth, requestInterceptor: interceptor)
     }
     
     public init(baseURLString: String, auth: PinterestWebAuthentication, requestInterceptor: RequestInterceptor) {
+        guard let customInterceptor = requestInterceptor as? PinterestWebInterceptor else {
+            fatalError("PinterestWebAPIClient requires a PinterestWebInterceptor.")
+        }
+        
         self.auth = auth
-        self.requestAdapter = (requestInterceptor as! Interceptor).adapters.first as! PinterestWebRequestAdapter
+        self.interceptor = customInterceptor
         super.init(baseURLString: baseURLString, requestInterceptor: requestInterceptor)
     }
     
@@ -31,27 +38,31 @@ public final class PinterestWebAPIClient: AuthClient {
         return configuration
     }
     
+    // MARK: - Configuration
+    
     public func loadSettings(_ options: JSON?) {
         if let value = options?["keep_device_settings"].bool {
-            requestAdapter.auth.keepDeviceSettings = value
+            interceptor.auth.keepDeviceSettings = value
         }
         
         if let value = UserAgentMode(options?["browser_mode"].string) {
-            requestAdapter.auth.browserMode = value
+            interceptor.auth.browserMode = value
         }
         
         if let value = options?["custom_user_agent"].string {
-            requestAdapter.auth.customUserAgent = value
+            interceptor.auth.customUserAgent = value
         }
         
         if let value = options?["cookies_domain"].string {
-            requestAdapter.auth.cookiesDomain = value
+            interceptor.auth.cookiesDomain = value
         }
         
         if let value = options?["app_id"].string {
-            requestAdapter.auth.appId = value
+            interceptor.auth.appId = value
         }
     }
+    
+    // MARK: - Error Handling
     
     public override func extractErrorMessage(from json: JSON?) -> String? {
         if let message = json?["resource_response"]["error"]["message"].string {
@@ -62,5 +73,4 @@ public final class PinterestWebAPIClient: AuthClient {
         }
         return super.extractErrorMessage(from: json)
     }
-    
 }

@@ -4,28 +4,37 @@ import Alamofire
 
 public final class TwitterAPIClient: OAuth1Client {
     
+    // MARK: - Properties
+    
     public override var accountType: AccountType {
         AccountStore.twitter
     }
+    
+    // MARK: - Initialization
     
     public convenience init(consumerKey: String, consumerSecret: String, auth: Auth1Authentication) {
         self.init(baseURLString: "https://api.twitter.com/2/", consumerKey: consumerKey, consumerSecret: consumerSecret, auth: auth)
     }
     
+    // MARK: - Error Handling
+    
     public override func extractErrorMessage(from json: JSON?) -> String? {
-        if let message = json?["errors"][0]["message"].string { // Common in v1.1 arrays
+        if let message = json?["errors"][0]["message"].string {
             return message
         }
-        if let message = json?["title"].string { // Common in v2 top-level
+
+        if let message = json?["title"].string {
             return message
         }
-        if let message = json?["detail"].string { // Also seen in v2
+
+        if let message = json?["detail"].string {
             return message
         }
-        if let message = json?["error"].string { // Seen in v1.1 simple errors
+
+        if let message = json?["error"].string {
             return message
         }
+        
         return super.extractErrorMessage(from: json)
     }
-    
 }

@@ -3,45 +3,35 @@ import Alamofire
 @preconcurrency import SwiftyJSON
 
 @MainActor
-public final class TumblrAPIClient: AuthClient {
+public final class TumblrAPIClient: OAuth2Client {
+    
+    // MARK: - Properties
     
     public override var accountType: AccountType {
         AccountStore.tumblr
     }
     
-    fileprivate var requestAdapter: OAuth2RequestAdapter
+    // MARK: - Initialization
     
     public required convenience init(auth: Auth2Authentication) {
-        let requestAdapter = OAuth2RequestAdapter(auth: auth)
-        requestAdapter.tokenLocation = .authorizationHeader // Use Bearer token
-        
-        let interceptor = Interceptor(adapters: [requestAdapter])
+        let interceptor = OAuth2Interceptor(auth: auth)
+        // Tumblr API v2 uses Bearer token in Authorization header
+        interceptor.tokenLocation = .authorizationHeader
         
         self.init(baseURLString: "https://api.tumblr.com/v2/", requestInterceptor: interceptor)
     }
     
     public override init(baseURLString: String, requestInterceptor: RequestInterceptor) {
-        guard let interceptor = requestInterceptor as? Interceptor,
-              let adapter = interceptor.adapters.first as? OAuth2RequestAdapter
-        else {
-            fatalError("Failed to extract RequestInterceptor from requestInterceptor.")
+        guard requestInterceptor is OAuth2Interceptor else {
+            fatalError("TumblrAPIClient requires an OAuth2Interceptor.")
         }
         
-        self.requestAdapter = adapter
         super.init(baseURLString: baseURLString, requestInterceptor: requestInterceptor)
     }
     
-    public func loadSettings(_ options: JSON?) {
-        if let value = UserAgentMode(options?["browser_mode"].string) {
-            requestAdapter.auth.browserMode = value
-        }
-        
-        if let value = options?["custom_user_agent"].string {
-            requestAdapter.auth.customUserAgent = value
-        }
-    }
+    // MARK: - Error Handling
     
-    override public func extractErrorMessage(from json: JSON?) -> String? {
+    public override func extractErrorMessage(from json: JSON?) -> String? {
         if let message = json?["meta"]["msg"].string {
             return message
         }
@@ -51,7 +41,7 @@ public final class TumblrAPIClient: AuthClient {
         return super.extractErrorMessage(from: json)
     }
     
-    override public func isSessionExpiredError(response: DataResponse<JSON, AFError>, json: JSON?) -> Bool {
+    public override func isSessionExpiredError(response: DataResponse<JSON, AFError>, json: JSON?) -> Bool {
         return super.isSessionExpiredError(response: response, json: json) || json?["meta"]["status"].int == 401
     }
 }

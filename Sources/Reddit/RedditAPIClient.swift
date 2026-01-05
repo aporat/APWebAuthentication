@@ -2,42 +2,28 @@ import Foundation
 import Alamofire
 @preconcurrency import SwiftyJSON
 
-@MainActor
-public final class RedditAPIClient: AuthClient {
+public final class RedditAPIClient: OAuth2Client {
+    
+    // MARK: - Properties
     
     public override var accountType: AccountType {
         AccountStore.reddit
     }
     
-    fileprivate var requestAdapter: OAuth2RequestAdapter
+    // MARK: - Initialization
     
-    public required convenience init(auth: Auth2Authentication) {
-        let requestAdapter = OAuth2RequestAdapter(auth: auth)
-        requestAdapter.tokenLocation = .authorizationHeader
-        
-        let interceptor = Interceptor(adapters: [requestAdapter])
+    public convenience init(auth: Auth2Authentication) {
+        let interceptor = OAuth2Interceptor(auth: auth)
+        interceptor.tokenLocation = .authorizationHeader
         
         self.init(baseURLString: "https://oauth.reddit.com/api/v1/", requestInterceptor: interceptor)
     }
     
     public override init(baseURLString: String, requestInterceptor: RequestInterceptor) {
-        guard let interceptor = requestInterceptor as? Interceptor,
-              let adapter = interceptor.adapters.first as? OAuth2RequestAdapter
-        else {
-            fatalError("Failed to extract RequestInterceptor from requestInterceptor.")
+        guard requestInterceptor is OAuth2Interceptor else {
+            fatalError("RedditAPIClient requires an OAuth2Interceptor.")
         }
         
-        self.requestAdapter = adapter
         super.init(baseURLString: baseURLString, requestInterceptor: requestInterceptor)
-    }
-    
-    public func loadSettings(_ options: JSON?) {
-        if let value = UserAgentMode(options?["browser_mode"].string) {
-            requestAdapter.auth.browserMode = value
-        }
-        
-        if let value = options?["custom_user_agent"].string {
-            requestAdapter.auth.customUserAgent = value
-        }
     }
 }
