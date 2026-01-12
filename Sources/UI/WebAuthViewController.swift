@@ -1,7 +1,7 @@
 import Foundation
 import SnapKit
 import SwifterSwift
-import SwiftyJSON
+@preconcurrency import SwiftyJSON
 @preconcurrency import WebKit
 import UIKit
 import JGProgressHUD

@@ -1,6 +1,6 @@
 import Foundation
 import Alamofire
-import SwiftyJSON
+@preconcurrency import SwiftyJSON
 
 open class OAuth2Client: AuthClient {
     

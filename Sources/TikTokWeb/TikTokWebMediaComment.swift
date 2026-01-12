@@ -1,5 +1,5 @@
 import Foundation
-import SwiftyJSON
+@preconcurrency import SwiftyJSON
 
 public final class TikTokWebMediaComment: MediaComment, Sendable {
     public let commentId: String

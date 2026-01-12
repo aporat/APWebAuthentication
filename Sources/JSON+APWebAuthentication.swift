@@ -1,5 +1,5 @@
 import Foundation
-import SwiftyJSON
+@preconcurrency import SwiftyJSON
 
 public extension JSON {
     /// Safely returns a string representation of an ID that might be stored as a string or an integer.

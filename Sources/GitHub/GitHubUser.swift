@@ -1,5 +1,5 @@
 import Foundation
-import SwiftyJSON
+@preconcurrency import SwiftyJSON
 
 public final class GitHubUser: GenericUser, @unchecked Sendable {
     public required init?(info: JSON) {

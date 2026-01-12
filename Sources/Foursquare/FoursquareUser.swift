@@ -1,5 +1,5 @@
 import Foundation
-import SwiftyJSON
+@preconcurrency import SwiftyJSON
 
 public final class FoursquareUser: User, Sendable {
     public let userId: String

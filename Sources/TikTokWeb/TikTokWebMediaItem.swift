@@ -1,5 +1,5 @@
 import Foundation
-import SwiftyJSON
+@preconcurrency import SwiftyJSON
 
 public final class TikTokWebMediaItem: MediaItem, Hashable, @unchecked Sendable {
     public var type = MediaItemType.video

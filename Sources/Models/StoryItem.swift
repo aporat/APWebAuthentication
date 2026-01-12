@@ -1,5 +1,5 @@
 import Foundation
-import SwiftyJSON
+@preconcurrency import SwiftyJSON
 
 public protocol StoryItem: Sendable {
     init?(info: JSON)

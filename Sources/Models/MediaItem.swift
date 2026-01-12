@@ -1,5 +1,5 @@
 import Foundation
-import SwiftyJSON
+@preconcurrency import SwiftyJSON
 
 public enum MediaItemType: Int16, Sendable, CaseIterable, CustomStringConvertible {
     case photo = 1

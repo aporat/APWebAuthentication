@@ -1,5 +1,5 @@
 import Foundation
-import SwiftyJSON
+@preconcurrency import SwiftyJSON
 
 public final class TumblrBlog: GenericUser, @unchecked Sendable {
     
