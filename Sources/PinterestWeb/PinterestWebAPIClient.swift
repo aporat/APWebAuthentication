@@ -2,6 +2,8 @@ import Foundation
 import Alamofire
 @preconcurrency import SwiftyJSON
 
+// MARK: - PinterestWebAPIClient
+
 @MainActor
 public final class PinterestWebAPIClient: AuthClient {
     
@@ -11,14 +13,13 @@ public final class PinterestWebAPIClient: AuthClient {
         AccountStore.pinterest
     }
     
-    fileprivate var interceptor: PinterestWebInterceptor
-    fileprivate let auth: PinterestWebAuthentication
+    private var interceptor: PinterestWebInterceptor
+    private let auth: PinterestWebAuthentication
     
     // MARK: - Initialization
     
     public required convenience init(auth: PinterestWebAuthentication) {
         let interceptor = PinterestWebInterceptor(auth: auth)
-        // Pass the interceptor directly, no wrapper needed
         self.init(baseURLString: "https://www.pinterest.com/", auth: auth, requestInterceptor: interceptor)
     }
     
@@ -32,6 +33,8 @@ public final class PinterestWebAPIClient: AuthClient {
         super.init(baseURLString: baseURLString, requestInterceptor: requestInterceptor)
     }
     
+    // MARK: - Session Configuration
+    
     public override func makeSessionConfiguration() -> URLSessionConfiguration {
         let configuration = URLSessionConfiguration.ephemeral
         configuration.httpCookieStorage = auth.cookieStorage
@@ -41,22 +44,27 @@ public final class PinterestWebAPIClient: AuthClient {
     // MARK: - Configuration
     
     public func loadSettings(_ options: JSON?) {
+        // Keep device settings flag
         if let value = options?["keep_device_settings"].bool {
             interceptor.auth.keepDeviceSettings = value
         }
         
+        // Browser mode configuration
         if let value = UserAgentMode(options?["browser_mode"].string) {
             interceptor.auth.browserMode = value
         }
         
+        // Custom user agent
         if let value = options?["custom_user_agent"].string {
             interceptor.auth.customUserAgent = value
         }
         
+        // Cookies domain
         if let value = options?["cookies_domain"].string {
             interceptor.auth.cookiesDomain = value
         }
         
+        // App ID
         if let value = options?["app_id"].string {
             interceptor.auth.appId = value
         }
@@ -65,12 +73,16 @@ public final class PinterestWebAPIClient: AuthClient {
     // MARK: - Error Handling
     
     public override func extractErrorMessage(from json: JSON?) -> String? {
+        // Check nested error structure
         if let message = json?["resource_response"]["error"]["message"].string {
             return message
         }
+        
+        // Check simple error structure
         if let message = json?["error"]["message"].string {
             return message
         }
+        
         return super.extractErrorMessage(from: json)
     }
 }

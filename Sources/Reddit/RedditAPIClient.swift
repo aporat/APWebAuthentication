@@ -2,6 +2,8 @@ import Foundation
 import Alamofire
 @preconcurrency import SwiftyJSON
 
+// MARK: - RedditAPIClient
+
 public final class RedditAPIClient: OAuth2Client {
     
     // MARK: - Properties
@@ -20,6 +22,7 @@ public final class RedditAPIClient: OAuth2Client {
     }
     
     public override init(baseURLString: String, requestInterceptor: RequestInterceptor) {
+        // Validate that we are using an OAuth2 based interceptor
         guard requestInterceptor is OAuth2Interceptor else {
             fatalError("RedditAPIClient requires an OAuth2Interceptor.")
         }

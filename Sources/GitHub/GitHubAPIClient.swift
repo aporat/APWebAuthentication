@@ -2,7 +2,9 @@ import Foundation
 import Alamofire
 @preconcurrency import SwiftyJSON
 
-public class GitHubAPIClient: OAuth2Client {
+// MARK: - GitHubAPIClient
+
+public final class GitHubAPIClient: OAuth2Client {
     
     // MARK: - Properties
     

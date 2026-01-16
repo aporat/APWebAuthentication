@@ -1,28 +1,142 @@
 import Foundation
 
+/// OAuth 2.0 authentication manager.
+///
+/// `Auth2Authentication` manages OAuth 2.0 credentials including:
+/// - Access token (identifies the user and authorizes requests)
+/// - Refresh token (obtains new access tokens when expired)
+/// - Client ID (identifies the application)
+/// - Persistent storage of credentials
+/// - Authorization status checking
+///
+/// **OAuth 2.0 Overview:**
+/// OAuth 2.0 uses bearer tokens for authentication. Each request includes:
+/// ```
+/// Authorization: Bearer {access_token}
+/// ```
+///
+/// When the access token expires, the refresh token can be used to obtain
+/// a new access token without requiring the user to log in again.
+///
+/// **Example Usage:**
+/// ```swift
+/// let auth = Auth2Authentication()
+/// auth.accountIdentifier = "reddit_user"
+/// auth.clientId = "app_client_id"
+/// auth.accessToken = "access_token_here"
+/// auth.refreshToken = "refresh_token_here"
+///
+/// if auth.isAuthorized {
+///     await auth.storeAuthSettings()
+/// }
+/// ```
+///
+/// **Platforms Using OAuth 2.0:**
+/// - Reddit
+/// - GitHub
+/// - Pinterest
+/// - Twitch
+/// - Most modern APIs
+///
+/// - Note: All operations must be performed on the main actor.
 @MainActor
 public final class Auth2Authentication: Authentication {
     
+    // MARK: - Settings Storage
+    
+    /// Internal structure for encoding/decoding OAuth 2.0 settings.
+    ///
+    /// This structure is used for property list serialization of credentials.
     private struct AuthSettings: Codable, Sendable {
         let accessToken: String?
         let refreshToken: String?
         let clientId: String?
     }
     
+    // MARK: - OAuth 2.0 Credentials
+    
+    /// The OAuth client ID.
+    ///
+    /// This identifies your application to the OAuth provider.
+    /// Typically obtained when registering your app with the platform.
+    ///
+    /// **Example:**
+    /// ```swift
+    /// auth.clientId = "abc123def456"
+    /// ```
     public var clientId: String?
+    
+    /// The OAuth access token.
+    ///
+    /// This token is sent with every authenticated request as a Bearer token.
+    /// It has a limited lifetime and should be refreshed when expired.
+    ///
+    /// **Example:**
+    /// ```swift
+    /// auth.accessToken = "ya29.a0AfH6SMBx..."
+    /// // Use in requests:
+    /// // Authorization: Bearer ya29.a0AfH6SMBx...
+    /// ```
     public var accessToken: String?
+    
+    /// The OAuth refresh token.
+    ///
+    /// This token is used to obtain new access tokens when they expire,
+    /// without requiring the user to re-authenticate.
+    ///
+    /// **Example:**
+    /// ```swift
+    /// auth.refreshToken = "1//0gLTCK..."
+    /// // Use to get new access token when expired
+    /// ```
+    ///
+    /// - Note: Not all OAuth flows provide refresh tokens (implicit flow doesn't)
     public var refreshToken: String?
     
+    // MARK: - Initialization
+    
+    /// Creates a new OAuth 2.0 authentication instance.
     public required init() {}
     
+    // MARK: - Configuration
+    
+    /// Sets the browser mode for user agent generation.
+    ///
+    /// - Parameter mode: The desired browser/device mode
     func setBrowserMode(_ mode: UserAgentMode) {
         self.browserMode = mode
     }
     
+    /// Sets a custom user agent string.
+    ///
+    /// When set, this overrides automatic user agent generation.
+    ///
+    /// - Parameter agent: The custom user agent string
     func setCustomUserAgent(_ agent: String) {
         self.customUserAgent = agent
     }
     
+    // MARK: - Authorization Status
+    
+    /// Whether the authentication has a valid access token.
+    ///
+    /// Returns `true` if an access token is present and non-empty.
+    /// This indicates the user has completed OAuth authorization.
+    ///
+    /// **Example:**
+    /// ```swift
+    /// if auth.isAuthorized {
+    ///     // Make authenticated API requests
+    ///     let client = OAuth2Client(auth: auth)
+    /// } else {
+    ///     // Show login screen
+    ///     showLoginScreen()
+    /// }
+    /// ```
+    ///
+    /// - Note: This doesn't check if the token is expired; it only verifies presence
+    ///
+    /// - Returns: `true` if access token is valid, `false` otherwise
     public var isAuthorized: Bool {
         if let currentAccessToken = accessToken, !currentAccessToken.isEmpty {
             return true
@@ -30,8 +144,24 @@ public final class Auth2Authentication: Authentication {
         return false
     }
     
-    // MARK: - Auth Settings
+    // MARK: - Settings Persistence
     
+    /// Stores OAuth 2.0 credentials to disk.
+    ///
+    /// Saves the access token, refresh token, and client ID to a property list file
+    /// in the documents directory. The file name is based on the `accountIdentifier`.
+    ///
+    /// **File Format:** Property list containing access token, refresh token, and client ID
+    ///
+    /// **Example:**
+    /// ```swift
+    /// auth.accessToken = "access_token"
+    /// auth.refreshToken = "refresh_token"
+    /// auth.clientId = "client_id"
+    /// await auth.storeAuthSettings()
+    /// ```
+    ///
+    /// - Note: Errors are logged but not thrown to avoid interrupting the flow
     override public func storeAuthSettings() async {
         let settings = AuthSettings(
             accessToken: self.accessToken,
@@ -48,10 +178,25 @@ public final class Auth2Authentication: Authentication {
                 try data.write(to: authSettingsURL)
             }.value
         } catch {
-            print("⚠️ Failed to store Auth2 settings: \(error)")
+            print("⚠️ Failed to store OAuth 2.0 settings: \(error)")
         }
     }
     
+    /// Loads OAuth 2.0 credentials from disk.
+    ///
+    /// Reads the access token, refresh token, and client ID from the property list
+    /// file and updates the corresponding properties.
+    ///
+    /// **Example:**
+    /// ```swift
+    /// await auth.loadAuthSettings()
+    /// if auth.isAuthorized {
+    ///     print("Credentials loaded successfully")
+    ///     print("Access token: \(auth.accessToken ?? "none")")
+    /// }
+    /// ```
+    ///
+    /// - Note: Errors are logged but not thrown; properties remain nil on failure
     override public func loadAuthSettings() async {
         guard let authSettingsURL = authSettingsURL else { return }
         
@@ -65,10 +210,24 @@ public final class Auth2Authentication: Authentication {
             self.refreshToken = settings.refreshToken
             self.clientId = settings.clientId
         } catch {
-            print("⚠️ Failed to load Auth2 settings: \(error)")
+            print("⚠️ Failed to load OAuth 2.0 settings: \(error)")
         }
     }
     
+    /// Clears OAuth 2.0 credentials from disk and memory.
+    ///
+    /// This method:
+    /// 1. Deletes the settings file (via super)
+    /// 2. Clears the access token property
+    /// 3. Clears the refresh token property
+    /// 4. Clears the client ID property
+    ///
+    /// **Example:**
+    /// ```swift
+    /// // Logout user
+    /// await auth.clearAuthSettings()
+    /// // auth.isAuthorized is now false
+    /// ```
     override public func clearAuthSettings() async {
         await super.clearAuthSettings()
         accessToken = nil

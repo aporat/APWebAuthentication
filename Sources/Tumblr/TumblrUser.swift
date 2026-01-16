@@ -1,7 +1,11 @@
 import Foundation
 @preconcurrency import SwiftyJSON
 
+// MARK: - TumblrUser
+
 public final class TumblrUser: User, Sendable {
+    
+    // MARK: - Properties
     
     public let userId: String
     public let username: String?
@@ -10,12 +14,15 @@ public final class TumblrUser: User, Sendable {
     public let privateProfile: Bool = false
     public let verified: Bool = false
     
-    /// A list of the user's blogs.
+    /// The user's blogs (Tumblr accounts can have multiple blogs)
     public let blogs: [TumblrBlog]
     
-    /// A failable initializer that creates a `TumblrUser` from a SwiftyJSON object.
-    /// - Parameter info: The JSON object containing the user's data.
+    // MARK: - Initialization
+    
+    /// Creates a Tumblr user from JSON data
+    /// - Parameter info: The JSON object containing user data
     public required init?(info: JSON) {
+        // Extract username (used as both ID and username)
         guard let name = info["name"].string else {
             return nil
         }
@@ -23,6 +30,8 @@ public final class TumblrUser: User, Sendable {
         self.userId = name
         self.username = name
         self.fullname = name
+        
+        // Parse user's blogs
         self.blogs = info["blogs"].arrayValue.compactMap { TumblrBlog(info: $0) }
     }
 }
