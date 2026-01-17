@@ -67,7 +67,6 @@ private struct CodableHTTPCookie: Codable, Sendable {
 /// ```swift
 /// let auth = SessionAuthentication()
 /// auth.accountIdentifier = "web_user"
-/// auth.cookiesDomain = ".example.com"
 /// auth.sessionId = "session_id_here"
 /// auth.csrfToken = "csrf_token_here"
 ///
@@ -99,18 +98,6 @@ open class SessionAuthentication: Authentication {
     /// auth.keepDeviceSettings = true // Persist device identity
     /// ```
     public var keepDeviceSettings = true
-    
-    /// The domain filter for cookies.
-    ///
-    /// When set, only cookies matching this domain (or subdomains) are loaded and stored.
-    /// Empty string means accept cookies from all domains.
-    ///
-    /// **Example:**
-    /// ```swift
-    /// auth.cookiesDomain = ".instagram.com"
-    /// // Only loads cookies for *.instagram.com
-    /// ```
-    public var cookiesDomain = ""
     
     /// Unique identifier for this session's cookie storage.
     ///
@@ -271,7 +258,6 @@ open class SessionAuthentication: Authentication {
     /// Loads cookies from disk and adds them to cookie storage.
     ///
     /// Reads cookies from the property list file and sets them in `cookieStorage`.
-    /// Respects the `cookiesDomain` filter if set.
     ///
     /// **Example:**
     /// ```swift
@@ -297,9 +283,7 @@ open class SessionAuthentication: Authentication {
             
             // Apply domain filter and set cookies
             cookies.forEach { cookie in
-                if cookiesDomain.isEmpty || cookie.domain.hasSuffix(cookiesDomain) {
-                    cookieStorage.setCookie(cookie)
-                }
+                cookieStorage.setCookie(cookie)
             }
             
             return cookies
@@ -344,25 +328,19 @@ open class SessionAuthentication: Authentication {
     
     /// Sets cookies in cookie storage with domain filtering.
     ///
-    /// Adds the provided cookies to `cookieStorage`, respecting the `cookiesDomain`
-    /// filter if set. Only cookies matching the domain (or subdomains) are added.
+    /// Adds the provided cookies to `cookieStorage`
     ///
     /// **Example:**
     /// ```swift
     /// // From API response
     /// let cookies = HTTPCookie.cookies(withResponseHeaderFields: headers, for: url)
     ///
-    /// // Set with domain filtering
-    /// auth.cookiesDomain = ".instagram.com"
-    /// auth.setCookies(cookies) // Only sets *.instagram.com cookies
     /// ```
     ///
     /// - Parameter cookies: The cookies to set, or `nil` to do nothing
     public func setCookies(_ cookies: [HTTPCookie]?) {
         cookies?.forEach {
-            if self.cookiesDomain.isEmpty || $0.domain.hasSuffix(self.cookiesDomain) {
-                self.cookieStorage.setCookie($0)
-            }
+            self.cookieStorage.setCookie($0)
         }
     }
     

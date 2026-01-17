@@ -58,12 +58,6 @@ public final class PinterestWebAPIClient: AuthClient {
         if let value = options?["custom_user_agent"].string {
             interceptor.auth.customUserAgent = value
         }
-        
-        // Cookies domain
-        if let value = options?["cookies_domain"].string {
-            interceptor.auth.cookiesDomain = value
-        }
-        
         // App ID
         if let value = options?["app_id"].string {
             interceptor.auth.appId = value

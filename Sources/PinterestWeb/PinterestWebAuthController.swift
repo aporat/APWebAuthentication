@@ -24,11 +24,18 @@ public final class PinterestWebAuthController: WebAuthViewController {
     
     // MARK: - Redirect Logic Override
     
-    override func checkForRedirect(url: URL?) -> Bool {
+    @objc override public func checkForRedirect(url: URL?) -> Bool {
         guard let url = url else { return false }
         let urlString = url.absoluteString
         
         log.debug("Pinterest Check Redirect: \(urlString)")
+        
+        // Only check for redirect AFTER the initial page has loaded
+        // This prevents immediate dismissal on first navigation
+        guard initialLoaded else {
+            log.debug("⏭️ Skipping redirect check - initial page not yet loaded")
+            return false
+        }
         
         if let currentRedirectURL = redirectURL?.absoluteString, !currentRedirectURL.isEmpty, urlString.hasPrefix(currentRedirectURL) {
             log.info("✅ Redirect URL MATCH detected: \(urlString)")
@@ -47,6 +54,19 @@ public final class PinterestWebAuthController: WebAuthViewController {
         }
         
         return false
+    }
+    
+    // MARK: - WKNavigationDelegate Override
+    
+    override public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        // Check for custom redirect first
+        if checkForRedirect(url: webView.url) {
+            didStopLoading()
+            return
+        }
+        
+        // Otherwise, call super to handle default behavior
+        super.webView(webView, didFinish: navigation)
     }
     
     // MARK: - Verification Logic

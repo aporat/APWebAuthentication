@@ -7,303 +7,196 @@ import UIKit
 import JGProgressHUD
 import SwiftyBeaver
 
+// MARK: - Type Aliases
+
 extension WebAuthViewController {
     public typealias CompletionHandler = (Result<[String: Any]?, APWebAuthenticationError>) -> Void
+    public typealias DismissButtonStyle = WebAuthNavigationManager.DismissButtonStyle
 }
 
-extension WebAuthViewController {
-    public enum DismissButtonStyle: Int {
-        case done
-        case close
-        case cancel
-    }
-}
+// MARK: - Web Auth View Controller
 
+/// A view controller that handles web-based authentication flows.
+///
+/// This view controller presents a web view for OAuth, form-based login,
+/// and other web authentication patterns. It manages the web view lifecycle,
+/// navigation, and callback detection with a clean, modular architecture.
+///
+/// **Key Features:**
+/// - Two appearance styles (normal and Safari-like)
+/// - Automatic redirect URL detection and parsing
+/// - Cookie management
+/// - JavaScript execution
+/// - JSON error response handling
+/// - Progress tracking
+///
+/// **Architecture:**
+/// This class delegates responsibilities to specialized manager classes:
+/// - `WebAuthNavigationManager`: Handles navigation bar and toolbar
+/// - `WebAuthCookieManager`: Manages HTTP cookies
+/// - `WebAuthJavaScriptBridge`: Executes JavaScript
+/// - `WebAuthRedirectHandler`: Detects redirects and parses responses
+///
+/// **Example Usage:**
+/// ```swift
+/// let vc = WebAuthViewController(
+///     authURL: URL(string: "https://api.instagram.com/oauth/authorize?...")!,
+///     redirectURL: URL(string: "myapp://callback")!
+/// )
+///
+/// vc.appearanceStyle = .safari
+/// vc.completionHandler = { result in
+///     switch result {
+///     case .success(let params):
+///         print("Authenticated:", params)
+///     case .failure(let error):
+///         print("Failed:", error)
+///     }
+/// }
+///
+/// let navController = UINavigationController(rootViewController: vc)
+/// present(navController, animated: true)
+/// ```
 @MainActor
-open class WebAuthViewController: UIViewController, WKNavigationDelegate {
-    public var dismissButtonStyle: WebAuthViewController.DismissButtonStyle = .cancel
+open class WebAuthViewController: UIViewController {
     
+    // MARK: - Public Properties
+    
+    /// The dismiss button style for the navigation bar
+    public var dismissButtonStyle: DismissButtonStyle = .cancel
+    
+    /// The visual appearance style (normal or Safari-like)
     public var appearanceStyle: APWebAuthSession.AppearanceStyle = .normal
-    public var statusBarStyle = UIStatusBarStyle.default
-    public var initialLoaded = false
-    public var isJSONContentType = false
     
+    /// The status bar style to use when this view controller is presented
+    public var statusBarStyle = UIStatusBarStyle.default
+    
+    /// Whether the initial page load has completed
+    public var initialLoaded = false
+    
+    /// Whether the current response has a JSON content type
+    public private(set) var isJSONContentType = false
+    
+    /// The completion handler called when authentication completes or fails
     public var completionHandler: CompletionHandler?
+    
+    /// The authentication URL to load
     public var authURL: URL?
+    
+    /// The redirect URL that signals authentication completion
     public var redirectURL: URL?
+    
+    /// Custom user agent string for the web view
     public var customUserAgent: String? {
-        get {
-            webView.customUserAgent
-        }
-        set {
-            webView.customUserAgent = newValue
-        }
+        get { webView.customUserAgent }
+        set { webView.customUserAgent = newValue }
     }
     
-    fileprivate lazy var loginHUD: JGProgressHUD = {
-        let view = JGProgressHUD(style: .dark)
-        return view
-    }()
-    
+    /// An optional existing session ID (for app-specific use)
     public var existingSessionId: String?
     
-    fileprivate var observerAdded = false
-    
-    // MARK: - UI Elements
-    
-    public var completedBarButtonItems = [UIBarButtonItem]()
-    fileprivate var loadingBarButtonItems = [UIBarButtonItem]()
-    
-    fileprivate var refreshBarButtonItem: UIBarButtonItem!
-    fileprivate var stopBarButtonItem: UIBarButtonItem!
-    
-    fileprivate var dismissBarButtonItem: UIBarButtonItem!
-    
-    fileprivate lazy var activityBarButtonItem: UIBarButtonItem = {
-        let view = UIBarButtonItem(customView: self.activityIndicator)
-        return view
-    }()
-    
-    // Toolbar
-    fileprivate lazy var actionBarBackBarButtonItem: UIBarButtonItem = {
-        return createToolbarButton(
-            systemName: "chevron.left",
-            selector: #selector(WebAuthViewController.goBackTapped(_:))
-        )
-    }()
-    
-    fileprivate lazy var actionBarForwardBarButtonItem: UIBarButtonItem = {
-        return createToolbarButton(
-            systemName: "chevron.right",
-            selector: #selector(WebAuthViewController.goForwardTapped(_:))
-        )
-    }()
-    
-    fileprivate lazy var actionSafariBarButtonItem: UIBarButtonItem = {
-        return createToolbarButton(
-            systemName: "safari",
-            selector: #selector(WebAuthViewController.openInSafari(_:))
-        )
-    }()
-    
-    fileprivate lazy var actionBarButtonItem: UIBarButtonItem = {
-        return createToolbarButton(
-            systemName: "square.and.arrow.up",
-            selector: #selector(WebAuthViewController.actionButtonTapped(_:))
-        )
-    }()
-    
-    fileprivate lazy var activityIndicator: UIActivityIndicatorView = {
-        let view = UIActivityIndicatorView()
-        
-        view.frame = CGRect(x: 0, y: 0, width: 25, height: 25)
-        view.autoresizingMask = [.flexibleLeftMargin, .flexibleRightMargin, .flexibleTopMargin, .flexibleBottomMargin]
-        view.sizeToFit()
-        
-        return view
-    }()
-    
+    /// Progress view for tracking page load progress
     public lazy var progressView: UIProgressView = {
         let view = UIProgressView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = .clear
         view.trackTintColor = .clear
-        
         return view
     }()
     
+    // MARK: - Web View Configuration
+    
+    /// The web view configuration to use
     open lazy var webViewConfiguration: WKWebViewConfiguration = {
         let config = WKWebViewConfiguration()
         config.websiteDataStore = WKWebsiteDataStore.nonPersistent()
         return config
     }()
     
+    /// The web view that displays authentication pages
     open lazy var webView: WKWebView = {
-        let view = WKWebView(frame: CGRect.zero, configuration: self.webViewConfiguration)
+        let view = WKWebView(frame: .zero, configuration: self.webViewConfiguration)
         view.translatesAutoresizingMaskIntoConstraints = false
         view.isMultipleTouchEnabled = true
         view.autoresizesSubviews = true
         view.scrollView.alwaysBounceVertical = true
-        
         return view
     }()
     
-    // MARK: - UIViewController
+    // MARK: - Private Properties - Managers
     
+    private lazy var navigationManager: WebAuthNavigationManager = {
+        let manager = WebAuthNavigationManager(
+            viewController: self,
+            webView: webView,
+            appearanceStyle: appearanceStyle,
+            dismissButtonStyle: dismissButtonStyle
+        )
+        setupNavigationCallbacks(manager)
+        return manager
+    }()
+    
+    private lazy var cookieManager: WebAuthCookieManager = {
+        WebAuthCookieManager(webView: webView)
+    }()
+    
+    private lazy var javaScriptBridge: WebAuthJavaScriptBridge = {
+        WebAuthJavaScriptBridge(webView: webView)
+    }()
+    
+    private lazy var redirectHandler: WebAuthRedirectHandler = {
+        WebAuthRedirectHandler(redirectURL: redirectURL)
+    }()
+    
+    // MARK: - Private Properties - UI
+    
+    private lazy var loginHUD: JGProgressHUD = {
+        JGProgressHUD(style: .dark)
+    }()
+    
+    private var progressObserver: NSKeyValueObservation?
+    
+    // MARK: - Initialization
+    
+    /// Creates a new web authentication view controller.
+    ///
+    /// - Parameters:
+    ///   - authURL: The URL to load for authentication
+    ///   - redirectURL: The callback URL that signals completion
     public init(authURL: URL?, redirectURL: URL?) {
         self.authURL = authURL
         self.redirectURL = redirectURL
-        
         super.init(nibName: nil, bundle: nil)
     }
     
+    @available(*, unavailable)
     public required init(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)!
+        fatalError("init(coder:) has not been implemented")
     }
+    
+    // MARK: - Lifecycle
     
     override open func viewDidLoad() {
         super.viewDidLoad()
         
-        webView.navigationDelegate = self
-        
-        view.addSubview(webView)
-        
-        var dismissButtonLabel = NSLocalizedString("Cancel", comment: "")
-        if dismissButtonStyle == .close {
-            dismissButtonLabel = NSLocalizedString("Close", comment: "")
-        } else if dismissButtonStyle == .done {
-            dismissButtonLabel = NSLocalizedString("Done", comment: "")
-        }
-        
-        refreshBarButtonItem = createNavBarButton(
-            systemName: "arrow.clockwise",
-            selector: #selector(refresh(_:))
-        )
-        stopBarButtonItem = createNavBarButton(
-            systemName: "xmark",
-            selector: #selector(stop(_:))
-        )
-        
-        loadingBarButtonItems = [stopBarButtonItem]
-        dismissBarButtonItem = UIBarButtonItem(title: dismissButtonLabel, style: .plain, target: self, action: #selector(dismissCancelled(_:)))
-        
-        if appearanceStyle == .normal {
-            completedBarButtonItems = [refreshBarButtonItem]
-            
-            navigationItem.leftBarButtonItems = [dismissBarButtonItem]
-            navigationItem.rightBarButtonItems = [activityBarButtonItem]
-            
-            let newNavBarAppearance = UINavigationBarAppearance()
-            newNavBarAppearance.configureWithOpaqueBackground()
-            newNavBarAppearance.backgroundColor = UIColor(named: "BarTintColor")
-            newNavBarAppearance.largeTitleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor(named: "TintColor")!]
-            newNavBarAppearance.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor(named: "TintColor")!]
-            
-            refreshBarButtonItem.setTitleTextAttributes([.foregroundColor: UIColor.black], for: .normal)
-            activityBarButtonItem.setTitleTextAttributes([.foregroundColor: UIColor.black], for: .normal)
-            dismissBarButtonItem.setTitleTextAttributes([.foregroundColor: UIColor.black], for: .normal)
-            
-            self.navigationController?.navigationBar.standardAppearance = newNavBarAppearance
-            self.navigationController?.navigationBar.scrollEdgeAppearance = newNavBarAppearance
-            self.navigationController?.navigationBar.compactAppearance = newNavBarAppearance
-            self.navigationController?.navigationBar.compactScrollEdgeAppearance = newNavBarAppearance
-        } else {
-            
-            let newNavBarAppearance = UINavigationBarAppearance()
-            newNavBarAppearance.configureWithOpaqueBackground()
-            
-            self.navigationController?.navigationBar.isTranslucent = false
-            
-            if let currentNavigationController = navigationController, currentNavigationController.traitCollection.userInterfaceStyle == .dark {
-                newNavBarAppearance.backgroundColor = UIColor(hex: 0x565656)!
-            } else {
-                newNavBarAppearance.backgroundColor = UIColor(hex: 0xF8F8F8)!
-            }
-            
-            newNavBarAppearance.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.label]
-            newNavBarAppearance.largeTitleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.label]
-            
-            self.navigationController?.navigationBar.standardAppearance = newNavBarAppearance
-            self.navigationController?.navigationBar.scrollEdgeAppearance = newNavBarAppearance
-            self.navigationController?.navigationBar.compactAppearance = newNavBarAppearance
-            self.navigationController?.navigationBar.compactScrollEdgeAppearance = newNavBarAppearance
-            let newToolbarBarAppearance = UIToolbarAppearance()
-            newToolbarBarAppearance.configureWithOpaqueBackground()
-            
-            if let currentNavigationController = navigationController, currentNavigationController.traitCollection.userInterfaceStyle == .dark {
-                newToolbarBarAppearance.backgroundColor = UIColor(hex: 0x565656)!
-            } else {
-                newToolbarBarAppearance.backgroundColor = UIColor(hex: 0xF8F8F8)!
-            }
-            
-            self.navigationController?.toolbar.standardAppearance = newToolbarBarAppearance
-            self.navigationController?.toolbar.scrollEdgeAppearance = newToolbarBarAppearance
-            self.navigationController?.toolbar.compactAppearance = newToolbarBarAppearance
-            self.navigationController?.toolbar.compactScrollEdgeAppearance = newToolbarBarAppearance
-            
-            setupToolbarItems()
-        }
-        
-        activityIndicator.style = .medium
-        
-        self.registerForTraitChanges([UITraitUserInterfaceStyle.self]) { (self: Self, previousTraitCollection: UITraitCollection) in
-            if self.appearanceStyle == .safari, let currentNavigationController = self.navigationController {
-                let newNavBarAppearance = UINavigationBarAppearance()
-                newNavBarAppearance.configureWithOpaqueBackground()
-                
-                if currentNavigationController.traitCollection.userInterfaceStyle == .dark {
-                    newNavBarAppearance.backgroundColor = UIColor(hex: 0x565656)!
-                } else {
-                    newNavBarAppearance.backgroundColor = UIColor(hex: 0xF8F8F8)!
-                }
-                
-                newNavBarAppearance.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.label]
-                currentNavigationController.navigationBar.standardAppearance = newNavBarAppearance
-                currentNavigationController.navigationBar.scrollEdgeAppearance = newNavBarAppearance
-                currentNavigationController.navigationBar.compactAppearance = newNavBarAppearance
-                currentNavigationController.navigationBar.compactScrollEdgeAppearance = newNavBarAppearance
-                
-                let newToolbarBarAppearance = UIToolbarAppearance()
-                newToolbarBarAppearance.configureWithOpaqueBackground()
-                
-                if currentNavigationController.traitCollection.userInterfaceStyle == .dark {
-                    newToolbarBarAppearance.backgroundColor = UIColor(hex: 0x565656)!
-                } else {
-                    newToolbarBarAppearance.backgroundColor = UIColor(hex: 0xF8F8F8)!
-                }
-                
-                self.navigationController?.toolbar.standardAppearance = newToolbarBarAppearance
-                self.navigationController?.toolbar.scrollEdgeAppearance = newToolbarBarAppearance
-                self.navigationController?.toolbar.compactAppearance = newToolbarBarAppearance
-                self.navigationController?.toolbar.compactScrollEdgeAppearance = newToolbarBarAppearance
-                
-                if currentNavigationController.traitCollection.userInterfaceStyle == .dark {
-                    currentNavigationController.navigationBar.tintColor = UIColor(hex: 0x5A91F7)
-                    currentNavigationController.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor(hex: 0x5A91F7)!]
-                    currentNavigationController.navigationBar.barTintColor = UIColor(hex: 0x565656)
-                } else {
-                    currentNavigationController.navigationBar.tintColor = UIColor(hex: 0x0079FF)
-                    currentNavigationController.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor(hex: 0x0079FF)!]
-                    currentNavigationController.navigationBar.barTintColor = UIColor(hex: 0xF8F8F8)
-                }
-            }
-        }
-        
-        view.setNeedsUpdateConstraints()
-        
-        let dataStore = self.webView.configuration.websiteDataStore
-        let allTypes = WKWebsiteDataStore.allWebsiteDataTypes()
-        
-        dataStore.fetchDataRecords(ofTypes: allTypes) { [weak self] records in
-            guard let self = self else { return }
-            dataStore.removeData(ofTypes: allTypes, for: records) {
-                self.loadRequest()
-            }
-        }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1)) {
-            if let navBar = self.navigationItem.titleView as? AuthNavBarView {
-                navBar.showSecure()
-            }
-        }
+        setupWebView()
+        setupNavigation()
+        setupTraitObservation()
+        clearWebsiteDataAndLoad()
+        scheduleSecureLockDisplay()
     }
     
     override open func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        if !observerAdded, appearanceStyle == .safari {
-            webView.addObserver(self, forKeyPath: #keyPath(WKWebView.estimatedProgress), options: .new, context: nil)
-            observerAdded = true
+        if appearanceStyle == .safari {
+            setupProgressObserver()
         }
     }
     
     override open func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        
-        if observerAdded {
-            webView.removeObserver(self, forKeyPath: #keyPath(WKWebView.estimatedProgress))
-            observerAdded = false
-        }
+        removeProgressObserver()
     }
     
     override open func updateViewConstraints() {
@@ -318,62 +211,184 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
         statusBarStyle
     }
     
-    // MARK: - Toolbar
+    // MARK: - Setup
     
-    fileprivate func setupToolbarItems() {
-        toolbarItems = [actionBarBackBarButtonItem, UIBarButtonItem.flexibleSpace, actionBarForwardBarButtonItem, UIBarButtonItem.flexibleSpace, UIBarButtonItem.flexibleSpace, actionBarButtonItem, UIBarButtonItem.flexibleSpace, actionSafariBarButtonItem]
+    private func setupWebView() {
+        webView.navigationDelegate = self
+        view.addSubview(webView)
+        view.setNeedsUpdateConstraints()
+    }
+    
+    private func setupNavigation() {
+        navigationManager.configure()
+    }
+    
+    private func setupNavigationCallbacks(_ manager: WebAuthNavigationManager) {
+        manager.onDismiss = { [weak self] in
+            self?.handleDismiss()
+        }
         
+        manager.onRefresh = { [weak self] in
+            self?.handleRefresh()
+        }
         
-        let textTranformButton = createToolbarButton(
-            systemName: "textformat.size",
-            selector: #selector(textTransform(_:))
-        )
+        manager.onStop = { [weak self] in
+            self?.handleStop()
+        }
         
-        completedBarButtonItems = [refreshBarButtonItem, UIBarButtonItem.fixedSpace(width: 0), textTranformButton]
-        loadingBarButtonItems = [stopBarButtonItem, UIBarButtonItem.fixedSpace(width: 0), textTranformButton]
+        manager.onBack = { [weak self] in
+            self?.webView.goBack()
+        }
         
-        if appearanceStyle == .safari, let currentNavigationController = navigationController {
-            
-            currentNavigationController.toolbar.isTranslucent = false
-            currentNavigationController.setToolbarHidden(false, animated: false)
-            
-            if presentingViewController == nil {
-                navigationController?.toolbar.barTintColor = currentNavigationController.navigationBar.barTintColor
-            } else {
-                navigationController?.toolbar.barStyle = currentNavigationController.navigationBar.barStyle
+        manager.onForward = { [weak self] in
+            self?.webView.goForward()
+        }
+        
+        manager.onOpenInSafari = { [weak self] in
+            self?.handleOpenInSafari()
+        }
+        
+        manager.onShare = { [weak self] sender in
+            self?.handleShare(sender: sender)
+        }
+        
+        manager.onTextTransform = { [weak self] in
+            self?.textTransform(nil)
+        }
+    }
+    
+    private func setupTraitObservation() {
+        registerForTraitChanges([UITraitUserInterfaceStyle.self]) { (self: Self, _: UITraitCollection) in
+            self.navigationManager.updateAppearance(for: self.traitCollection)
+        }
+    }
+    
+    private func setupProgressObserver() {
+        guard progressObserver == nil else { return }
+        
+        progressObserver = webView.observe(\.estimatedProgress, options: .new) { [weak self] webView, _ in
+            Task { @MainActor [weak self] in
+                self?.navigationManager.updateProgress(Float(webView.estimatedProgress))
             }
-            navigationController?.toolbar.tintColor = currentNavigationController.navigationBar.tintColor
         }
-        
-        navigationItem.rightBarButtonItems = completedBarButtonItems
-        navigationItem.leftBarButtonItems = [dismissBarButtonItem]
     }
     
-    // MARK: - KVO
+    private func removeProgressObserver() {
+        progressObserver?.invalidate()
+        progressObserver = nil
+    }
     
-    override open func observeValue(forKeyPath keyPath: String?, of _: Any?, change _: [NSKeyValueChangeKey: Any]?, context _: UnsafeMutableRawPointer?) {
-        if keyPath == "estimatedProgress" {
-            Task { @MainActor in
-                self.updateProgressBar(Float(self.webView.estimatedProgress))
+    private func scheduleSecureLockDisplay() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1)) { [weak self] in
+            if let navBar = self?.navigationItem.titleView as? AuthNavBarView {
+                navBar.showSecure()
             }
         }
     }
     
-    fileprivate func updateProgressBar(_ progress: Float) {
-        if progress >= 1.0 {
-            navigationController?.finishProgress()
-        } else {
-            navigationController?.setProgress(progress, animated: true)
+    // MARK: - Website Data Management
+    
+    private func clearWebsiteDataAndLoad() {
+        let dataStore = webView.configuration.websiteDataStore
+        let allTypes = WKWebsiteDataStore.allWebsiteDataTypes()
+        
+        dataStore.fetchDataRecords(ofTypes: allTypes) { [weak self] records in
+            guard let self = self else { return }
+            dataStore.removeData(ofTypes: allTypes, for: records) {
+                self.loadRequest()
+            }
         }
     }
     
-    // MARK: - WKNavigationDelegate
-    open func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, preferences: WKWebpagePreferences, decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void) {
-        
+    // MARK: - Public Methods - Cookie Management
+    
+    /// Stores cookies in the web view's cookie store.
+    ///
+    /// - Parameter cookies: The cookies to store
+    public func storeCookies(_ cookies: [HTTPCookie]?) async {
+        await cookieManager.store(cookies)
+    }
+    
+    /// Retrieves all cookies from the web view's cookie store.
+    ///
+    /// - Returns: An array of HTTP cookies
+    public func getCookies() async -> [HTTPCookie] {
+        await cookieManager.getCookies()
+    }
+    
+    // MARK: - Public Methods - JavaScript
+    
+    /// Executes JavaScript and returns the result as a string.
+    ///
+    /// - Parameter javaScriptString: The JavaScript code to execute
+    /// - Returns: The result as a string, or `nil` if execution failed
+    @discardableResult
+    public func loadJavascript(_ javaScriptString: String) async -> String? {
+        await javaScriptBridge.evaluateString(javaScriptString)
+    }
+    
+    // MARK: - Public Methods - Loading
+    
+    /// Loads the authentication URL in the web view.
+    open func loadRequest() {
+        guard let url = authURL else { return }
+        log.debug("🌐 Loading Request: \(url.absoluteString)")
+        let request = URLRequest(url: url)
+        webView.load(request)
+    }
+    
+    /// Shows the loading state in the navigation bar.
+    public func didStartLoading() {
+        navigationManager.showLoading()
+    }
+    
+    /// Hides the loading state in the navigation bar.
+    public func didStopLoading() {
+        navigationManager.hideLoading()
+    }
+    
+    // MARK: - Public Methods - HUD
+    
+    /// Shows a progress HUD overlay.
+    public func showHUD() {
+        loginHUD.show(in: view)
+    }
+    
+    /// Hides the progress HUD overlay.
+    public func hideHUD() {
+        loginHUD.dismiss()
+    }
+    
+    // MARK: - Public Methods - Text Transform
+    
+    /// Override this method to provide custom text transform functionality.
+    ///
+    /// This is called when the text transform button is tapped in Safari-style mode.
+    @objc open func textTransform(_: Any?) {
+        // Override in subclass
+    }
+}
+
+// MARK: - WKNavigationDelegate
+
+extension WebAuthViewController: WKNavigationDelegate {
+    
+    open func webView(
+        _ webView: WKWebView,
+        decidePolicyFor navigationAction: WKNavigationAction,
+        preferences: WKWebpagePreferences,
+        decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void
+    ) {
         let urlString = navigationAction.request.url?.absoluteString ?? "nil URL"
         log.debug("🕸 WKWebView Navigation Action: \(urlString)")
         
+        // Allow subclasses to check for custom redirects first
         if checkForRedirect(url: navigationAction.request.url) {
+            decisionHandler(.cancel, preferences)
+            return
+        }
+        
+        if handleRedirect(url: navigationAction.request.url) {
             decisionHandler(.cancel, preferences)
             return
         }
@@ -381,11 +396,26 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
         decisionHandler(.allow, preferences)
     }
     
-    public func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse, decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
+    /// Override this method in subclasses to provide custom redirect detection logic.
+    /// Return `true` if the URL should be treated as a redirect (canceling navigation),
+    /// or `false` to continue with standard redirect handling.
+    ///
+    /// - Parameter url: The URL to check
+    /// - Returns: `true` if custom redirect handling was performed, `false` otherwise
+    @objc open func checkForRedirect(url: URL?) -> Bool {
+        return false
+    }
+    
+    open func webView(
+        _ webView: WKWebView,
+        decidePolicyFor navigationResponse: WKNavigationResponse,
+        decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void
+    ) {
         let urlString = navigationResponse.response.url?.absoluteString ?? "nil URL"
-        log.debug("🕸 WKWebView Navigation Response: \(urlString) | MIME: \(navigationResponse.response.mimeType ?? "unknown")")
+        let mimeType = navigationResponse.response.mimeType ?? "unknown"
+        log.debug("🕸 WKWebView Navigation Response: \(urlString) | MIME: \(mimeType)")
         
-        if checkForRedirect(url: navigationResponse.response.url) {
+        if handleRedirect(url: navigationResponse.response.url) {
             decisionHandler(.cancel)
             return
         }
@@ -397,54 +427,19 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
         decisionHandler(.allow)
     }
     
-    // MARK: - Helper Logic
-    
-    func checkForRedirect(url: URL?) -> Bool {
-        guard let url = url, let currentRedirectURL = redirectURL?.absoluteString, !currentRedirectURL.isEmpty else {
-            return false
-        }
-        
-        log.debug("🔍 Checking Redirect: URL: \(url.absoluteString) vs Redirect: \(currentRedirectURL)")
-        
-        if url.absoluteString.hasPrefix(currentRedirectURL) {
-            log.info("✅ Redirect URL MATCH detected: \(url.absoluteString)")
-            
-            let result = url.getResponse()
-            
-            if case let .success(params) = result {
-                self.completionHandler?(.success(params))
-            } else if case let .failure(error) = result {
-                self.completionHandler?(.failure(error))
-            }
-            
-            self.completionHandler = nil
-            
-            DispatchQueue.main.async {
-                self.dismiss(animated: true)
-            }
-            
-            return true
-        }
-        
-        return false
-    }
-    
     open func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
         let urlString = webView.url?.absoluteString ?? "nil URL"
         log.debug("🚀 WKWebView Started Provisional Navigation: \(urlString)")
-        
         didStartLoading()
     }
     
-    
-    open func webView(_: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+    open func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
         let nsError = error as NSError
-        
         log.error("❌ WKWebView Navigation Failed: \(error.localizedDescription)")
         
         if let failingURL = nsError.userInfo[NSURLErrorFailingURLErrorKey] as? URL {
             log.debug("❌ Failing URL: \(failingURL.absoluteString)")
-            if checkForRedirect(url: failingURL) {
+            if handleRedirect(url: failingURL) {
                 return
             }
         }
@@ -452,14 +447,17 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
         didStopLoading()
     }
     
-    open func webView(_: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+    open func webView(
+        _ webView: WKWebView,
+        didFailProvisionalNavigation navigation: WKNavigation!,
+        withError error: Error
+    ) {
         let nsError = error as NSError
-        
         log.error("❌ WKWebView Provisional Navigation Failed: \(error.localizedDescription)")
         
         if let failingURL = nsError.userInfo[NSURLErrorFailingURLErrorKey] as? URL {
             log.debug("❌ Provisional Failing URL: \(failingURL.absoluteString)")
-            if checkForRedirect(url: failingURL) {
+            if handleRedirect(url: failingURL) {
                 return
             }
         }
@@ -474,7 +472,7 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
         initialLoaded = true
         didStopLoading()
         
-        if checkForRedirect(url: webView.url) {
+        if handleRedirect(url: webView.url) {
             return
         }
         
@@ -484,187 +482,99 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
             }
         }
     }
+}
+
+// MARK: - Private Methods - Redirect Handling
+
+private extension WebAuthViewController {
     
-    private func parseAndHandleJSONResponse() async {
-        guard let htmlString = await loadJavascript("document.body.innerText"), !htmlString.isEmpty else {
+    /// Handles redirect URL detection and completion.
+    ///
+    /// - Parameter url: The URL to check
+    /// - Returns: `true` if the URL matched the redirect URL, `false` otherwise
+    func handleRedirect(url: URL?) -> Bool {
+        guard let result = redirectHandler.checkRedirect(url: url) else {
+            return false
+        }
+        
+        // Complete authentication
+        switch result {
+        case .success(let params):
+            completionHandler?(.success(params))
+        case .failure(let error):
+            completionHandler?(.failure(error))
+        }
+        
+        completionHandler = nil
+        
+        DispatchQueue.main.async { [weak self] in
+            self?.dismiss(animated: true)
+        }
+        
+        return true
+    }
+    
+    /// Parses JSON response from the web page and handles errors.
+    func parseAndHandleJSONResponse() async {
+        guard let htmlString = await javaScriptBridge.evaluateString("document.body.innerText"),
+              !htmlString.isEmpty else {
             return
         }
         
-        let response = JSON(parseJSON: htmlString)
-        var errorMessage: String?
-        
-        if let msg = response["meta"]["error_message"].string { errorMessage = msg }
-        else if let msg = response["error_message"].string { errorMessage = msg }
-        else if let msg = response["error"].string { errorMessage = msg }
-        else if response["status"].stringValue == "failure", let msg = response["message"].string { errorMessage = msg }
-        
-        if let finalMessage = errorMessage, !finalMessage.isEmpty {
-            completionHandler?(.failure(APWebAuthenticationError.failed(reason: finalMessage)))
+        if let error = redirectHandler.parseJSONError(from: htmlString) {
+            completionHandler?(.failure(error))
             dismiss(animated: true)
         }
     }
+}
+
+// MARK: - Private Methods - Action Handlers
+
+private extension WebAuthViewController {
     
-    // MARK: - Cookies
-    
-    public func storeCookies(_ cookies: [HTTPCookie]?) async {
-        guard let cookies = cookies, !cookies.isEmpty else { return }
-        
-        await withTaskGroup(of: Void.self) { group in
-            for cookie in cookies {
-                group.addTask {
-                    await self.webView.configuration.websiteDataStore.httpCookieStore.setCookie(cookie)
-                }
-            }
+    func handleDismiss() {
+        dismiss(animated: true) { [weak self] in
+            self?.completionHandler?(.failure(.canceled))
+            self?.completionHandler = nil
         }
     }
     
-    public func getCookies() async -> [HTTPCookie] {
-        await withCheckedContinuation { (continuation: CheckedContinuation<[HTTPCookie], Never>) in
-            webView.configuration.websiteDataStore.httpCookieStore.getAllCookies { cookies in
-                Task { @MainActor in
-                    continuation.resume(returning: cookies)
-                }
-            }
-        }
-    }
-    
-    // MARK: - Actions
-    
-    open func loadRequest() {
-        if let url = authURL {
-            log.debug("🌐 Loading Request: \(url.absoluteString)")
-            let request = URLRequest(url: url)
-            webView.load(request)
-        }
-    }
-    
-    public func didStartLoading() {
-        if appearanceStyle == .normal {
-            activityIndicator.startAnimating()
-            
-            if navigationItem.rightBarButtonItems != [activityBarButtonItem] {
-                navigationItem.rightBarButtonItems = [activityBarButtonItem]
-            }
-        } else {
-            navigationItem.rightBarButtonItems = loadingBarButtonItems
-            updateProgressBar(0.5)
-            
-            actionBarBackBarButtonItem.isEnabled = webView.canGoBack
-            actionBarForwardBarButtonItem.isEnabled = webView.canGoForward
-        }
-    }
-    
-    public func didStopLoading() {
-        if navigationItem.rightBarButtonItems != completedBarButtonItems {
-            navigationItem.rightBarButtonItems = completedBarButtonItems
-        }
-        
-        if appearanceStyle == .normal {
-            activityIndicator.stopAnimating()
-        } else {
-            updateProgressBar(1.0)
-            
-            actionBarBackBarButtonItem.isEnabled = webView.canGoBack
-            actionBarForwardBarButtonItem.isEnabled = webView.canGoForward
-        }
-    }
-    
-    @discardableResult
-    public func loadJavascript(_ javaScriptString: String) async -> String? {
-        do {
-            let result = try await webView.evaluateJavaScript(javaScriptString)
-            return result as? String
-        } catch {
-            return nil
-        }
-    }
-    
-    @objc func dismissCancelled(_: Any?) {
-        self.dismiss(animated: true) {
-            self.completionHandler?(.failure(APWebAuthenticationError.canceled))
-            self.completionHandler = nil
-        }
-    }
-    
-    @objc open func textTransform(_: Any?) {}
-    
-    @objc open func refresh(_: Any?) {
+    func handleRefresh() {
         initialLoaded = false
         loadRequest()
     }
     
-    @objc fileprivate func stop(_: Any?) {
+    func handleStop() {
         initialLoaded = false
-        
         webView.stopLoading()
         didStopLoading()
     }
     
-    // MARK: - Toolbar Actions
-    
-    @objc fileprivate func goBackTapped(_: UIBarButtonItem) {
-        webView.goBack()
+    func handleOpenInSafari() {
+        guard let url = webView.url ?? authURL else { return }
+        UIApplication.shared.open(url, options: [:])
     }
     
-    @objc fileprivate func goForwardTapped(_: UIBarButtonItem) {
-        webView.goForward()
-    }
-    
-    @objc fileprivate func openInSafari(_: UIBarButtonItem) {
-        if authURL != nil, let url: URL = ((webView.url != nil) ? webView.url : authURL) {
-            UIApplication.shared.open(url, options: [:])
-        }
-    }
-    
-    @objc fileprivate func actionButtonTapped(_ sender: AnyObject) {
-        if authURL != nil, let url: URL = ((webView.url != nil) ? webView.url : authURL) {
-            let activities: [UIActivity] = [WebActivitySafari()]
+    func handleShare(sender: UIBarButtonItem) {
+        guard let url = webView.url ?? authURL else { return }
+        
+        let activities: [UIActivity] = [WebActivitySafari()]
+        
+        if url.absoluteString.hasPrefix("file:///") {
+            let documentController = UIDocumentInteractionController(url: url)
+            documentController.presentOptionsMenu(from: view.bounds, in: view, animated: true)
+        } else {
+            let activityController = UIActivityViewController(
+                activityItems: [url],
+                applicationActivities: activities
+            )
             
-            if url.absoluteString.hasPrefix("file:///") {
-                let vc = UIDocumentInteractionController(url: url)
-                vc.presentOptionsMenu(from: view.bounds, in: view, animated: true)
-            } else {
-                let activityController = UIActivityViewController(activityItems: [url], applicationActivities: activities)
-                
-                if let presentation = activityController.popoverPresentationController, let button = sender as? UIBarButtonItem {
-                    presentation.permittedArrowDirections = UIPopoverArrowDirection.any
-                    presentation.barButtonItem = button
-                }
-                
-                present(activityController, animated: true)
+            if let presentation = activityController.popoverPresentationController {
+                presentation.permittedArrowDirections = .any
+                presentation.barButtonItem = sender
             }
+            
+            present(activityController, animated: true)
         }
-    }
-    
-    // MARK: - UI Loading
-    
-    public func showHUD() {
-        self.loginHUD.show(in: self.view)
-    }
-    
-    public func hideHUD() {
-        self.loginHUD.dismiss()
-    }
-    
-    // MARK: - Button Creation Helpers
-    
-    /// Creates a UIBarButtonItem with a custom UIButton for navigation bars
-    private func createNavBarButton(systemName: String, selector: Selector) -> UIBarButtonItem {
-        let button = UIButton(type: .system)
-        button.setImage(UIImage(systemName: systemName), for: .normal)
-        button.addTarget(self, action: selector, for: .touchUpInside)
-        button.frame = CGRect(x: 0, y: 0, width: 30, height: 30)
-        button.imageView?.contentMode = .scaleAspectFit
-        return UIBarButtonItem(customView: button)
-    }
-    
-    /// Creates a UIBarButtonItem with a custom UIButton for toolbars
-    private func createToolbarButton(systemName: String, selector: Selector) -> UIBarButtonItem {
-        let button = UIButton(type: .system)
-        button.setImage(UIImage(systemName: systemName), for: .normal)
-        button.addTarget(self, action: selector, for: .touchUpInside)
-        button.frame = CGRect(x: 0, y: 0, width: 40, height: 30)
-        button.imageView?.contentMode = .scaleAspectFit
-        return UIBarButtonItem(customView: button)
     }
 }

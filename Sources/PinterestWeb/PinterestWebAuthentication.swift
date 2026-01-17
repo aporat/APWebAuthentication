@@ -4,7 +4,6 @@ import Foundation
 public final class PinterestWebAuthentication: SessionAuthentication {
     
     private struct AuthSettings: Codable, Sendable {
-        var cookiesDomain: String?
         var browserMode: UserAgentMode?
         var customUserAgent: String?
         var appId: String?
@@ -25,7 +24,6 @@ public final class PinterestWebAuthentication: SessionAuthentication {
     public func loadAuthTokens(forceLoad: Bool = false) {
         if forceLoad || sessionId == nil || csrfToken == nil {
             cookieStorage.cookies?.forEach {
-                if self.cookiesDomain.isEmpty || $0.domain.hasSuffix(self.cookiesDomain) {
                     if $0.name == "csrftoken", !$0.value.isEmpty {
                         self.csrfToken = $0.value
                     } else if $0.name == "_pinterest_sess", !$0.value.isEmpty {
@@ -33,7 +31,6 @@ public final class PinterestWebAuthentication: SessionAuthentication {
                     } else if $0.name == "_auth", !$0.value.isEmpty {
                         self.isAuthenticated = $0.value == "1"
                     }
-                }
             }
         }
     }
@@ -42,7 +39,6 @@ public final class PinterestWebAuthentication: SessionAuthentication {
     
     override public func storeAuthSettings() async {
         let settings = AuthSettings(
-            cookiesDomain: cookiesDomain,
             browserMode: browserMode,
             customUserAgent: customUserAgent,
             appId: appId,
@@ -77,7 +73,6 @@ public final class PinterestWebAuthentication: SessionAuthentication {
             
             let settings = try PropertyListDecoder().decode(AuthSettings.self, from: data)
             
-            cookiesDomain = settings.cookiesDomain ?? cookiesDomain
             browserMode = settings.browserMode ?? browserMode
             customUserAgent = settings.customUserAgent ?? customUserAgent
             appId = settings.appId ?? appId

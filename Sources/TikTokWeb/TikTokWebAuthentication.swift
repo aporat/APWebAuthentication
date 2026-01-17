@@ -6,7 +6,6 @@ public final class TikTokWebAuthentication: SessionAuthentication {
     
     private struct AuthSettings: Codable, Sendable {
         var signatureUrl: URL?
-        var cookiesDomain: String?
         var browserMode: UserAgentMode?
         var customUserAgent: String?
         var sessionId: String?
@@ -47,7 +46,6 @@ public final class TikTokWebAuthentication: SessionAuthentication {
     public func loadAuthTokens(forceLoad: Bool = false) {
         if forceLoad || sessionId == nil || svWebId == nil {
             cookieStorage.cookies?.forEach {
-                if self.cookiesDomain.isEmpty || $0.domain.hasSuffix(self.cookiesDomain) {
                     if $0.name == "s_v_web_id", !$0.value.isEmpty {
                         self.svWebId = $0.value
                     } else if $0.name == "tt_webid_v2", !$0.value.isEmpty {
@@ -57,7 +55,6 @@ public final class TikTokWebAuthentication: SessionAuthentication {
                     } else if $0.name == "sessionid", !$0.value.isEmpty {
                         self.sessionId = $0.value
                     }
-                }
             }
         }
     }
@@ -67,7 +64,6 @@ public final class TikTokWebAuthentication: SessionAuthentication {
     override public func storeAuthSettings() async {
         let settings = AuthSettings(
             signatureUrl: signatureUrl,
-            cookiesDomain: cookiesDomain,
             browserMode: browserMode,
             customUserAgent: customUserAgent,
             sessionId: sessionId,
@@ -112,7 +108,6 @@ public final class TikTokWebAuthentication: SessionAuthentication {
             let settings = try PropertyListDecoder().decode(AuthSettings.self, from: data)
             
             signatureUrl = settings.signatureUrl ?? signatureUrl
-            cookiesDomain = settings.cookiesDomain ?? cookiesDomain
             browserMode = settings.browserMode ?? browserMode
             customUserAgent = settings.customUserAgent ?? customUserAgent
             sessionId = settings.sessionId ?? sessionId

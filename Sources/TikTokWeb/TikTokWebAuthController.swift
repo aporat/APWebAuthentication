@@ -21,6 +21,7 @@ public final class TikTokWebAuthViewController: WebAuthViewController {
 
     // MARK: - WKNavigationDelegate
 
+    /*
     override public func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, preferences: WKWebpagePreferences, decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void) {
         if redirectURL == nil {
             checkForAuthTokens()
@@ -42,7 +43,7 @@ public final class TikTokWebAuthViewController: WebAuthViewController {
 
         decisionHandler(.allow, preferences)
     }
-
+*/
     override public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         if loggedIn {
             checkForAuthTokens()
