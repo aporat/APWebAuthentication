@@ -129,11 +129,18 @@ open class AuthClient {
     /// - Parameter configuration: The URL session configuration to use
     /// - Returns: A configured Alamofire session
     open func makeSessionManager(configuration: URLSessionConfiguration) -> Session {
-        Session(
+        print("🏗️ AuthClient.makeSessionManager() called for \(type(of: self))")
+        print("   Interceptor: \(type(of: requestInterceptor))")
+        print("   Cookie storage: \(configuration.httpCookieStorage?.cookies?.count ?? 0) cookies")
+        
+        let session = Session(
             configuration: configuration,
             delegate: SessionDelegate(),
             interceptor: requestInterceptor
         )
+        
+        print("✅ Session created with interceptor: \(session.interceptor != nil)")
+        return session
     }
     
     /// Creates the URL session configuration for the client.

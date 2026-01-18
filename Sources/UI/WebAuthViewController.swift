@@ -58,7 +58,7 @@ extension WebAuthViewController {
 /// present(navController, animated: true)
 /// ```
 @MainActor
-open class WebAuthViewController: UIViewController {
+open class WebAuthViewController: UIViewController, WKNavigationDelegate {
     
     // MARK: - Public Properties
     
@@ -367,11 +367,8 @@ open class WebAuthViewController: UIViewController {
     @objc open func textTransform(_: Any?) {
         // Override in subclass
     }
-}
-
-// MARK: - WKNavigationDelegate
-
-extension WebAuthViewController: WKNavigationDelegate {
+    
+    // MARK: - WKNavigationDelegate
     
     open func webView(
         _ webView: WKWebView,
@@ -380,7 +377,8 @@ extension WebAuthViewController: WKNavigationDelegate {
         decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void
     ) {
         let urlString = navigationAction.request.url?.absoluteString ?? "nil URL"
-        log.debug("🕸 WKWebView Navigation Action: \(urlString)")
+        let navType = navigationAction.navigationType.rawValue
+        log.debug("🕸 WKWebView Navigation Action: \(urlString) | Type: \(navType)")
         
         // Allow subclasses to check for custom redirects first
         if checkForRedirect(url: navigationAction.request.url) {
@@ -435,10 +433,17 @@ extension WebAuthViewController: WKNavigationDelegate {
     
     open func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
         let nsError = error as NSError
-        log.error("❌ WKWebView Navigation Failed: \(error.localizedDescription)")
+        log.error("❌ WKWebView Navigation Failed: \(error.localizedDescription) | Domain: \(nsError.domain) | Code: \(nsError.code)")
         
         if let failingURL = nsError.userInfo[NSURLErrorFailingURLErrorKey] as? URL {
             log.debug("❌ Failing URL: \(failingURL.absoluteString)")
+            
+            // Check for custom redirect handling first (subclass override)
+            if checkForRedirect(url: failingURL) {
+                return
+            }
+            
+            // Then check standard redirect handling
             if handleRedirect(url: failingURL) {
                 return
             }
@@ -453,10 +458,17 @@ extension WebAuthViewController: WKNavigationDelegate {
         withError error: Error
     ) {
         let nsError = error as NSError
-        log.error("❌ WKWebView Provisional Navigation Failed: \(error.localizedDescription)")
+        log.error("❌ WKWebView Provisional Navigation Failed: \(error.localizedDescription) | Domain: \(nsError.domain) | Code: \(nsError.code)")
         
         if let failingURL = nsError.userInfo[NSURLErrorFailingURLErrorKey] as? URL {
             log.debug("❌ Provisional Failing URL: \(failingURL.absoluteString)")
+            
+            // Check for custom redirect handling first (subclass override)
+            if checkForRedirect(url: failingURL) {
+                return
+            }
+            
+            // Then check standard redirect handling
             if handleRedirect(url: failingURL) {
                 return
             }
@@ -481,6 +493,41 @@ extension WebAuthViewController: WKNavigationDelegate {
                 await parseAndHandleJSONResponse()
             }
         }
+    }
+    
+    open func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
+        let urlString = webView.url?.absoluteString ?? "nil URL"
+        log.debug("📝 WKWebView Did Commit Navigation: \(urlString)")
+    }
+    
+    open func webView(_ webView: WKWebView, didReceiveServerRedirectForProvisionalNavigation navigation: WKNavigation!) {
+        let urlString = webView.url?.absoluteString ?? "nil URL"
+        log.debug("🔄 WKWebView Received Server Redirect: \(urlString)")
+        
+        // Check if this redirect URL should be handled
+        if checkForRedirect(url: webView.url) {
+            webView.stopLoading()
+            return
+        }
+        
+        if handleRedirect(url: webView.url) {
+            webView.stopLoading()
+            return
+        }
+    }
+    
+    open func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
+        log.error("💥 WKWebView Web Content Process Terminated")
+        didStopLoading()
+    }
+    
+    open func webView(
+        _ webView: WKWebView,
+        didReceive challenge: URLAuthenticationChallenge,
+        completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void
+    ) {
+        log.debug("🔐 WKWebView Received Authentication Challenge: \(challenge.protectionSpace.authenticationMethod)")
+        completionHandler(.performDefaultHandling, nil)
     }
 }
 
