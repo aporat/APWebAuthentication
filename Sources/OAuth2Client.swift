@@ -84,18 +84,14 @@ open class OAuth2Client: AuthClient {
     /// ```
     ///
     /// - Parameters:
+    ///   - accountType: The account type/platform this client targets
     ///   - baseURLString: The base URL for all API requests
     ///   - requestInterceptor: The request interceptor (must be OAuth2Interceptor or subclass)
     ///
-    /// - Important: The interceptor must be an OAuth2Interceptor or subclass, otherwise a fatal error occurs.
-    public override init(baseURLString: String, requestInterceptor: RequestInterceptor) {
-        // Validate interceptor type
-        guard let customInterceptor = requestInterceptor as? OAuth2Interceptor else {
-            fatalError("OAuth2Client requires an OAuth2Interceptor (or subclass).")
-        }
-        
-        self.interceptor = customInterceptor
-        super.init(baseURLString: baseURLString, requestInterceptor: requestInterceptor)
+    /// - Important: The interceptor must be an OAuth2Interceptor or subclass, otherwise initialization will fail with a precondition.
+    public init(accountType: AccountType, baseURLString: String, requestInterceptor: OAuth2Interceptor) {
+        self.interceptor = requestInterceptor
+        super.init(accountType: accountType, baseURLString: baseURLString, requestInterceptor: requestInterceptor)
     }
     
     // MARK: - Configuration

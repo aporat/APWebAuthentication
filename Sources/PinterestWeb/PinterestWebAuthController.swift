@@ -18,6 +18,7 @@ public final class PinterestWebAuthController: WebAuthViewController {
         super.init(authURL: authURL, redirectURL: redirectURL)
     }
     
+    @available(*, unavailable)
     required init(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }

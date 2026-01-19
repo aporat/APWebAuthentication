@@ -1,5 +1,4 @@
 import UIKit
-import UIKit
 import SwiftyBeaver
 import SwifterSwift
 
@@ -7,10 +6,8 @@ import SwifterSwift
 
 /// A thread-safe wrapper for web authentication result data.
 ///
-/// This struct safely transports dictionary data across async/concurrent boundaries
-/// using the `@unchecked Sendable` marker. While dictionaries with `Any` values
-/// aren't inherently Sendable, this wrapper ensures thread safety by being immutable
-/// and only being created after all data processing is complete.
+/// This struct safely transports dictionary data across async/concurrent boundaries.
+/// The data is constrained to Sendable types only, ensuring true thread safety.
 ///
 /// **Usage:**
 /// ```swift
@@ -19,20 +16,18 @@ import SwifterSwift
 ///     print("Auth data:", result.data)
 /// }
 /// ```
-///
-/// - Important: The wrapped data should contain only Sendable types at runtime
-///              to maintain true thread safety.
-public struct APWebAuthResult: @unchecked Sendable {
-    
+public struct APWebAuthResult: Sendable {
+
     /// The authentication response data from the web service.
     ///
     /// Typical contents include tokens, user IDs, and other auth-related information.
-    public let data: [String: Any]
-    
+    /// All values must conform to Sendable for thread safety.
+    public let data: [String: any Sendable]
+
     /// Creates a new authentication result.
     ///
     /// - Parameter data: The dictionary containing authentication response data
-    public init(_ data: [String: Any]) {
+    public init(_ data: [String: any Sendable]) {
         self.data = data
     }
 }
@@ -338,7 +333,7 @@ public final class APWebAuthSession {
                 }
                 
                 // Set up completion handler for web view controller
-                loginVC.completionHandler = { [weak self] (result: Result<[String: Any]?, APWebAuthenticationError>) in
+                loginVC.completionHandler = { [weak self] (result: Result<[String: any Sendable]?, APWebAuthenticationError>) in
                     
                     switch result {
                     case .success(let params):
@@ -355,7 +350,7 @@ public final class APWebAuthSession {
                     }
                     
                     // Clean up after authentication completes
-                    guard let self = self else { return }
+                    guard let self else { return }
                     
                     self.loginViewController?.dismiss(animated: true) {
                         self.loginViewController = nil

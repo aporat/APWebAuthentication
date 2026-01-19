@@ -70,7 +70,7 @@ public final class WebAuthRedirectHandler {
     ///     }
     /// }
     /// ```
-    public func checkRedirect(url: URL?) -> Result<[String: Any]?, APWebAuthenticationError>? {
+    public func checkRedirect(url: URL?) -> Result<[String: any Sendable]?, APWebAuthenticationError>? {
         guard let url = url,
               let currentRedirectURL = redirectURL?.absoluteString,
               !currentRedirectURL.isEmpty else {
@@ -138,7 +138,7 @@ public final class WebAuthRedirectHandler {
             errorMessage = msg
         } else if let msg = response["error"].string {
             errorMessage = msg
-        } else if response["status"].stringValue == "failure",
+        } else if response["status"].string == "failure",
                   let msg = response["message"].string {
             errorMessage = msg
         }
@@ -166,8 +166,8 @@ private extension URL {
     /// - Custom parameters in query or fragment
     ///
     /// - Returns: A result containing parsed parameters or an error
-    func getResponse() -> Result<[String: Any]?, APWebAuthenticationError> {
-        var params = [String: Any]()
+    func getResponse() -> Result<[String: any Sendable]?, APWebAuthenticationError> {
+        var params = [String: any Sendable]()
         
         // Parse query parameters
         if let components = URLComponents(url: self, resolvingAgainstBaseURL: false),
@@ -205,8 +205,8 @@ private extension URL {
     ///
     /// - Parameter fragment: The fragment string (without the # symbol)
     /// - Returns: A dictionary of parsed key-value pairs
-    private func parseFragment(_ fragment: String) -> [String: Any] {
-        var params = [String: Any]()
+    private func parseFragment(_ fragment: String) -> [String: any Sendable] {
+        var params = [String: any Sendable]()
         
         let pairs = fragment.components(separatedBy: "&")
         for pair in pairs {

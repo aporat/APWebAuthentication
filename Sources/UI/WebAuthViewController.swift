@@ -10,7 +10,7 @@ import SwiftyBeaver
 // MARK: - Type Aliases
 
 extension WebAuthViewController {
-    public typealias CompletionHandler = (Result<[String: Any]?, APWebAuthenticationError>) -> Void
+    public typealias CompletionHandler = (Result<[String: any Sendable]?, APWebAuthenticationError>) -> Void
     public typealias DismissButtonStyle = WebAuthNavigationManager.DismissButtonStyle
 }
 
@@ -293,9 +293,9 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
         let allTypes = WKWebsiteDataStore.allWebsiteDataTypes()
         
         dataStore.fetchDataRecords(ofTypes: allTypes) { [weak self] records in
-            guard let self = self else { return }
-            dataStore.removeData(ofTypes: allTypes, for: records) {
-                self.loadRequest()
+            guard let self else { return }
+            dataStore.removeData(ofTypes: allTypes, for: records) { [weak self] in
+                self?.loadRequest()
             }
         }
     }

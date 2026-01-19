@@ -82,19 +82,9 @@ open class AuthClient {
     
     /// The account type/platform this client targets.
     ///
-    /// Subclasses **must** override this property to specify their platform.
-    ///
-    /// **Example:**
-    /// ```swift
-    /// override var accountType: AccountType {
-    ///     AccountStore.instagram
-    /// }
-    /// ```
-    ///
-    /// - Important: Failing to override this property will cause a fatal error.
-    open var accountType: AccountType {
-        fatalError("Subclasses must override the accountType property.")
-    }
+    /// This property identifies which social platform (Twitter, Reddit, GitHub, etc.)
+    /// this client is configured to communicate with.
+    public let accountType: AccountType
     
     /// Whether request reloading has been cancelled by the user.
     ///
@@ -112,9 +102,11 @@ open class AuthClient {
     /// Creates a new auth client with the specified base URL and request interceptor.
     ///
     /// - Parameters:
+    ///   - accountType: The account type/platform this client targets
     ///   - baseURLString: The base URL for all API requests
     ///   - requestInterceptor: The interceptor for adding authentication and handling retries
-    public init(baseURLString: String, requestInterceptor: RequestInterceptor) {
+    public init(accountType: AccountType, baseURLString: String, requestInterceptor: RequestInterceptor) {
+        self.accountType = accountType
         self.baseURLString = baseURLString
         self.requestInterceptor = requestInterceptor
     }
@@ -451,7 +443,7 @@ open class AuthClient {
     /// **Example:**
     /// ```swift
     /// override func isCheckpointRequired(response: DataResponse<JSON, AFError>, json: JSON?) -> Bool {
-    ///     json?["checkpoint_required"].boolValue ?? false
+    ///     json?["checkpoint_required"].bool ?? false
     /// }
     /// ```
     ///

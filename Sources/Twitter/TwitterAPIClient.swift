@@ -5,17 +5,12 @@ import Alamofire
 // MARK: - TwitterAPIClient
 
 public final class TwitterAPIClient: OAuth1Client {
-    
-    // MARK: - Properties
-    
-    public override var accountType: AccountType {
-        AccountStore.twitter
-    }
-    
+
     // MARK: - Initialization
-    
+
     public convenience init(consumerKey: String, consumerSecret: String, auth: Auth1Authentication) {
         self.init(
+            accountType: AccountStore.twitter,
             baseURLString: "https://api.twitter.com/2/",
             consumerKey: consumerKey,
             consumerSecret: consumerSecret,

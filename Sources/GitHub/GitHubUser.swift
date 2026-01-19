@@ -9,9 +9,7 @@ public final class GitHubUser: GenericUser, @unchecked Sendable {
     
     public required init?(info: JSON) {
         // Extract user ID (can be string or number)
-        let id = info["id"].string ?? info["id"].number?.stringValue
-        
-        guard let id = id else {
+        guard let id = info["id"].string ?? info["id"].int64?.description else {
             return nil
         }
         

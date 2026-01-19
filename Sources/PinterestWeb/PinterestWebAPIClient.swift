@@ -6,31 +6,23 @@ import Alamofire
 
 @MainActor
 public final class PinterestWebAPIClient: AuthClient {
-    
+
     // MARK: - Properties
-    
-    public override var accountType: AccountType {
-        AccountStore.pinterest
-    }
-    
+
     private var interceptor: PinterestWebInterceptor
     private let auth: PinterestWebAuthentication
-    
+
     // MARK: - Initialization
-    
+
     public required convenience init(auth: PinterestWebAuthentication) {
         let interceptor = PinterestWebInterceptor(auth: auth)
         self.init(baseURLString: "https://www.pinterest.com/", auth: auth, requestInterceptor: interceptor)
     }
-    
-    public init(baseURLString: String, auth: PinterestWebAuthentication, requestInterceptor: RequestInterceptor) {
-        guard let customInterceptor = requestInterceptor as? PinterestWebInterceptor else {
-            fatalError("PinterestWebAPIClient requires a PinterestWebInterceptor.")
-        }
-        
+
+    public init(baseURLString: String, auth: PinterestWebAuthentication, requestInterceptor: PinterestWebInterceptor) {
         self.auth = auth
-        self.interceptor = customInterceptor
-        super.init(baseURLString: baseURLString, requestInterceptor: requestInterceptor)
+        self.interceptor = requestInterceptor
+        super.init(accountType: AccountStore.pinterest, baseURLString: baseURLString, requestInterceptor: requestInterceptor)
     }
     
     // MARK: - Session Configuration

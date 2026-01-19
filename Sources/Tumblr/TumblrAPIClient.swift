@@ -6,30 +6,19 @@ import Alamofire
 
 @MainActor
 public final class TumblrAPIClient: OAuth2Client {
-    
-    // MARK: - Properties
-    
-    public override var accountType: AccountType {
-        AccountStore.tumblr
-    }
-    
+
     // MARK: - Initialization
-    
+
     public required convenience init(auth: Auth2Authentication) {
         let interceptor = OAuth2Interceptor(auth: auth)
         // Tumblr API v2 uses Bearer token in Authorization header
         interceptor.tokenLocation = .authorizationHeader
-        
+
         self.init(baseURLString: "https://api.tumblr.com/v2/", requestInterceptor: interceptor)
     }
-    
-    public override init(baseURLString: String, requestInterceptor: RequestInterceptor) {
-        // Validate that we are using an OAuth2 based interceptor
-        guard requestInterceptor is OAuth2Interceptor else {
-            fatalError("TumblrAPIClient requires an OAuth2Interceptor.")
-        }
-        
-        super.init(baseURLString: baseURLString, requestInterceptor: requestInterceptor)
+
+    public init(baseURLString: String, requestInterceptor: OAuth2Interceptor) {
+        super.init(accountType: AccountStore.tumblr, baseURLString: baseURLString, requestInterceptor: requestInterceptor)
     }
     
     // MARK: - Error Handling
