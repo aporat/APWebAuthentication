@@ -9,15 +9,15 @@ public final class TwitterUser: GenericUser, @unchecked Sendable {
     
     public required init?(info: JSON) {
         // Extract user ID (string or number format)
-        guard let id = info["id_str"].string ?? info["id"].number?.stringValue else {
+        guard let id = info["id_str"].string ?? info["id"].int64?.description else {
             return nil
         }
-        
+
         // Extract profile information
         let username = info["screen_name"].string
         let fullname = info["name"].string
-        let isVerified = info["verified"].boolValue
-        let privateProfile = info["protected"].boolValue
+        let isVerified = info["verified"].bool ?? false
+        let privateProfile = info["protected"].bool ?? false
         
         // Process avatar URL (remove '_normal' suffix for higher quality)
         let constructedAvatarPicture: URL?

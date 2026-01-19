@@ -13,6 +13,7 @@ public final class TikTokWebAuthCheckpointController: WebTokenInterceptorViewCon
         super.init(url: url, forURL: forURL, completionHandler: completionHandler)
     }
 
+    @available(*, unavailable)
     public required init(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }

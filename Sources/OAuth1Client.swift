@@ -52,11 +52,13 @@ open class OAuth1Client: AuthClient {
     /// Creates a new OAuth 1.0a client with the specified configuration.
     ///
     /// - Parameters:
+    ///   - accountType: The account type/platform this client targets
     ///   - baseURLString: The base URL for all API requests
     ///   - consumerKey: The OAuth consumer key (identifies your app)
     ///   - consumerSecret: The OAuth consumer secret (your app's secret key)
     ///   - auth: The authentication object containing user tokens
     public init(
+        accountType: AccountType,
         baseURLString: String,
         consumerKey: String,
         consumerSecret: String,
@@ -67,9 +69,9 @@ open class OAuth1Client: AuthClient {
             consumerSecret: consumerSecret,
             auth: auth
         )
-        
+
         self.interceptor = interceptor
-        super.init(baseURLString: baseURLString, requestInterceptor: interceptor)
+        super.init(accountType: accountType, baseURLString: baseURLString, requestInterceptor: interceptor)
     }
     
     // MARK: - Configuration

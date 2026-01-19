@@ -241,6 +241,7 @@ open class WebTokenInterceptorViewController: UIViewController {
         self.init(configuration: config)
     }
     
+    @available(*, unavailable)
     public required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }

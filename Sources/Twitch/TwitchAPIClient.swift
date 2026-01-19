@@ -6,29 +6,18 @@ import Alamofire
 
 @MainActor
 public final class TwitchAPIClient: OAuth2Client {
-    
-    // MARK: - Properties
-    
-    public override var accountType: AccountType {
-        AccountStore.twitch
-    }
-    
+
     // MARK: - Initialization
-    
+
     public convenience init(auth: Auth2Authentication) {
         let interceptor = TwitchInterceptor(auth: auth)
         interceptor.tokenLocation = .authorizationHeader
-        
+
         self.init(baseURLString: "https://api.twitch.tv/helix/", requestInterceptor: interceptor)
     }
-    
-    public override init(baseURLString: String, requestInterceptor: RequestInterceptor) {
-        // Validate that we are using a TwitchInterceptor
-        guard requestInterceptor is TwitchInterceptor else {
-            fatalError("TwitchAPIClient requires a TwitchInterceptor.")
-        }
-        
-        super.init(baseURLString: baseURLString, requestInterceptor: requestInterceptor)
+
+    public init(baseURLString: String, requestInterceptor: TwitchInterceptor) {
+        super.init(accountType: AccountStore.twitch, baseURLString: baseURLString, requestInterceptor: requestInterceptor)
     }
     
     // MARK: - Configuration

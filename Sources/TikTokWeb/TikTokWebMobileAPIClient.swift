@@ -4,31 +4,23 @@ import Alamofire
 
 @MainActor
 public class TikTokWebMobileAPIClient: AuthClient {
-    
+
     // MARK: - Properties
-    
-    public override var accountType: AccountType {
-        AccountStore.tiktok
-    }
-    
+
     fileprivate var interceptor: TikTokWebMobileInterceptor
     fileprivate let auth: TikTokWebAuthentication
-    
+
     // MARK: - Initialization
-    
+
     public convenience init(auth: TikTokWebAuthentication) {
         let interceptor = TikTokWebMobileInterceptor(auth: auth)
         self.init(baseURLString: "https://m.tiktok.com/", auth: auth, requestInterceptor: interceptor)
     }
-    
-    public init(baseURLString: String, auth: TikTokWebAuthentication, requestInterceptor: RequestInterceptor) {
-        guard let customInterceptor = requestInterceptor as? TikTokWebMobileInterceptor else {
-            fatalError("TikTokWebMobileAPIClient requires a TikTokWebMobileInterceptor.")
-        }
-        
+
+    public init(baseURLString: String, auth: TikTokWebAuthentication, requestInterceptor: TikTokWebMobileInterceptor) {
         self.auth = auth
-        self.interceptor = customInterceptor
-        super.init(baseURLString: baseURLString, requestInterceptor: requestInterceptor)
+        self.interceptor = requestInterceptor
+        super.init(accountType: AccountStore.tiktok, baseURLString: baseURLString, requestInterceptor: requestInterceptor)
     }
     
     public override func makeSessionConfiguration() -> URLSessionConfiguration {

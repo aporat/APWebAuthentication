@@ -16,7 +16,7 @@ public final class RedditUser: GenericUser, @unchecked Sendable {
         // Extract profile information
         let name = info["name"].string
         let avatarPicture = info["icon_img"].url
-        let isVerified = info["verified"].boolValue
+        let isVerified = info["verified"].bool ?? false
         
         super.init(
             userId: id,
