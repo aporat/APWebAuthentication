@@ -21,7 +21,7 @@ public struct APWebAuthResult: Sendable {
     /// The authentication response data from the web service.
     ///
     /// Typical contents include tokens, user IDs, and other auth-related information.
-    /// All values must conform to Sendable for thread safety.
+    /// Values are constrained to Sendable types for thread safety across async boundaries.
     public let data: [String: any Sendable]
 
     /// Creates a new authentication result.

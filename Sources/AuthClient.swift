@@ -84,7 +84,9 @@ open class AuthClient {
     ///
     /// This property identifies which social platform (Twitter, Reddit, GitHub, etc.)
     /// this client is configured to communicate with.
-    public let accountType: AccountType
+    ///
+    /// Subclasses should set this property in their initializer to identify their platform.
+    private var accountType: AccountType
     
     /// Whether request reloading has been cancelled by the user.
     ///
@@ -102,7 +104,6 @@ open class AuthClient {
     /// Creates a new auth client with the specified base URL and request interceptor.
     ///
     /// - Parameters:
-    ///   - accountType: The account type/platform this client targets
     ///   - baseURLString: The base URL for all API requests
     ///   - requestInterceptor: The interceptor for adding authentication and handling retries
     public init(accountType: AccountType, baseURLString: String, requestInterceptor: RequestInterceptor) {

@@ -3,7 +3,7 @@ import Alamofire
 
 // MARK: - PinterestWebInterceptor
 
-final class PinterestWebInterceptor: RequestInterceptor, @unchecked Sendable {
+public final class PinterestWebInterceptor: RequestInterceptor, @unchecked Sendable {
     
     // MARK: - Properties
     
@@ -13,7 +13,7 @@ final class PinterestWebInterceptor: RequestInterceptor, @unchecked Sendable {
     // MARK: - Initialization
     
     @MainActor
-    init(auth: PinterestWebAuthentication) {
+    public init(auth: PinterestWebAuthentication) {
         self.auth = auth
     }
     

@@ -1,13 +1,13 @@
 import Foundation
 import Alamofire
 
-final class TikTokWebInterceptor: RequestInterceptor, @unchecked Sendable {
+public final class TikTokWebInterceptor: RequestInterceptor, @unchecked Sendable {
     
     @MainActor
     var auth: TikTokWebAuthentication
     
     @MainActor
-    init(auth: TikTokWebAuthentication) {
+    public init(auth: TikTokWebAuthentication) {
         self.auth = auth
     }
     

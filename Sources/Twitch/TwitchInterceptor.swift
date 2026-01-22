@@ -3,11 +3,11 @@ import Alamofire
 
 // MARK: - TwitchInterceptor
 
-final class TwitchInterceptor: OAuth2Interceptor, @unchecked Sendable {
+public final class TwitchInterceptor: OAuth2Interceptor, @unchecked Sendable {
     
     // MARK: - Request Adaptation
     
-    override func adapt(
+    public override func adapt(
         _ urlRequest: URLRequest,
         for session: Session,
         completion: @escaping @Sendable (Result<URLRequest, any Error>) -> Void

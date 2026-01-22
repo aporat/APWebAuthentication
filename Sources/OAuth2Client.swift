@@ -1,4 +1,5 @@
 import Foundation
+import Foundation
 import Alamofire
 @preconcurrency import SwiftyJSON
 
@@ -50,20 +51,6 @@ open class OAuth2Client: AuthClient {
     /// and may handle automatic token refresh if configured.
     public var interceptor: OAuth2Interceptor
     
-    // MARK: - Initialization
-    
-    /// Creates a new OAuth 2.0 client with the specified authentication.
-    ///
-    /// This convenience initializer creates an OAuth2Interceptor automatically
-    /// from the provided authentication object.
-    ///
-    /// - Parameters:
-    ///   - baseURLString: The base URL for all API requests
-    ///   - auth: The authentication object containing access/refresh tokens
-    public convenience init(baseURLString: String, auth: Auth2Authentication) {
-        let interceptor = OAuth2Interceptor(auth: auth)
-        self.init(baseURLString: baseURLString, requestInterceptor: interceptor)
-    }
     
     /// Creates a new OAuth 2.0 client with a custom request interceptor.
     ///
@@ -78,6 +65,7 @@ open class OAuth2Client: AuthClient {
     ///
     /// let interceptor = CustomOAuth2Interceptor(auth: auth)
     /// let client = OAuth2Client(
+    ///     accountType: AccountStore.myPlatform,
     ///     baseURLString: "https://api.example.com/",
     ///     requestInterceptor: interceptor
     /// )

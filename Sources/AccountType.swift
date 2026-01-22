@@ -163,7 +163,7 @@ public extension AccountType {
     ///
     /// - Note: The codes use `com.apple.*` namespace for historical reasons
     ///         and consistency with system account types.
-    enum Code: String, Hashable, Sendable, CaseIterable {
+    public enum Code: String, Hashable, Sendable, CaseIterable {
         
         /// Twitter/X platform code
         case twitter = "com.apple.twitter"

@@ -3,18 +3,18 @@ import Alamofire
 
 // MARK: - GitHubInterceptor
 
-final class GitHubInterceptor: OAuth2Interceptor, @unchecked Sendable {
+public final class GitHubInterceptor: OAuth2Interceptor, @unchecked Sendable {
     
     // MARK: - Initialization
     
-    override init(auth: Auth2Authentication) {
+    public override init(auth: Auth2Authentication) {
         super.init(auth: auth)
         tokenLocation = .authorizationHeader
     }
 
     // MARK: - Request Adaptation
     
-    override func adapt(
+    public override func adapt(
         _ urlRequest: URLRequest,
         for session: Session,
         completion: @escaping @Sendable (Result<URLRequest, any Error>) -> Void

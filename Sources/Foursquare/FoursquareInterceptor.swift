@@ -1,14 +1,14 @@
 import Foundation
 import Alamofire
 
-final class FoursquareInterceptor: OAuth2Interceptor, @unchecked Sendable {
+public final class FoursquareInterceptor: OAuth2Interceptor, @unchecked Sendable {
     
     override init(auth: Auth2Authentication) {
         super.init(auth: auth)
         self.tokenParamName = "oauth_token"
     }
     
-    override func adapt(_ urlRequest: URLRequest, for session: Session, completion: @escaping @Sendable (Result<URLRequest, any Error>) -> Void) {
+    public override func adapt(_ urlRequest: URLRequest, for session: Session, completion: @escaping @Sendable (Result<URLRequest, any Error>) -> Void) {
         var urlRequest = urlRequest
         
         let params: Parameters = ["v": "20240109"]
