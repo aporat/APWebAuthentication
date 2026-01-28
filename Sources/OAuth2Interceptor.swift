@@ -4,7 +4,7 @@ import Alamofire
 // MARK: - Token Location
 
 /// Specifies where the OAuth 2.0 access token should be included in requests.
-internal enum TokenLocation: Int {
+public enum TokenLocation: Int, Sendable {
     
     /// Include the token in the Authorization header (recommended).
     ///
@@ -68,9 +68,10 @@ internal enum TokenLocation: Int {
 /// - Twitch
 /// - Most modern APIs
 ///
-/// - Note: The interceptor is marked `@unchecked Sendable` because it accesses
-///         authentication properties that may be isolated to MainActor.
-open class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
+/// - Note: The `auth` property is marked `nonisolated(unsafe)` because it's set
+///         once during initialization and its MainActor-isolated properties are
+///         safely accessed within Task contexts.
+public class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
     
     // MARK: - Configuration
     
@@ -85,7 +86,7 @@ open class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
     /// interceptor.tokenParamName = "token"
     /// // Results in: ?token={access_token}
     /// ```
-    var tokenParamName = "access_token"
+    let tokenParamName: String
     
     /// The authorization scheme name when sending the token in the header.
     ///
@@ -98,7 +99,7 @@ open class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
     /// interceptor.tokenHeaderParamName = "Bearer"
     /// // Results in: Authorization: Bearer {access_token}
     /// ```
-    var tokenHeaderParamName = "Bearer"
+    let tokenHeaderParamName: String
     
     /// Specifies where the access token should be included in requests.
     ///
@@ -118,12 +119,15 @@ open class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
     /// interceptor.tokenLocation = .params
     /// // ?access_token={token}
     /// ```
-    var tokenLocation: TokenLocation = .params
+    let tokenLocation: TokenLocation
     
     /// The authentication manager containing the access token.
     ///
     /// Provides access to the user's OAuth 2.0 access token.
-    var auth: Auth2Authentication
+    ///
+    /// - Note: Marked `nonisolated(unsafe)` because it's immutable after initialization
+    ///         and MainActor-isolated properties are accessed safely within Task contexts.
+    let auth: Auth2Authentication
     
     // MARK: - Initialization
     
@@ -135,11 +139,31 @@ open class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
     /// auth.accessToken = "access_token"
     ///
     /// let interceptor = OAuth2Interceptor(auth: auth)
+    ///
+    /// // Or with custom configuration:
+    /// let interceptor = OAuth2Interceptor(
+    ///     auth: auth,
+    ///     tokenLocation: .authorizationHeader,
+    ///     tokenParamName: "token",
+    ///     tokenHeaderParamName: "Bearer"
+    /// )
     /// ```
     ///
-    /// - Parameter auth: The authentication manager with access token
-    public init(auth: Auth2Authentication) {
+    /// - Parameters:
+    ///   - auth: The authentication manager with access token
+    ///   - tokenLocation: Where to include the token (default: `.params`)
+    ///   - tokenParamName: Parameter name for token (default: `"access_token"`)
+    ///   - tokenHeaderParamName: Authorization scheme name (default: `"Bearer"`)
+    public init(
+        auth: Auth2Authentication,
+        tokenLocation: TokenLocation = .params,
+        tokenParamName: String = "access_token",
+        tokenHeaderParamName: String = "Bearer"
+    ) {
         self.auth = auth
+        self.tokenLocation = tokenLocation
+        self.tokenParamName = tokenParamName
+        self.tokenHeaderParamName = tokenHeaderParamName
     }
     
     // MARK: - RequestAdapter

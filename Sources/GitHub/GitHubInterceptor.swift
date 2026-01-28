@@ -3,13 +3,17 @@ import Alamofire
 
 // MARK: - GitHubInterceptor
 
-public final class GitHubInterceptor: OAuth2Interceptor, @unchecked Sendable {
+public final class GitHubInterceptor: OAuth2Interceptor, Sendable {
     
     // MARK: - Initialization
     
-    public override init(auth: Auth2Authentication) {
-        super.init(auth: auth)
-        tokenLocation = .authorizationHeader
+    public init(auth: Auth2Authentication) {
+        super.init(
+            auth: auth,
+            tokenLocation: .authorizationHeader,
+            tokenParamName: "access_token",
+            tokenHeaderParamName: "Bearer"
+        )
     }
 
     // MARK: - Request Adaptation

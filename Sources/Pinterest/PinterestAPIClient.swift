@@ -9,8 +9,7 @@ public final class PinterestAPIClient: OAuth2Client {
     // MARK: - Initialization
 
     public convenience init(auth: Auth2Authentication) {
-        let interceptor = OAuth2Interceptor(auth: auth)
-        interceptor.tokenLocation = .authorizationHeader
+        let interceptor = OAuth2Interceptor(auth: auth, tokenLocation: .authorizationHeader)
 
         self.init(baseURLString: "https://api.pinterest.com/v5/", requestInterceptor: interceptor)
     }

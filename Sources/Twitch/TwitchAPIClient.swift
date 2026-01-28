@@ -10,8 +10,7 @@ public final class TwitchAPIClient: OAuth2Client {
     // MARK: - Initialization
 
     public convenience init(auth: Auth2Authentication) {
-        let interceptor = TwitchInterceptor(auth: auth)
-        interceptor.tokenLocation = .authorizationHeader
+        let interceptor = TwitchInterceptor(auth: auth, tokenLocation: .authorizationHeader)
 
         self.init(baseURLString: "https://api.twitch.tv/helix/", requestInterceptor: interceptor)
     }

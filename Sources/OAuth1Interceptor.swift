@@ -77,7 +77,7 @@ public enum OAuth1Error: Error, Sendable {
 ///
 /// - Note: The interceptor is marked `@unchecked Sendable` because it accesses
 ///         `@MainActor`-isolated authentication properties.
-public final class OAuth1Interceptor: RequestInterceptor, @unchecked Sendable {
+public final class OAuth1Interceptor: RequestInterceptor, Sendable {
     
     // MARK: - Properties
     

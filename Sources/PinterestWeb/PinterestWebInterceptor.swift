@@ -3,7 +3,7 @@ import Alamofire
 
 // MARK: - PinterestWebInterceptor
 
-public final class PinterestWebInterceptor: RequestInterceptor, @unchecked Sendable {
+public final class PinterestWebInterceptor: RequestInterceptor, Sendable {
     
     // MARK: - Properties
     

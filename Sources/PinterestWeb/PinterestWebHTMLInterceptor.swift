@@ -1,7 +1,7 @@
 import Foundation
 import Alamofire
 
-public final class PinterestWebHTMLInterceptor: RequestInterceptor, @unchecked Sendable {
+public final class PinterestWebHTMLInterceptor: RequestInterceptor, Sendable {
     
     @MainActor
     var auth: PinterestWebAuthentication

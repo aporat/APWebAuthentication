@@ -10,9 +10,8 @@ public final class TumblrAPIClient: OAuth2Client {
     // MARK: - Initialization
 
     public required convenience init(auth: Auth2Authentication) {
-        let interceptor = OAuth2Interceptor(auth: auth)
         // Tumblr API v2 uses Bearer token in Authorization header
-        interceptor.tokenLocation = .authorizationHeader
+        let interceptor = OAuth2Interceptor(auth: auth, tokenLocation: .authorizationHeader)
 
         self.init(baseURLString: "https://api.tumblr.com/v2/", requestInterceptor: interceptor)
     }
