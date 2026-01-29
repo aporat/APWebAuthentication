@@ -3,7 +3,7 @@ import Alamofire
 
 // MARK: - GitHubInterceptor
 
-public final class GitHubInterceptor: OAuth2Interceptor, Sendable {
+public final class GitHubInterceptor: OAuth2Interceptor {
     
     // MARK: - Initialization
     

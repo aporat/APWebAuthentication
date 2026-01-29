@@ -3,7 +3,7 @@ import Alamofire
 
 // MARK: - TwitchInterceptor
 
-public final class TwitchInterceptor: OAuth2Interceptor, @unchecked Sendable {
+public final class TwitchInterceptor: OAuth2Interceptor, Sendable {
     
     // MARK: - Request Adaptation
     

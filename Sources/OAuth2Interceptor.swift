@@ -68,9 +68,7 @@ public enum TokenLocation: Int, Sendable {
 /// - Twitch
 /// - Most modern APIs
 ///
-/// - Note: The `auth` property is marked `nonisolated(unsafe)` because it's set
-///         once during initialization and its MainActor-isolated properties are
-///         safely accessed within Task contexts.
+
 public class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
     
     // MARK: - Configuration
