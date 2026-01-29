@@ -1,6 +1,5 @@
 import Foundation
 import Alamofire
-@preconcurrency import SwiftyJSON
 
 // MARK: - TwitchAPIClient
 
@@ -19,14 +18,4 @@ public final class TwitchAPIClient: OAuth2Client {
         super.init(accountType: AccountStore.twitch, baseURLString: baseURLString, requestInterceptor: requestInterceptor)
     }
     
-    // MARK: - Configuration
-    
-    public override func loadSettings(_ options: JSON?) async {
-        await super.loadSettings(options)
-        
-        // Load Twitch client ID from settings
-        if let clientId = options?["client_id"].string {
-            interceptor.auth.clientId = clientId
-        }
-    }
 }

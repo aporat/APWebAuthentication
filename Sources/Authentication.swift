@@ -1,26 +1,30 @@
 import Foundation
+import Foundation
 import APUserAgentGenerator
+@preconcurrency import SwiftyJSON
 
 /// Base class for authentication management across different OAuth versions.
 ///
 /// `Authentication` provides common functionality for all authentication types:
 /// - User agent generation and customization
 /// - Locale and language configuration
-/// - Authentication settings persistence
+/// - Persistence (disk storage of credentials and settings)
+/// - Runtime configuration (from JSON/server)
 /// - Account identification
 ///
 /// **Subclassing:**
 /// Subclasses (Auth1Authentication, Auth2Authentication) should override:
-/// - `loadAuthSettings()` - Load auth-specific tokens/secrets
-/// - `storeAuthSettings()` - Save auth-specific tokens/secrets
-/// - `clearAuthSettings()` - Clear auth-specific data (calling super)
+/// - `load()` - Load persisted credentials and settings from disk
+/// - `save()` - Save credentials and settings to disk
+/// - `delete()` - Delete credentials and settings (calling super)
+/// - `configure(with:)` - Apply runtime configuration from JSON
 ///
 /// **Example:**
 /// ```swift
 /// let auth = Auth2Authentication()
 /// auth.accountIdentifier = "user@example.com"
 /// auth.accessToken = "token"
-/// await auth.storeAuthSettings()
+/// await auth.save()
 /// ```
 ///
 /// - Note: All operations must be performed on the main actor.
@@ -208,53 +212,53 @@ open class Authentication {
     /// Subclasses must implement this required initializer.
     public required init() {}
     
-    // MARK: - Authentication Settings Persistence
+    // MARK: - Persistence
     
-    /// Loads authentication settings from disk.
+    /// Loads credentials and settings from disk.
     ///
-    /// Subclasses should override this method to load their specific tokens/secrets.
+    /// Subclasses should override this method to load their specific credentials and configuration.
     /// The base implementation does nothing.
     ///
     /// **Example Override:**
     /// ```swift
-    /// override func loadAuthSettings() async {
+    /// override func load() async {
     ///     guard let url = authSettingsURL else { return }
     ///     let data = try? Data(contentsOf: url)
-    ///     // Decode and set tokens...
+    ///     // Decode and set credentials...
     /// }
     /// ```
-    open func loadAuthSettings() async {}
+    open func load() async {}
     
-    /// Stores authentication settings to disk.
+    /// Saves credentials and settings to disk.
     ///
-    /// Subclasses should override this method to save their specific tokens/secrets.
+    /// Subclasses should override this method to save their specific credentials and configuration.
     /// The base implementation does nothing.
     ///
     /// **Example Override:**
     /// ```swift
-    /// override func storeAuthSettings() async {
+    /// override func save() async {
     ///     guard let url = authSettingsURL else { return }
     ///     let data = try? encode(settings)
     ///     try? data?.write(to: url)
     /// }
     /// ```
-    open func storeAuthSettings() async {}
+    open func save() async {}
     
-    /// Clears authentication settings from disk.
+    /// Deletes credentials and settings from disk.
     ///
     /// Deletes the settings file from the file system.
-    /// Subclasses should call `super.clearAuthSettings()` and then clear their
+    /// Subclasses should call `super.delete()` and then clear their
     /// specific properties (tokens, secrets, etc.).
     ///
     /// **Example Override:**
     /// ```swift
-    /// override func clearAuthSettings() async {
-    ///     await super.clearAuthSettings()
+    /// override func delete() async {
+    ///     await super.delete()
     ///     accessToken = nil
     ///     refreshToken = nil
     /// }
     /// ```
-    public func clearAuthSettings() async {
+    public func delete() async {
         guard let url = authSettingsURL else {
             return
         }
@@ -262,5 +266,38 @@ open class Authentication {
         try? await Task.detached {
             try FileManager.default.removeItem(at: url)
         }.value
+    }
+    
+    
+    // MARK: - Configuration
+    
+    /// Loads configuration settings from a JSON options object.
+    ///
+    /// This method updates the authentication configuration based on provided options.
+    /// Supported options:
+    /// - `browser_mode`: Sets the user agent mode (mobile, desktop, or custom)
+    /// - `custom_user_agent`: Sets a custom user agent string
+    ///
+    /// **Example:**
+    /// ```swift
+    /// let options: JSON = [
+    ///     "browser_mode": "desktop",
+    ///     "custom_user_agent": "MyApp/2.0 (iPhone; iOS 17.0)"
+    /// ]
+    /// await client.loadSettings(options)
+    /// ```
+    ///
+    /// - Parameter options: JSON object containing configuration key-value pairs
+    open func configure(with options: JSON?) {
+
+        // Update browser mode
+        if let value = UserAgentMode(options?["browser_mode"].string) {
+            browserMode = value
+        }
+        
+        // Update custom user agent
+        if let value = options?["custom_user_agent"].string {
+            customUserAgent = value
+        }
     }
 }

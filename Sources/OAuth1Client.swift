@@ -73,35 +73,4 @@ open class OAuth1Client: AuthClient {
         self.interceptor = interceptor
         super.init(accountType: accountType, baseURLString: baseURLString, requestInterceptor: interceptor)
     }
-    
-    // MARK: - Configuration
-    
-    /// Loads configuration settings from a JSON options object.
-    ///
-    /// This method updates the authentication configuration based on provided options.
-    /// Supported options:
-    /// - `browser_mode`: Sets the user agent mode (mobile, desktop, or custom)
-    /// - `custom_user_agent`: Sets a custom user agent string
-    ///
-    /// **Example:**
-    /// ```swift
-    /// let options: JSON = [
-    ///     "browser_mode": "mobile",
-    ///     "custom_user_agent": "MyApp/1.0"
-    /// ]
-    /// await client.loadSettings(options)
-    /// ```
-    ///
-    /// - Parameter options: JSON object containing configuration key-value pairs
-    public func loadSettings(_ options: JSON?) async {
-        // Update browser mode
-        if let value = UserAgentMode(options?["browser_mode"].string) {
-            interceptor.auth.setBrowserMode(value)
-        }
-        
-        // Update custom user agent
-        if let value = options?["custom_user_agent"].string {
-            interceptor.auth.setCustomUserAgent(value)
-        }
-    }
 }

@@ -198,9 +198,9 @@ open class SessionAuthentication: Authentication {
         return storage
     }()
     
-    // MARK: - Settings Persistence
+    // MARK: - Persistence
     
-    /// Clears session credentials from disk and memory.
+    /// Deletes session credentials from disk and memory.
     ///
     /// This method:
     /// 1. Deletes the settings file (via super)
@@ -211,12 +211,12 @@ open class SessionAuthentication: Authentication {
     /// **Example:**
     /// ```swift
     /// // Logout user
-    /// await auth.clearAuthSettings()
+    /// await auth.delete()
     /// // auth.isAuthorized is now false
     /// // All cookies are removed from disk
     /// ```
-    override open func clearAuthSettings() async {
-        await super.clearAuthSettings()
+    override open func delete() async {
+        await super.delete()
         sessionId = nil
         csrfToken = nil
         await clearCookiesSettings()
@@ -228,7 +228,7 @@ open class SessionAuthentication: Authentication {
     ///
     /// Saves cookies from `cookieStorage` to a property list file.
     /// Only cookies are saved; session ID and CSRF token should be saved
-    /// separately via subclass `storeAuthSettings()`.
+    /// separately via subclass `save()`.
     ///
     /// **Example:**
     /// ```swift

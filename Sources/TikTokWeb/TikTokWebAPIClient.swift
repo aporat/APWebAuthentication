@@ -29,18 +29,6 @@ public class TikTokWebAPIClient: AuthClient {
         return configuration
     }
     
-    // MARK: - Configuration
-    
-    public func loadSettings(_ options: JSON?) {
-        if let value = UserAgentMode(options?["browser_mode"].string) {
-            interceptor.auth.browserMode = value
-        }
-        
-        if let value = options?["custom_user_agent"].string {
-            interceptor.auth.customUserAgent = value
-        }
-    }
-    
     // MARK: - Error Handling
     
     public override func extractErrorMessage(from json: JSON?) -> String? {

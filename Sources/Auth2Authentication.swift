@@ -1,4 +1,5 @@
 import Foundation
+@preconcurrency import SwiftyJSON
 
 /// OAuth 2.0 authentication manager.
 ///
@@ -27,7 +28,7 @@ import Foundation
 /// auth.refreshToken = "refresh_token_here"
 ///
 /// if auth.isAuthorized {
-///     await auth.storeAuthSettings()
+///     await auth.save()
 /// }
 /// ```
 ///
@@ -144,9 +145,9 @@ public final class Auth2Authentication: Authentication {
         return false
     }
     
-    // MARK: - Settings Persistence
+    // MARK: - Persistence
     
-    /// Stores OAuth 2.0 credentials to disk.
+    /// Saves OAuth 2.0 credentials to disk.
     ///
     /// Saves the access token, refresh token, and client ID to a property list file
     /// in the documents directory. The file name is based on the `accountIdentifier`.
@@ -158,11 +159,11 @@ public final class Auth2Authentication: Authentication {
     /// auth.accessToken = "access_token"
     /// auth.refreshToken = "refresh_token"
     /// auth.clientId = "client_id"
-    /// await auth.storeAuthSettings()
+    /// await auth.save()
     /// ```
     ///
     /// - Note: Errors are logged but not thrown to avoid interrupting the flow
-    override public func storeAuthSettings() async {
+    override public func save() async {
         let settings = AuthSettings(
             accessToken: self.accessToken,
             refreshToken: self.refreshToken,
@@ -189,7 +190,7 @@ public final class Auth2Authentication: Authentication {
     ///
     /// **Example:**
     /// ```swift
-    /// await auth.loadAuthSettings()
+    /// await auth.load()
     /// if auth.isAuthorized {
     ///     print("Credentials loaded successfully")
     ///     print("Access token: \(auth.accessToken ?? "none")")
@@ -197,7 +198,7 @@ public final class Auth2Authentication: Authentication {
     /// ```
     ///
     /// - Note: Errors are logged but not thrown; properties remain nil on failure
-    override public func loadAuthSettings() async {
+    override public func load() async {
         guard let authSettingsURL = authSettingsURL else { return }
         
         do {
@@ -214,7 +215,7 @@ public final class Auth2Authentication: Authentication {
         }
     }
     
-    /// Clears OAuth 2.0 credentials from disk and memory.
+    /// Deletes OAuth 2.0 credentials from disk and memory.
     ///
     /// This method:
     /// 1. Deletes the settings file (via super)
@@ -225,13 +226,24 @@ public final class Auth2Authentication: Authentication {
     /// **Example:**
     /// ```swift
     /// // Logout user
-    /// await auth.clearAuthSettings()
+    /// await auth.delete()
     /// // auth.isAuthorized is now false
     /// ```
-    override public func clearAuthSettings() async {
-        await super.clearAuthSettings()
+    override public func delete() async {
+        await super.delete()
         accessToken = nil
         refreshToken = nil
         clientId = nil
+    }
+    
+    
+    // MARK: - Runtime Configuration
+    
+    public override func configure(with options: JSON?) {
+        super.configure(with: options)
+        
+        if let value = options?["client_id"].string {
+            clientId = value
+        }
     }
 }

@@ -61,7 +61,7 @@ public final class TikTokWebAuthentication: SessionAuthentication {
     
     // MARK: - Auth Settings
     
-    override public func storeAuthSettings() async {
+    override public func save() async {
         let settings = AuthSettings(
             signatureUrl: signatureUrl,
             browserMode: browserMode,
@@ -94,7 +94,7 @@ public final class TikTokWebAuthentication: SessionAuthentication {
         await storeCookiesSettings()
     }
     
-    override public func loadAuthSettings() async {
+    override public func load() async {
         guard let authSettingsURL = authSettingsURL else {
             await loadCookiesSettings()
             return

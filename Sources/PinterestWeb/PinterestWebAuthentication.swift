@@ -1,4 +1,5 @@
 import Foundation
+@preconcurrency import SwiftyJSON
 
 @MainActor
 public final class PinterestWebAuthentication: SessionAuthentication {
@@ -37,7 +38,7 @@ public final class PinterestWebAuthentication: SessionAuthentication {
     
     // MARK: - Auth Settings
     
-    override public func storeAuthSettings() async {
+    override public func save() async {
         let settings = AuthSettings(
             browserMode: browserMode,
             customUserAgent: customUserAgent,
@@ -63,7 +64,7 @@ public final class PinterestWebAuthentication: SessionAuthentication {
         await storeCookiesSettings()
     }
     
-    override public func loadAuthSettings() async {
+    override public func load() async {
         guard let authSettingsURL = authSettingsURL else { return }
         
         do {
@@ -86,5 +87,22 @@ public final class PinterestWebAuthentication: SessionAuthentication {
         }
         
         await loadCookiesSettings()
+    }
+    
+    
+    // MARK: - Configuration
+    
+    public override func configure(with options: JSON?) {
+        super.configure(with: options)
+        
+        // Keep device settings flag
+        if let value = options?["keep_device_settings"].bool {
+            keepDeviceSettings = value
+        }
+        
+        // App ID
+        if let value = options?["app_id"].string {
+            appId = value
+        }
     }
 }

@@ -33,28 +33,6 @@ public final class PinterestWebAPIClient: AuthClient {
         return configuration
     }
     
-    // MARK: - Configuration
-    
-    public func loadSettings(_ options: JSON?) {
-        // Keep device settings flag
-        if let value = options?["keep_device_settings"].bool {
-            interceptor.auth.keepDeviceSettings = value
-        }
-        
-        // Browser mode configuration
-        if let value = UserAgentMode(options?["browser_mode"].string) {
-            interceptor.auth.browserMode = value
-        }
-        
-        // Custom user agent
-        if let value = options?["custom_user_agent"].string {
-            interceptor.auth.customUserAgent = value
-        }
-        // App ID
-        if let value = options?["app_id"].string {
-            interceptor.auth.appId = value
-        }
-    }
     
     // MARK: - Error Handling
     

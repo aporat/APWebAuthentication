@@ -20,7 +20,7 @@ import Foundation
 /// auth.secret = "user_secret"
 ///
 /// if auth.isAuthorized {
-///     await auth.storeAuthSettings()
+///     await auth.save()
 /// }
 /// ```
 ///
@@ -119,9 +119,9 @@ public final class Auth1Authentication: Authentication {
         self.customUserAgent = agent
     }
     
-    // MARK: - Settings Persistence
+    // MARK: - Persistence
     
-    /// Stores OAuth 1.0a credentials to disk.
+    /// Saves OAuth 1.0a credentials to disk.
     ///
     /// Saves the token and secret to a property list file in the documents directory.
     /// The file name is based on the `accountIdentifier`.
@@ -132,11 +132,11 @@ public final class Auth1Authentication: Authentication {
     /// ```swift
     /// auth.token = "user_token"
     /// auth.secret = "user_secret"
-    /// await auth.storeAuthSettings()
+    /// await auth.save()
     /// ```
     ///
     /// - Note: Errors are logged but not thrown to avoid interrupting the flow
-    override public func storeAuthSettings() async {
+    override public func save() async {
         let settings = AuthSettings(token: token, secret: secret)
         guard let authSettingsURL = authSettingsURL else { return }
         
@@ -158,14 +158,14 @@ public final class Auth1Authentication: Authentication {
     ///
     /// **Example:**
     /// ```swift
-    /// await auth.loadAuthSettings()
+    /// await auth.load()
     /// if auth.isAuthorized {
     ///     print("Credentials loaded successfully")
     /// }
     /// ```
     ///
     /// - Note: Errors are logged but not thrown; properties remain nil on failure
-    override public func loadAuthSettings() async {
+    override public func load() async {
         guard let authSettingsURL = authSettingsURL else { return }
         
         do {
@@ -181,7 +181,7 @@ public final class Auth1Authentication: Authentication {
         }
     }
     
-    /// Clears OAuth 1.0a credentials from disk and memory.
+    /// Deletes OAuth 1.0a credentials from disk and memory.
     ///
     /// This method:
     /// 1. Deletes the settings file (via super)
@@ -191,11 +191,11 @@ public final class Auth1Authentication: Authentication {
     /// **Example:**
     /// ```swift
     /// // Logout user
-    /// await auth.clearAuthSettings()
+    /// await auth.delete()
     /// // auth.isAuthorized is now false
     /// ```
-    override public func clearAuthSettings() async {
-        await super.clearAuthSettings()
+    override public func delete() async {
+        await super.delete()
         token = nil
         secret = nil
     }

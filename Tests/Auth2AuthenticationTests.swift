@@ -28,14 +28,14 @@ final class Auth2AuthenticationTests: XCTestCase {
         XCTAssertTrue(auth.isAuthorized)
     }
 
-    func testStoreAndLoadAuthSettings() {
+    func testStoreAndload() {
         auth.accessToken = "testAccessToken"
         auth.clientId = "testClientId"
-        auth.storeAuthSettings()
+        auth.save()
 
         let loaded = Auth2Authentication()
         loaded.accountIdentifier = auth.accountIdentifier
-        loaded.loadAuthSettings()
+        loaded.load()
 
         XCTAssertEqual(loaded.accessToken, "testAccessToken")
         XCTAssertEqual(loaded.clientId, "testClientId")
