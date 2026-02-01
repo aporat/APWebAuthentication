@@ -3,7 +3,7 @@ import Alamofire
 
 // MARK: - GitHubInterceptor
 
-public final class GitHubInterceptor: OAuth2Interceptor {
+public final class GitHubInterceptor: OAuth2Interceptor, Sendable {
     
     // MARK: - Initialization
     
@@ -18,7 +18,7 @@ public final class GitHubInterceptor: OAuth2Interceptor {
 
     // MARK: - Request Adaptation
     
-    public override func adapt(
+    nonisolated public override func adapt(
         _ urlRequest: URLRequest,
         for session: Session,
         completion: @escaping @Sendable (Result<URLRequest, any Error>) -> Void

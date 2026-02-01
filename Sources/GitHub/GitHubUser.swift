@@ -3,29 +3,21 @@ import Foundation
 
 // MARK: - GitHubUser
 
-public final class GitHubUser: GenericUser, @unchecked Sendable {
-    
+public final class GitHubUser: GenericUser {
+
     // MARK: - Initialization
-    
+
     public required init?(info: JSON) {
-        // Extract user ID (can be string or number)
-        guard let id = info["id"].string ?? info["id"].int64?.description else {
-            return nil
-        }
-        
-        // Extract user profile information
-        let username = info["login"].string
-        let fullname = info["name"].string
-        let avatarPicture = info["avatar_url"].url
+        let id = info["id"].stringValue
+        guard !id.isEmpty else { return nil }
 
         super.init(
             userId: id,
-            username: username,
-            fullname: fullname,
-            avatarPicture: avatarPicture
+            username: info["login"].string,
+            fullname: info["name"].string,
+            avatarPicture: info["avatar_url"].url
         )
-        
-        // Set social metrics
+
         followersCount = info["followers"].int32
         followingCount = info["following"].int32
     }
