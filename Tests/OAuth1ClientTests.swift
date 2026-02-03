@@ -2,6 +2,7 @@ import XCTest
 import SwiftyJSON
 @testable import APWebAuthentication
 
+@MainActor
 final class OAuth1ClientTests: XCTestCase {
 
     var auth: Auth1Authentication!
@@ -11,6 +12,7 @@ final class OAuth1ClientTests: XCTestCase {
         super.setUp()
         auth = Auth1Authentication()
         client = OAuth1Client(
+            accountType: AccountStore.twitter,
             baseURLString: "https://api.example.com",
             consumerKey: "key123",
             consumerSecret: "secret456",
@@ -18,27 +20,11 @@ final class OAuth1ClientTests: XCTestCase {
         )
     }
 
-    func testLoadSettings_setsBrowserModeAndUserAgent() {
-        let json: JSON = [
-            "browser_mode": "ios-chrome",
-            "custom_user_agent": "MyCustomAgent/1.0"
-        ]
-
-        client.loadSettings(json)
-
-        XCTAssertEqual(auth.browserMode, .iosChrome)
-        XCTAssertEqual(auth.customUserAgent, "MyCustomAgent/1.0")
+    func testInit_setsBaseURL() {
+        XCTAssertEqual(client.baseURLString, "https://api.example.com")
     }
 
-    func testLoadSettings_withInvalidValues_doesNotCrash() {
-        let json: JSON = [
-            "browser_mode": "invalid_mode",
-            "custom_user_agent": JSON.null
-        ]
-
-        client.loadSettings(json)
-
-        XCTAssertNil(auth.browserMode)
-        XCTAssertNil(auth.customUserAgent)
+    func testInit_setsSessionManager() {
+        XCTAssertNotNil(client.sessionManager)
     }
 }

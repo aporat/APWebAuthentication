@@ -1,9 +1,10 @@
 import XCTest
 @testable import APWebAuthentication
 
+@MainActor
 final class AuthenticationTests: XCTestCase {
 
-    class TestAuth: Authentication {} // concrete subclass
+    class TestAuth: Authentication {}
 
     var auth: Authentication!
 
@@ -55,9 +56,9 @@ final class AuthenticationTests: XCTestCase {
         XCTAssertEqual(auth.localeLanguageCode.count, 2)
     }
 
-    func testClearAuthSettings_doesNotCrashIfIdentifierMissing() {
+    func testDelete_doesNotCrashIfIdentifierMissing() async {
         auth.accountIdentifier = nil
-        auth.clearAuthSettings()
+        await auth.delete()
         // no crash = pass
     }
 }

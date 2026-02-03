@@ -1,6 +1,7 @@
 import XCTest
 @testable import APWebAuthentication
 
+@MainActor
 final class OAuth2ClientTests: XCTestCase {
 
     var auth: Auth2Authentication!
@@ -9,7 +10,11 @@ final class OAuth2ClientTests: XCTestCase {
     override func setUp() {
         super.setUp()
         auth = Auth2Authentication()
-        client = OAuth2Client(baseURLString: "https://api.example.com", auth: auth)
+        client = OAuth2Client(
+            accountType: AccountStore.github,
+            baseURLString: "https://api.example.com",
+            requestInterceptor: OAuth2Interceptor(auth: auth)
+        )
     }
 
     func testInitialization_setsBaseURLAndSessionManager() {
