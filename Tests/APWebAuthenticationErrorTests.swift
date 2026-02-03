@@ -71,16 +71,6 @@ final class APWebAuthenticationErrorTests: XCTestCase {
     }
     
     // MARK: - Test Error Categories
-    
-    func testIsAppError() {
-        XCTAssertTrue(APWebAuthenticationError.appSessionExpired(reason: nil).isAppError)
-        XCTAssertTrue(APWebAuthenticationError.appCheckPointRequired(content: nil).isAppError)
-        XCTAssertTrue(APWebAuthenticationError.appDownloadNewAppRequired(content: nil).isAppError)
-        XCTAssertTrue(APWebAuthenticationError.appUpdateRequired(content: nil).isAppError)
-        XCTAssertFalse(APWebAuthenticationError.loginFailed(reason: nil).isAppError)
-        XCTAssertFalse(APWebAuthenticationError.canceled.isAppError)
-    }
-    
     func testIsLoginError() {
         XCTAssertTrue(APWebAuthenticationError.loginFailed(reason: nil).isLoginError)
         XCTAssertTrue(APWebAuthenticationError.sessionExpired(reason: nil).isLoginError)
@@ -88,14 +78,5 @@ final class APWebAuthenticationErrorTests: XCTestCase {
         XCTAssertTrue(APWebAuthenticationError.feedbackRequired(reason: nil).isLoginError)
         XCTAssertFalse(APWebAuthenticationError.connectionError(reason: nil).isLoginError)
         XCTAssertFalse(APWebAuthenticationError.timeout.isLoginError)
-    }
-    
-    func testIsGenericError() {
-        XCTAssertTrue(APWebAuthenticationError.failed(reason: nil).isGenericError)
-        XCTAssertTrue(APWebAuthenticationError.serverError(reason: nil).isGenericError)
-        XCTAssertTrue(APWebAuthenticationError.notFound.isGenericError)
-        XCTAssertTrue(APWebAuthenticationError.badRequest.isGenericError)
-        XCTAssertFalse(APWebAuthenticationError.loginFailed(reason: nil).isGenericError)
-        XCTAssertFalse(APWebAuthenticationError.appUpdateRequired(content: nil).isGenericError)
     }
 }

@@ -127,16 +127,7 @@ public enum APWebAuthenticationError: Error, Sendable, Equatable {
     ///   - reason: Human-readable description of the expiration
     ///   - responseJSON: Optional JSON response from the server
     case sessionExpired(reason: String?, responseJSON: JSON? = nil)
-    
-    /// The app's session has expired (app-specific auth).
-    ///
-    /// This occurs when app-specific authentication tokens are no longer valid.
-    ///
-    /// - Parameters:
-    ///   - reason: Human-readable description of the expiration
-    ///   - responseJSON: Optional JSON response from the server
-    case appSessionExpired(reason: String?, responseJSON: JSON? = nil)
-    
+   
     // MARK: - Rate Limiting & Restrictions
     
     /// The request was rate limited.
@@ -157,36 +148,13 @@ public enum APWebAuthenticationError: Error, Sendable, Equatable {
     /// - Parameter responseJSON: JSON response containing checkpoint details and URL
     case checkPointRequired(responseJSON: JSON?)
     
-    /// A security checkpoint is required (app-specific auth).
-    ///
-    /// This is the app-specific variant of checkpoint requirements.
-    ///
-    /// - Parameter responseJSON: JSON response containing checkpoint details
-    case appCheckPointRequired(responseJSON: JSON?)
-    
     /// Two-factor authentication is required.
     ///
     /// This occurs when 2FA is enabled and a verification code is needed.
     ///
     /// - Parameter responseJSON: JSON response with 2FA instructions
-    case appTwoFactorRequired(responseJSON: JSON?)
-    
-    // MARK: - App Updates
-    
-    /// The app version is outdated and a new version must be downloaded.
-    ///
-    /// This occurs when Instagram blocks access from old app versions.
-    ///
-    /// - Parameter responseJSON: JSON response with update information
-    case appDownloadNewAppRequired(responseJSON: JSON?)
-    
-    /// The app must be updated to continue.
-    ///
-    /// Similar to `appDownloadNewAppRequired` but may allow some limited functionality.
-    ///
-    /// - Parameter responseJSON: JSON response with update information
-    case appUpdateRequired(responseJSON: JSON?)
-    
+    case twoFactorRequired(responseJSON: JSON?)
+ 
     // MARK: - Response JSON Access
     
     /// The raw JSON response from the server, if available.
@@ -214,12 +182,8 @@ public enum APWebAuthenticationError: Error, Sendable, Equatable {
              let .externalActionRequired(_, json),
              let .sessionExpired(_, json),
              let .rateLimit(_, json),
-             let .appSessionExpired(_, json),
-             let .checkPointRequired(json),
-             let .appCheckPointRequired(json),
-             let .appTwoFactorRequired(json),
-             let .appDownloadNewAppRequired(json),
-             let .appUpdateRequired(json):
+             let .twoFactorRequired(json),
+             let .checkPointRequired(json):
             return json
             
         case .canceled, .notFound, .badRequest, .unknown, .timeout:
@@ -248,18 +212,16 @@ extension APWebAuthenticationError: LocalizedError {
             return "Network Error"
         case .serverError:
             return "Server Error"
-        case .sessionExpired, .appSessionExpired:
+        case .sessionExpired:
             return "Session Expired"
         case .rateLimit:
             return "Rate Limit Reached"
         case .feedbackRequired, .externalActionRequired:
             return "Action Blocked"
-        case .checkPointRequired, .appCheckPointRequired:
+        case .checkPointRequired:
             return "Security Check"
-        case .appTwoFactorRequired:
+        case .twoFactorRequired:
             return "Two-Factor Authentication"
-        case .appUpdateRequired, .appDownloadNewAppRequired:
-            return "Update Required"
         case .failed, .notFound, .timeout, .badRequest, .canceled, .unknown:
             return "Error"
         }
@@ -276,8 +238,7 @@ extension APWebAuthenticationError: LocalizedError {
             
         // MARK: - Session Errors
             
-        case let .sessionExpired(reason, _),
-             let .appSessionExpired(reason, _):
+        case let .sessionExpired(reason, _):
             return reason ?? "Your session has expired. Please log in again."
             
         // MARK: - Login & Access Errors
@@ -285,8 +246,7 @@ extension APWebAuthenticationError: LocalizedError {
         case let .loginFailed(reason, _):
             return reason ?? "Unable to login. Please check your credentials and try again."
             
-        case let .checkPointRequired(json),
-             let .appCheckPointRequired(json):
+        case let .checkPointRequired(json):
             return json?["message"].string ?? "A security checkpoint is required to continue."
             
         case let .feedbackRequired(reason, _),
@@ -307,14 +267,9 @@ extension APWebAuthenticationError: LocalizedError {
         case let .failed(reason, _):
             return reason ?? "An unknown error occurred."
             
-        // MARK: - App Updates
-            
-        case .appUpdateRequired, .appDownloadNewAppRequired:
-            return "This version of the app is no longer supported. Please update to the latest version."
-            
         // MARK: - Other Errors
             
-        case .appTwoFactorRequired:
+        case .twoFactorRequired:
             return "Two-factor authentication is required."
         case .notFound:
             return "The requested resource could not be found."
@@ -360,16 +315,8 @@ extension APWebAuthenticationError: LocalizedError {
             return "session_expired"
         case .rateLimit:
             return "rate_limit"
-        case .appSessionExpired:
-            return "app_session_expired"
-        case .appCheckPointRequired:
-            return "app_checkpoint_required"
-        case .appTwoFactorRequired:
+        case .twoFactorRequired:
             return "app_two_factor_required"
-        case .appDownloadNewAppRequired:
-            return "app_download_new_app_required"
-        case .appUpdateRequired:
-            return "app_update_required"
         case .canceled:
             return "canceled"
         case .notFound:
@@ -385,34 +332,7 @@ extension APWebAuthenticationError: LocalizedError {
 // MARK: - Error Classification
 
 extension APWebAuthenticationError {
-    
-    /// Whether this is an app-specific error requiring app-level handling.
-    ///
-    /// Returns `true` for errors that are specific to app authentication:
-    /// - App session expired
-    /// - App checkpoint required
-    /// - Two-factor authentication required
-    /// - App update/download required
-    ///
-    /// **Example:**
-    /// ```swift
-    /// if error.isAppError {
-    ///     // Handle app-specific authentication flow
-    /// }
-    /// ```
-    public var isAppError: Bool {
-        switch self {
-        case .appSessionExpired,
-             .appCheckPointRequired,
-             .appTwoFactorRequired,
-             .appDownloadNewAppRequired,
-             .appUpdateRequired:
-            return true
-        default:
-            return false
-        }
-    }
-    
+
     /// Whether this is a login or authentication-related error.
     ///
     /// Returns `true` for errors that prevent or interrupt authentication:
@@ -432,33 +352,8 @@ extension APWebAuthenticationError {
         switch self {
         case .loginFailed,
              .sessionExpired,
-             .appSessionExpired,
              .feedbackRequired,
              .checkPointRequired:
-            return true
-        default:
-            return false
-        }
-    }
-    
-    /// Whether this is a generic error without specific handling requirements.
-    ///
-    /// Returns `true` for general errors that can be handled uniformly:
-    /// - Generic failure
-    /// - Server error
-    /// - Not found
-    /// - Bad request
-    ///
-    /// **Example:**
-    /// ```swift
-    /// if error.isGenericError {
-    ///     // Show generic error message
-    ///     showAlert(error.errorDescription)
-    /// }
-    /// ```
-    public var isGenericError: Bool {
-        switch self {
-        case .failed, .serverError, .notFound, .badRequest:
             return true
         default:
             return false
@@ -508,12 +403,9 @@ extension APWebAuthenticationError {
     public var requiresUserAction: Bool {
         switch self {
         case .checkPointRequired,
-             .appCheckPointRequired,
-             .appTwoFactorRequired,
+             .twoFactorRequired,
              .feedbackRequired,
-             .externalActionRequired,
-             .appUpdateRequired,
-             .appDownloadNewAppRequired:
+             .externalActionRequired:
             return true
         default:
             return false
@@ -545,8 +437,7 @@ extension APWebAuthenticationError: CustomDebugStringConvertible {
              let .feedbackRequired(reason, _),
              let .externalActionRequired(reason, _),
              let .sessionExpired(reason, _),
-             let .rateLimit(reason, _),
-             let .appSessionExpired(reason, _):
+             let .rateLimit(reason, _):
             if let reason = reason {
                 parts.append("reason: \"\(reason)\"")
             }

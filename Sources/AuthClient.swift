@@ -4,21 +4,6 @@ import CryptoKit
 @preconcurrency import SwiftyJSON
 import HTTPStatusCodes
 
-// MARK: - Notifications
-
-/// Notifications posted by `AuthClient` for various authentication events.
-public extension AuthClient {
-    
-    /// Posted when a rate limit error is encountered.
-    ///
-    /// Posted when a session expires and needs re-authentication.
-    ///
-    /// Listen for this notification to redirect users to login screens.
-    static let didSessionExpired = Notification.Name(rawValue: "apwebauthentication.client.sessionexpired")
-    
-    /// Posted when rate limit retry is cancelled by the user.
-}
-
 // MARK: - Auth Client
 
 /// Base class for authenticated HTTP clients.
@@ -381,7 +366,6 @@ open class AuthClient {
             return .sessionExpired(reason: reason, responseJSON: json)
         }
         
-        // Generic failures with error messages
         if let message = jsonErrorMessage {
             return .failed(reason: message, responseJSON: json)
         }
