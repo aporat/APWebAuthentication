@@ -1,6 +1,7 @@
 import XCTest
 @testable import APWebAuthentication
 
+@MainActor
 final class Auth1AuthenticationTests: XCTestCase {
 
     var auth: Auth1Authentication!
@@ -11,9 +12,9 @@ final class Auth1AuthenticationTests: XCTestCase {
         auth.accountIdentifier = UUID().uuidString
     }
 
-    override func tearDown() {
-        auth.clearAuthSettings()
-        super.tearDown()
+    override func tearDown() async throws {
+        await auth.delete()
+        try await super.tearDown()
     }
 
     func testIsAuthorized_whenEmpty_returnsFalse() {
@@ -29,10 +30,10 @@ final class Auth1AuthenticationTests: XCTestCase {
         XCTAssertTrue(auth.isAuthorized)
     }
 
-    func testClearAuthSettings_removesValues() {
+    func testDelete_removesValues() async {
         auth.token = "abc"
         auth.secret = "xyz"
-        auth.clearAuthSettings()
+        await auth.delete()
 
         XCTAssertNil(auth.token)
         XCTAssertNil(auth.secret)

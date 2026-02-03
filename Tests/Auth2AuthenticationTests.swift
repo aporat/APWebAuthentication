@@ -1,6 +1,7 @@
 import XCTest
 @testable import APWebAuthentication
 
+@MainActor
 final class Auth2AuthenticationTests: XCTestCase {
 
     var auth: Auth2Authentication!
@@ -11,9 +12,9 @@ final class Auth2AuthenticationTests: XCTestCase {
         auth.accountIdentifier = UUID().uuidString
     }
 
-    override func tearDown() {
-        auth.clearAuthSettings()
-        super.tearDown()
+    override func tearDown() async throws {
+        await auth.delete()
+        try await super.tearDown()
     }
 
     func testIsAuthorized_whenAccessTokenMissing_returnsFalse() {
@@ -28,24 +29,24 @@ final class Auth2AuthenticationTests: XCTestCase {
         XCTAssertTrue(auth.isAuthorized)
     }
 
-    func testStoreAndload() {
+    func testStoreAndLoad() async {
         auth.accessToken = "testAccessToken"
         auth.clientId = "testClientId"
-        auth.save()
+        await auth.save()
 
         let loaded = Auth2Authentication()
         loaded.accountIdentifier = auth.accountIdentifier
-        loaded.load()
+        await loaded.load()
 
         XCTAssertEqual(loaded.accessToken, "testAccessToken")
         XCTAssertEqual(loaded.clientId, "testClientId")
         XCTAssertTrue(loaded.isAuthorized)
     }
 
-    func testClearAuthSettings_removesValues() {
+    func testDelete_removesValues() async {
         auth.accessToken = "someToken"
         auth.clientId = "someClient"
-        auth.clearAuthSettings()
+        await auth.delete()
 
         XCTAssertNil(auth.accessToken)
         XCTAssertNil(auth.clientId)

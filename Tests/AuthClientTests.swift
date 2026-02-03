@@ -1,30 +1,29 @@
 import XCTest
 import Alamofire
-import CryptoKit
 @testable import APWebAuthentication
 
+@MainActor
 final class AuthClientTests: XCTestCase {
 
-    var client: AuthClient!
+    var client: OAuth2Client!
+    var auth: Auth2Authentication!
 
     override func setUp() {
         super.setUp()
-        client = AuthClient(baseURLString: "https://example.com")
-        client.sessionManager = Session.default
+        auth = Auth2Authentication()
+        client = OAuth2Client(
+            accountType: AccountStore.github,
+            baseURLString: "https://example.com",
+            requestInterceptor: OAuth2Interceptor(auth: auth)
+        )
     }
 
     func testInit_setsBaseURL() {
         XCTAssertEqual(client.baseURLString, "https://example.com")
     }
 
-    func testFlags_propagateToRetrier() {
-        client.isReloadingCancelled = true
-        XCTAssertTrue(client.requestRetrier.isReloadingCancelled)
-
-        client.shouldRetryRateLimit = false
-        XCTAssertTrue(client.requestRetrier.shouldRetryRateLimit)
-
-        client.shouldAlwaysShowLoginAgain = true
-        XCTAssertTrue(client.requestRetrier.shouldAlwaysShowLoginAgain)
+    func testSessionManagerUsesEphemeralConfig() {
+        let sessionConfig = client.sessionManager.session.configuration
+        XCTAssertEqual(sessionConfig.httpShouldSetCookies, false)
     }
 }

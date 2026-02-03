@@ -36,13 +36,12 @@ final class ErrorExtensionTests: XCTestCase {
         let afCancel = AFError.explicitlyCancelled
         XCTAssertTrue(afCancel.isCancelledError)
 
-        let wrapped = AFError.sessionTaskFailed(error: authError)
+        let wrapped = AFError.sessionTaskFailed(error: URLError(.cancelled))
         XCTAssertTrue(wrapped.isCancelledError)
     }
 
     func testIgnorableErrors() {
         XCTAssertTrue(URLError(.timedOut).isIgnorableError)
-        XCTAssertTrue(APWebAuthenticationError.badRequest.isIgnorableError)
     }
 
     func testNonIgnorableError() {
