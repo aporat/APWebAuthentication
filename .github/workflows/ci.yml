@@ -18,7 +18,7 @@ jobs:
         include:
           - platform: iOS Simulator
             device: iPhone 17
-            os: "26.0.1"
+            os: "26.2"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
