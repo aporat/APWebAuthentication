@@ -6,7 +6,7 @@ public enum MediaItemType: Int16, Sendable, CaseIterable, CustomStringConvertibl
     case video = 2
     case album = 3
     case post = 4
-    
+
     /// Provides a human-readable name for the media type (e.g., "Photo").
     public var description: String {
         switch self {

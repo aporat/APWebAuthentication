@@ -4,9 +4,9 @@ import Foundation
 // MARK: - TwitterUser
 
 public final class TwitterUser: GenericUser, @unchecked Sendable {
-    
+
     // MARK: - Initialization
-    
+
     public required init?(info: JSON) {
         // Extract user ID (string or number format)
         guard let id = info["id_str"].string ?? info["id"].int64?.description else {
@@ -18,7 +18,7 @@ public final class TwitterUser: GenericUser, @unchecked Sendable {
         let fullname = info["name"].string
         let isVerified = info["verified"].bool ?? false
         let privateProfile = info["protected"].bool ?? false
-        
+
         // Process avatar URL (remove '_normal' suffix for higher quality)
         let constructedAvatarPicture: URL?
         if let pictureString = info["profile_image_url_https"].string {
@@ -27,7 +27,7 @@ public final class TwitterUser: GenericUser, @unchecked Sendable {
         } else {
             constructedAvatarPicture = nil
         }
-        
+
         super.init(
             userId: id,
             username: username,

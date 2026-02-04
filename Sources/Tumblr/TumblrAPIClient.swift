@@ -1,5 +1,5 @@
-import Foundation
 import Alamofire
+import Foundation
 @preconcurrency import SwiftyJSON
 
 // MARK: - TumblrAPIClient
@@ -19,24 +19,24 @@ public final class TumblrAPIClient: OAuth2Client {
     public init(baseURLString: String, requestInterceptor: OAuth2Interceptor) {
         super.init(accountType: AccountStore.tumblr, baseURLString: baseURLString, requestInterceptor: requestInterceptor)
     }
-    
+
     // MARK: - Error Handling
-    
-    public override func extractErrorMessage(from json: JSON?) -> String? {
+
+    override public func extractErrorMessage(from json: JSON?) -> String? {
         // Check meta message field
         if let message = json?["meta"]["msg"].string {
             return message
         }
-        
+
         // Check response errors array
         if let message = json?["response"]["errors"].array?.first?.string {
             return message
         }
-        
+
         return super.extractErrorMessage(from: json)
     }
-    
-    public override func isSessionExpiredError(response: DataResponse<JSON, AFError>, json: JSON?) -> Bool {
+
+    override public func isSessionExpiredError(response: DataResponse<JSON, AFError>, json: JSON?) -> Bool {
         // Check for 401 status in Tumblr's meta field
         return super.isSessionExpiredError(response: response, json: json) || json?["meta"]["status"].int == 401
     }

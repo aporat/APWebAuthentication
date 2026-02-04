@@ -22,22 +22,22 @@ import WebKit
 /// ```
 @MainActor
 public final class WebAuthCookieManager {
-    
+
     // MARK: - Private Properties
-    
+
     private weak var webView: WKWebView?
-    
+
     // MARK: - Initialization
-    
+
     /// Creates a new cookie manager for the given web view.
     ///
     /// - Parameter webView: The web view whose cookie store to manage
     public init(webView: WKWebView) {
         self.webView = webView
     }
-    
+
     // MARK: - Public Methods
-    
+
     /// Stores multiple cookies in the web view's cookie store.
     ///
     /// This method stores all cookies concurrently for better performance.
@@ -61,7 +61,7 @@ public final class WebAuthCookieManager {
         guard let cookieStore = webView?.configuration.websiteDataStore.httpCookieStore else {
             return
         }
-        
+
         await withTaskGroup(of: Void.self) { group in
             for cookie in cookies {
                 group.addTask {
@@ -70,7 +70,7 @@ public final class WebAuthCookieManager {
             }
         }
     }
-    
+
     /// Retrieves all cookies from the web view's cookie store.
     ///
     /// - Returns: An array of all stored cookies
@@ -86,7 +86,7 @@ public final class WebAuthCookieManager {
         guard let cookieStore = webView?.configuration.websiteDataStore.httpCookieStore else {
             return []
         }
-        
+
         return await withCheckedContinuation { (continuation: CheckedContinuation<[HTTPCookie], Never>) in
             cookieStore.getAllCookies { cookies in
                 Task { @MainActor in
@@ -95,7 +95,7 @@ public final class WebAuthCookieManager {
             }
         }
     }
-    
+
     /// Clears all cookies from the web view's cookie store.
     ///
     /// This removes all HTTP cookies, which can be useful when starting
@@ -107,10 +107,10 @@ public final class WebAuthCookieManager {
     /// ```
     public func clearAll() async {
         guard let webView = webView else { return }
-        
+
         let dataStore = webView.configuration.websiteDataStore
         let cookieTypes = Set([WKWebsiteDataTypeCookies])
-        
+
         let records = await dataStore.dataRecords(ofTypes: cookieTypes)
         await dataStore.removeData(ofTypes: cookieTypes, for: records)
     }

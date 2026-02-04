@@ -1,5 +1,5 @@
-import Foundation
 import Alamofire
+import Foundation
 @preconcurrency import SwiftyJSON
 
 @MainActor
@@ -22,16 +22,16 @@ public class TikTokWebMobileAPIClient: AuthClient {
         self.interceptor = requestInterceptor
         super.init(accountType: AccountStore.tiktok, baseURLString: baseURLString, requestInterceptor: requestInterceptor)
     }
-    
-    public override func makeSessionConfiguration() -> URLSessionConfiguration {
+
+    override public func makeSessionConfiguration() -> URLSessionConfiguration {
         let configuration = super.makeSessionConfiguration()
         configuration.httpCookieStorage = auth.cookieStorage
         return configuration
     }
-    
+
     // MARK: - Error Handling
-    
-    public override func extractErrorMessage(from json: JSON?) -> String? {
+
+    override public func extractErrorMessage(from json: JSON?) -> String? {
         if let message = json?["status_msg"].string {
             return message
         }

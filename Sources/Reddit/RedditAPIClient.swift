@@ -1,5 +1,5 @@
-import Foundation
 import Alamofire
+import Foundation
 @preconcurrency import SwiftyJSON
 
 // MARK: - RedditAPIClient

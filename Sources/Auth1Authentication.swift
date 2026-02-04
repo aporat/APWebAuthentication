@@ -32,9 +32,9 @@ import Foundation
 /// - Note: All operations must be performed on the main actor.
 @MainActor
 public final class Auth1Authentication: Authentication {
-    
+
     // MARK: - Settings Storage
-    
+
     /// Internal structure for encoding/decoding OAuth 1.0a settings.
     ///
     /// This structure is used for property list serialization of credentials.
@@ -42,9 +42,9 @@ public final class Auth1Authentication: Authentication {
         let token: String?
         let secret: String?
     }
-    
+
     // MARK: - OAuth 1.0a Credentials
-    
+
     /// The OAuth access token.
     ///
     /// This token identifies the user and is sent with every authenticated request.
@@ -55,7 +55,7 @@ public final class Auth1Authentication: Authentication {
     /// auth.token = "1234567890-abcdefghijklmnop"
     /// ```
     public var token: String?
-    
+
     /// The OAuth access token secret.
     ///
     /// This secret is used to sign requests along with the consumer secret.
@@ -66,14 +66,14 @@ public final class Auth1Authentication: Authentication {
     /// auth.secret = "secret_key_here"
     /// ```
     public var secret: String?
-    
+
     // MARK: - Initialization
-    
+
     /// Creates a new OAuth 1.0a authentication instance.
     public required init() {}
-    
+
     // MARK: - Authorization Status
-    
+
     /// Whether the authentication has valid credentials.
     ///
     /// Returns `true` only if both token and secret are present and non-empty.
@@ -100,16 +100,16 @@ public final class Auth1Authentication: Authentication {
         }
         return false
     }
-    
+
     // MARK: - Configuration
-    
+
     /// Sets the browser mode for user agent generation.
     ///
     /// - Parameter mode: The desired browser/device mode
     func setBrowserMode(_ mode: UserAgentMode) {
         self.browserMode = mode
     }
-    
+
     /// Sets a custom user agent string.
     ///
     /// When set, this overrides automatic user agent generation.
@@ -118,9 +118,9 @@ public final class Auth1Authentication: Authentication {
     func setCustomUserAgent(_ agent: String) {
         self.customUserAgent = agent
     }
-    
+
     // MARK: - Persistence
-    
+
     /// Saves OAuth 1.0a credentials to disk.
     ///
     /// Saves the token and secret to a property list file in the documents directory.
@@ -139,10 +139,10 @@ public final class Auth1Authentication: Authentication {
     override public func save() async {
         let settings = AuthSettings(token: token, secret: secret)
         guard let authSettingsURL = authSettingsURL else { return }
-        
+
         do {
             let data = try PropertyListEncoder().encode(settings)
-            
+
             try await Task.detached {
                 try data.write(to: authSettingsURL)
             }.value
@@ -150,7 +150,7 @@ public final class Auth1Authentication: Authentication {
             print("⚠️ Failed to store OAuth 1.0a settings: \(error)")
         }
     }
-    
+
     /// Loads OAuth 1.0a credentials from disk.
     ///
     /// Reads the token and secret from the property list file and updates
@@ -167,12 +167,12 @@ public final class Auth1Authentication: Authentication {
     /// - Note: Errors are logged but not thrown; properties remain nil on failure
     override public func load() async {
         guard let authSettingsURL = authSettingsURL else { return }
-        
+
         do {
             let data = try await Task.detached {
                 try Data(contentsOf: authSettingsURL)
             }.value
-            
+
             let settings = try PropertyListDecoder().decode(AuthSettings.self, from: data)
             self.token = settings.token
             self.secret = settings.secret
@@ -180,7 +180,7 @@ public final class Auth1Authentication: Authentication {
             print("⚠️ Failed to load OAuth 1.0a settings: \(error)")
         }
     }
-    
+
     /// Deletes OAuth 1.0a credentials from disk and memory.
     ///
     /// This method:

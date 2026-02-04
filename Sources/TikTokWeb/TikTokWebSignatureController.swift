@@ -2,7 +2,7 @@ import Foundation
 import WebKit
 
 public final class TikTokWebSignatureController: WebTokenInterceptorViewController {
-    
+
     // MARK: - Data
     /*
     fileprivate var auth: TikTokWebAuthentication

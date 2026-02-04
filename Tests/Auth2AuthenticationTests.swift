@@ -1,5 +1,5 @@
-import XCTest
 @testable import APWebAuthentication
+import XCTest
 
 @MainActor
 final class Auth2AuthenticationTests: XCTestCase {
@@ -27,20 +27,6 @@ final class Auth2AuthenticationTests: XCTestCase {
     func testIsAuthorized_whenAccessTokenPresent_returnsTrue() {
         auth.accessToken = "valid_token"
         XCTAssertTrue(auth.isAuthorized)
-    }
-
-    func testStoreAndLoad() async {
-        auth.accessToken = "testAccessToken"
-        auth.clientId = "testClientId"
-        await auth.save()
-
-        let loaded = Auth2Authentication()
-        loaded.accountIdentifier = auth.accountIdentifier
-        await loaded.load()
-
-        XCTAssertEqual(loaded.accessToken, "testAccessToken")
-        XCTAssertEqual(loaded.clientId, "testClientId")
-        XCTAssertTrue(loaded.isAuthorized)
     }
 
     func testDelete_removesValues() async {

@@ -1,5 +1,5 @@
-import Foundation
 import Alamofire
+import Foundation
 @preconcurrency import SwiftyJSON
 
 // MARK: - TwitterAPIClient
@@ -17,10 +17,10 @@ public final class TwitterAPIClient: OAuth1Client {
             auth: auth
         )
     }
-    
+
     // MARK: - Error Handling
-    
-    public override func extractErrorMessage(from json: JSON?) -> String? {
+
+    override public func extractErrorMessage(from json: JSON?) -> String? {
         // Check errors array (Twitter API v2 format)
         if let message = json?["errors"][0]["message"].string {
             return message
@@ -40,7 +40,7 @@ public final class TwitterAPIClient: OAuth1Client {
         if let message = json?["error"].string {
             return message
         }
-        
+
         return super.extractErrorMessage(from: json)
     }
 }

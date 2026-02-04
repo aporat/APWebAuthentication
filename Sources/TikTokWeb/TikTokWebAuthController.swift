@@ -64,7 +64,7 @@ public final class TikTokWebAuthViewController: WebAuthViewController {
                 self.didStopLoading()
 
                 let result: [String: String] = [:]
-                
+
                 self.dismiss(animated: true) {
                     self.completionHandler?(.success(result))
                     self.completionHandler = nil

@@ -33,7 +33,7 @@ import Foundation
 ///
 /// - Note: Different modes may have different rate limits and available endpoints.
 public enum AuthenticationMode: String, Sendable, CaseIterable {
-    
+
     /// Private API mode with full native app access.
     ///
     /// Uses Instagram's private mobile API endpoints with native app authentication.
@@ -45,7 +45,7 @@ public enum AuthenticationMode: String, Sendable, CaseIterable {
     /// - May require app signature verification
     /// - Higher rate limits
     case `private`
-    
+
     /// Explicit OAuth 2.0 authorization flow.
     ///
     /// Uses standard OAuth 2.0 authorization code flow with user consent screen.
@@ -57,7 +57,7 @@ public enum AuthenticationMode: String, Sendable, CaseIterable {
     /// - Scoped permissions
     /// - Standard OAuth 2.0 flow
     case explicit
-    
+
     /// Implicit OAuth 2.0 flow for client-side apps.
     ///
     /// Uses OAuth 2.0 implicit flow without server-side token exchange.
@@ -69,7 +69,7 @@ public enum AuthenticationMode: String, Sendable, CaseIterable {
     /// - Limited permissions
     /// - Client-side only
     case implicit
-    
+
     /// Web-based authentication using cookies and sessions.
     ///
     /// Uses traditional web authentication with cookie-based sessions.
@@ -81,7 +81,7 @@ public enum AuthenticationMode: String, Sendable, CaseIterable {
     /// - Web-optimized endpoints
     /// - Browser compatibility
     case web
-    
+
     /// Bloks framework authentication.
     ///
     /// Uses Facebook's Bloks UI framework for authentication flows.
@@ -93,7 +93,7 @@ public enum AuthenticationMode: String, Sendable, CaseIterable {
     /// - Facebook infrastructure
     /// - Modern authentication flows
     case bloks
-    
+
     /// Browser-based OAuth flow.
     ///
     /// Redirects to browser for authentication, then returns to app.
@@ -105,7 +105,7 @@ public enum AuthenticationMode: String, Sendable, CaseIterable {
     /// - System authentication
     /// - Secure token handling
     case browser
-    
+
     /// Native mobile app authentication.
     ///
     /// Uses platform-native authentication mechanisms.
@@ -117,9 +117,9 @@ public enum AuthenticationMode: String, Sendable, CaseIterable {
     /// - Device binding
     /// - Biometric support (optional)
     case app
-    
+
     // MARK: - Initialization
-    
+
     /// Creates an `AuthenticationMode` from an optional string.
     ///
     /// This convenience initializer safely handles nil values and invalid strings.
@@ -137,12 +137,12 @@ public enum AuthenticationMode: String, Sendable, CaseIterable {
         guard let rawValue = string else {
             return nil
         }
-        
+
         self.init(rawValue: rawValue)
     }
-    
+
     // MARK: - Computed Properties
-    
+
     /// Whether this mode uses OAuth 2.0 authentication.
     ///
     /// Returns `true` for explicit, implicit, and browser modes.
@@ -160,7 +160,7 @@ public enum AuthenticationMode: String, Sendable, CaseIterable {
             return false
         }
     }
-    
+
     /// Whether this mode uses web-based authentication.
     ///
     /// Returns `true` for web and browser modes.
@@ -178,7 +178,7 @@ public enum AuthenticationMode: String, Sendable, CaseIterable {
             return false
         }
     }
-    
+
     /// Whether this mode uses native app authentication.
     ///
     /// Returns `true` for private, app, and bloks modes.
@@ -196,7 +196,7 @@ public enum AuthenticationMode: String, Sendable, CaseIterable {
             return false
         }
     }
-    
+
     /// Whether this mode supports token refresh.
     ///
     /// Returns `true` for modes that typically provide refresh tokens.
@@ -214,7 +214,7 @@ public enum AuthenticationMode: String, Sendable, CaseIterable {
             return false
         }
     }
-    
+
     /// A user-friendly description of the mode.
     ///
     /// **Example:**
@@ -250,7 +250,7 @@ extension AuthenticationMode: CustomStringConvertible {
 // MARK: - CustomDebugStringConvertible
 
 extension AuthenticationMode: CustomDebugStringConvertible {
-    
+
     /// Detailed debug description showing the mode and its characteristics.
     ///
     /// **Example:**
@@ -259,7 +259,7 @@ extension AuthenticationMode: CustomDebugStringConvertible {
     /// ```
     public var debugDescription: String {
         var traits: [String] = []
-        
+
         if isOAuth {
             traits.append("OAuth")
         }
@@ -272,9 +272,8 @@ extension AuthenticationMode: CustomDebugStringConvertible {
         if supportsRefresh {
             traits.append("refresh")
         }
-        
+
         let traitsString = traits.isEmpty ? "none" : traits.joined(separator: ", ")
         return "AuthenticationMode.\(rawValue)(traits: [\(traitsString)])"
     }
 }
-

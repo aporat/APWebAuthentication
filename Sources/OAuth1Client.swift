@@ -1,5 +1,5 @@
-import Foundation
 import Alamofire
+import Foundation
 @preconcurrency import SwiftyJSON
 
 /// HTTP client for OAuth 1.0a authenticated APIs.
@@ -38,17 +38,17 @@ import Alamofire
 /// - Note: OAuth 1.0a is used by platforms like Twitter (X) and Tumblr.
 @MainActor
 open class OAuth1Client: AuthClient {
-    
+
     // MARK: - Properties
-    
+
     /// The OAuth 1.0a request interceptor handling signature generation.
     ///
     /// This interceptor adds the OAuth authorization header to each request
     /// with the required signatures and nonces.
     private var interceptor: OAuth1Interceptor
-    
+
     // MARK: - Initialization
-    
+
     /// Creates a new OAuth 1.0a client with the specified configuration.
     ///
     /// - Parameters:

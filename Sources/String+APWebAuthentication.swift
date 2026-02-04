@@ -24,9 +24,9 @@ import Foundation
 /// print(params["code"])  // "abc123"
 /// ```
 public extension String {
-    
+
     // MARK: - JavaScript Escaping
-    
+
     /// Returns a string with characters properly escaped for JavaScript string literals.
     ///
     /// This property escapes characters that have special meaning in JavaScript strings,
@@ -80,22 +80,22 @@ public extension String {
     /// - Complexity: O(n) where n is the length of the string
     var javascriptEscaped: String {
         var escaped = self
-        
+
         // Order matters: backslash must be escaped first to avoid double-escaping
         escaped = escaped.replacingOccurrences(of: "\\", with: "\\\\")
         escaped = escaped.replacingOccurrences(of: "\"", with: "\\\"")
         escaped = escaped.replacingOccurrences(of: "\n", with: "\\n")
         escaped = escaped.replacingOccurrences(of: "\r", with: "\\r")
-        
+
         // Unicode line terminators that JavaScript treats specially
         escaped = escaped.replacingOccurrences(of: "\u{2028}", with: "\\u2028")
         escaped = escaped.replacingOccurrences(of: "\u{2029}", with: "\\u2029")
-        
+
         return escaped
     }
-    
+
     // MARK: - URL Encoding
-    
+
     /// Returns a percent-encoded string following RFC 3986 for OAuth 1.0 compliance.
     ///
     /// This property encodes the string using the "unreserved" character set defined
@@ -165,10 +165,10 @@ public extension String {
         // ALPHA / DIGIT / "-" / "." / "_" / "~"
         let unreserved = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~"
         let allowed = CharacterSet(charactersIn: unreserved)
-        
+
         return self.addingPercentEncoding(withAllowedCharacters: allowed) ?? self
     }
-    
+
     /// Returns a string with percent-encoding removed.
     ///
     /// This property safely decodes percent-encoded characters (e.g., `%20` → space),
@@ -206,9 +206,9 @@ public extension String {
     var urlUnescaped: String {
         self.removingPercentEncoding ?? self
     }
-    
+
     // MARK: - Query Parameter Parsing
-    
+
     /// Parses the string as a URL query string and returns key-value pairs.
     ///
     /// This property treats the string as a URL query string (format: `key=value&key2=value2`)
@@ -279,11 +279,11 @@ public extension String {
         // We add a dummy scheme and host to use the powerful URLComponents parser.
         // URLComponents requires a complete URL structure to parse properly.
         let urlString = "https://dummy.com?\(self)"
-        
+
         guard let components = URLComponents(string: urlString) else {
             return [:]
         }
-        
+
         // The `queryItems` property automatically handles percent-decoding
         // and provides a clean array of name-value pairs.
         return components.queryItems?.reduce(into: [String: String]()) { result, item in

@@ -1,12 +1,12 @@
-import Foundation
 import Alamofire
+import Foundation
 
 // MARK: - GitHubInterceptor
 
-public final class GitHubInterceptor: OAuth2Interceptor, Sendable {
-    
+public final class GitHubInterceptor: OAuth2Interceptor, @unchecked Sendable {
+
     // MARK: - Initialization
-    
+
     public init(auth: Auth2Authentication) {
         super.init(
             auth: auth,
@@ -17,8 +17,8 @@ public final class GitHubInterceptor: OAuth2Interceptor, Sendable {
     }
 
     // MARK: - Request Adaptation
-    
-    nonisolated public override func adapt(
+
+    override nonisolated public func adapt(
         _ urlRequest: URLRequest,
         for session: Session,
         completion: @escaping @Sendable (Result<URLRequest, any Error>) -> Void

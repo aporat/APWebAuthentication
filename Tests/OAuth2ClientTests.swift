@@ -1,5 +1,5 @@
-import XCTest
 @testable import APWebAuthentication
+import XCTest
 
 @MainActor
 final class OAuth2ClientTests: XCTestCase {

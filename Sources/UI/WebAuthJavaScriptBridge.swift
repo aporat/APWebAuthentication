@@ -23,22 +23,22 @@ import WebKit
 /// ```
 @MainActor
 public final class WebAuthJavaScriptBridge {
-    
+
     // MARK: - Private Properties
-    
+
     private weak var webView: WKWebView?
-    
+
     // MARK: - Initialization
-    
+
     /// Creates a new JavaScript bridge for the given web view.
     ///
     /// - Parameter webView: The web view to execute JavaScript in
     public init(webView: WKWebView) {
         self.webView = webView
     }
-    
+
     // MARK: - Public Methods
-    
+
     /// Evaluates JavaScript and returns the result as a string.
     ///
     /// This method executes JavaScript code and attempts to convert the
@@ -63,7 +63,7 @@ public final class WebAuthJavaScriptBridge {
     @discardableResult
     public func evaluateString(_ script: String) async -> String? {
         guard let webView = webView else { return nil }
-        
+
         do {
             let result = try await webView.evaluateJavaScript(script)
             return result as? String
@@ -71,7 +71,7 @@ public final class WebAuthJavaScriptBridge {
             return nil
         }
     }
-    
+
     /// Evaluates JavaScript and returns the raw result.
     ///
     /// Use this method when you need access to the raw JavaScript result
@@ -95,14 +95,14 @@ public final class WebAuthJavaScriptBridge {
     @discardableResult
     public func evaluate(_ script: String) async -> Any? {
         guard let webView = webView else { return nil }
-        
+
         do {
             return try await webView.evaluateJavaScript(script)
         } catch {
             return nil
         }
     }
-    
+
     /// Evaluates JavaScript and returns whether execution succeeded.
     ///
     /// Use this method when you want to run JavaScript for side effects
@@ -122,7 +122,7 @@ public final class WebAuthJavaScriptBridge {
     @discardableResult
     public func execute(_ script: String) async -> Bool {
         guard let webView = webView else { return false }
-        
+
         do {
             _ = try await webView.evaluateJavaScript(script)
             return true

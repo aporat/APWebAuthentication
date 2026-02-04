@@ -11,7 +11,7 @@ import Foundation
 /// - Low-level data manipulation
 /// - Hashing and checksums
 extension Data {
-    
+
     /// Returns all bytes in the data as an array of `UInt8`.
     ///
     /// This property provides convenient access to the raw bytes of the `Data` object,

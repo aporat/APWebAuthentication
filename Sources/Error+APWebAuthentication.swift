@@ -1,5 +1,5 @@
-import Foundation
 import Alamofire
+import Foundation
 
 // MARK: - Error Extensions
 
@@ -29,9 +29,9 @@ import Alamofire
 /// }
 /// ```
 public extension Error {
-    
+
     // MARK: - Underlying Error Extraction
-    
+
     /// Safely extracts a `URLError` from the error or its underlying errors.
     ///
     /// Checks both direct URLError instances and URLErrors wrapped inside Alamofire errors.
@@ -49,13 +49,13 @@ public extension Error {
         if let urlError = self as? URLError {
             return urlError
         }
-        
+
         // Check if wrapped in AFError
         if let afError = self.asAFError,
            let urlError = afError.underlyingError as? URLError {
             return urlError
         }
-        
+
         return nil
     }
 
@@ -83,18 +83,18 @@ public extension Error {
         if let authError = self as? APWebAuthenticationError {
             return authError
         }
-        
+
         // Check if wrapped in AFError
         if let afError = self.asAFError,
            let authError = afError.underlyingError as? APWebAuthenticationError {
             return authError
         }
-        
+
         return nil
     }
-    
+
     // MARK: - Error Classification
-    
+
     /// Whether this error represents a network connection issue.
     ///
     /// Returns `true` for common connection problems:
@@ -118,7 +118,7 @@ public extension Error {
     /// - Returns: `true` if this is a connection error, `false` otherwise
     var isConnectionError: Bool {
         guard let urlError = underlyingURLError else { return false }
-        
+
         switch urlError.code {
         case .timedOut,
              .dnsLookupFailed,
@@ -161,7 +161,7 @@ public extension Error {
         if underlyingURLError?.code == .cancelled {
             return true
         }
-        
+
         // Check custom authentication error cancellation
         if let authError = underlyingAuthenticationError {
             switch authError {
@@ -171,10 +171,10 @@ public extension Error {
                 return false
             }
         }
-        
+
         return false
     }
-    
+
     /// Whether this error can be safely ignored from a user-facing perspective.
     ///
     /// Returns `true` for errors that don't need user alerts:
@@ -197,9 +197,9 @@ public extension Error {
     var isIgnorableError: Bool {
         isConnectionError || isCancelledError
     }
-    
+
     // MARK: - Error Information
-    
+
     /// Returns a user-friendly description of the error.
     ///
     /// Attempts to extract the most informative error message by checking:
@@ -222,17 +222,17 @@ public extension Error {
            let description = localizedError.errorDescription {
             return description
         }
-        
+
         // Check for APWebAuthenticationError
         if let authError = underlyingAuthenticationError {
             return authError.errorDescription ?? authError.localizedDescription
         }
-        
+
         // Check for AFError
         if let afError = self.asAFError {
             return afError.localizedDescription
         }
-        
+
         // Fallback to standard description
         return localizedDescription
     }

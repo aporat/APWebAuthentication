@@ -56,7 +56,7 @@ public extension UINavigationController {
         let newProgressView = ProgressView(frame: .zero)
         newProgressView.translatesAutoresizingMaskIntoConstraints = false
         navigationBar.addSubview(newProgressView)
-        
+
         // Set up Auto Layout constraints to pin it to the bottom of the navigation bar.
         NSLayoutConstraint.activate([
             newProgressView.leadingAnchor.constraint(equalTo: navigationBar.leadingAnchor),
@@ -64,10 +64,10 @@ public extension UINavigationController {
             newProgressView.bottomAnchor.constraint(equalTo: navigationBar.bottomAnchor),
             newProgressView.heightAnchor.constraint(equalToConstant: defaultHeight)
         ])
-        
+
         // Store the new progress view as an associated object for future access.
         objc_setAssociatedObject(self, &AssociatedKeys.progressView, newProgressView, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-        
+
         return newProgressView
     }
 

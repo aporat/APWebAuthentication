@@ -3,7 +3,7 @@ import UIKit
 
 @MainActor
 public final class TikTokWebAuthentication: SessionAuthentication {
-    
+
     private struct AuthSettings: Codable, Sendable {
         var signatureUrl: URL?
         var browserMode: UserAgentMode?
@@ -20,7 +20,7 @@ public final class TikTokWebAuthentication: SessionAuthentication {
         var browserVersion: String?
         var timezoneName: String?
     }
-    
+
     public var signatureUrl: URL?
     public var secUid: String?
     public var username: String?
@@ -28,7 +28,7 @@ public final class TikTokWebAuthentication: SessionAuthentication {
     public var ttWebId: String?
     public var uidtt: String?
     public var sessionLastValidated = Date().adding(.hour, value: -2)
-    
+
     public var aid: String = "1988"
     public var screenWidth: String = "375"
     public var screenHeight: String = "812"
@@ -37,12 +37,12 @@ public final class TikTokWebAuthentication: SessionAuthentication {
     public var browserName: String = "Mozilla"
     public var browserVersion: String = "5.0+(iPhone;+CPU+iPhone+OS+13_2_3+like+Mac+OS+X)+AppleWebKit/605.1.15+(KHTML,+like+Gecko)+Version/13.0.3+Mobile/15E148+Safari/604.1"
     public var timezoneName: String = "America/Chicago"
-    
+
     override public var isAuthorized: Bool {
         if let currentSessionId = sessionId, !currentSessionId.isEmpty { return true }
         return false
     }
-    
+
     public func loadAuthTokens(forceLoad: Bool = false) {
         if forceLoad || sessionId == nil || svWebId == nil {
             cookieStorage.cookies?.forEach {
@@ -58,9 +58,9 @@ public final class TikTokWebAuthentication: SessionAuthentication {
             }
         }
     }
-    
+
     // MARK: - Auth Settings
-    
+
     override public func save() async {
         let settings = AuthSettings(
             signatureUrl: signatureUrl,
@@ -78,35 +78,35 @@ public final class TikTokWebAuthentication: SessionAuthentication {
             browserVersion: browserVersion,
             timezoneName: timezoneName
         )
-        
+
         guard let authSettingsURL = authSettingsURL else { return }
-        
+
         do {
             let data = try PropertyListEncoder().encode(settings)
-            
+
             try await Task.detached {
                 try data.write(to: authSettingsURL)
             }.value
         } catch {
             print("⚠️ Failed to store TikTok settings: \(error)")
         }
-        
+
         await storeCookiesSettings()
     }
-    
+
     override public func load() async {
         guard let authSettingsURL = authSettingsURL else {
             await loadCookiesSettings()
             return
         }
-        
+
         do {
             let data = try await Task.detached {
                 try Data(contentsOf: authSettingsURL)
             }.value
-            
+
             let settings = try PropertyListDecoder().decode(AuthSettings.self, from: data)
-            
+
             signatureUrl = settings.signatureUrl ?? signatureUrl
             browserMode = settings.browserMode ?? browserMode
             customUserAgent = settings.customUserAgent ?? customUserAgent
@@ -121,11 +121,11 @@ public final class TikTokWebAuthentication: SessionAuthentication {
             browserName = settings.browserName ?? browserName
             browserVersion = settings.browserVersion ?? browserVersion
             timezoneName = settings.timezoneName ?? timezoneName
-            
+
         } catch {
             print("⚠️ Failed to load TikTok settings: \(error)")
         }
-        
+
         await loadCookiesSettings()
     }
 }

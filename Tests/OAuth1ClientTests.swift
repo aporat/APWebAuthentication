@@ -1,6 +1,6 @@
-import XCTest
-import SwiftyJSON
 @testable import APWebAuthentication
+import SwiftyJSON
+import XCTest
 
 @MainActor
 final class OAuth1ClientTests: XCTestCase {

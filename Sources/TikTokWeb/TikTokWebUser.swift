@@ -4,14 +4,14 @@ import Foundation
 public final class TikTokWebUser: GenericUser, @unchecked Sendable {
     public required init?(info: JSON) {
         let id = info["uid"].string ?? info["id"].string ?? info["userId"].string ?? info["sec_uid"].string
-        
+
         guard let userId = id else {
             return nil
         }
-        
+
         let username = info["unique_id"].string ?? info["uniqueId"].string
         let fullname = info["nickname"].string ?? info["nickName"].string
-        
+
         let avatarPicture: URL?
         if let thumbURL = info["avatarThumb"].url {
             avatarPicture = thumbURL
@@ -24,7 +24,7 @@ public final class TikTokWebUser: GenericUser, @unchecked Sendable {
         } else {
             avatarPicture = nil
         }
-        
+
         super.init(userId: userId,
                    username: username,
                    fullname: fullname,

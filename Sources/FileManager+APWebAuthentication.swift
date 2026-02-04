@@ -7,7 +7,7 @@ import Foundation
 /// These extensions provide convenient access to standard iOS directories
 /// used for storing authentication data, settings, and other app data.
 public extension FileManager {
-    
+
     /// The URL to the app's documents directory.
     ///
     /// The documents directory is the primary location for user-generated content
@@ -35,7 +35,7 @@ public extension FileManager {
     static var documentsDirectoryURL: URL? {
         FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
     }
-    
+
     /// The URL to the app's caches directory.
     ///
     /// The caches directory is for temporary data that can be regenerated
@@ -62,7 +62,7 @@ public extension FileManager {
     static var cachesDirectoryURL: URL? {
         FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
     }
-    
+
     /// The URL to the app's temporary directory.
     ///
     /// The temporary directory is for short-lived files that should be deleted
@@ -95,7 +95,7 @@ public extension FileManager {
 // MARK: - File Operations
 
 public extension FileManager {
-    
+
     /// Checks if a file exists at the specified URL.
     ///
     /// **Example:**
@@ -110,7 +110,7 @@ public extension FileManager {
     func fileExists(at url: URL) -> Bool {
         fileExists(atPath: url.path)
     }
-    
+
     /// Safely removes a file if it exists.
     ///
     /// Unlike `removeItem(at:)`, this method doesn't throw an error
@@ -128,7 +128,7 @@ public extension FileManager {
         guard fileExists(at: url) else { return }
         try removeItem(at: url)
     }
-    
+
     /// Creates a directory at the specified URL if it doesn't exist.
     ///
     /// **Example:**

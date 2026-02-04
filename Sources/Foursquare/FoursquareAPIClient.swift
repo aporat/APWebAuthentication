@@ -1,5 +1,5 @@
-import Foundation
 import Alamofire
+import Foundation
 @preconcurrency import SwiftyJSON
 
 public final class FoursquareAPIClient: OAuth2Client {
@@ -16,12 +16,12 @@ public final class FoursquareAPIClient: OAuth2Client {
     }
 
     // MARK: - Error Handling
-    
-    public override func extractErrorMessage(from json: JSON?) -> String? {
+
+    override public func extractErrorMessage(from json: JSON?) -> String? {
         if let message = json?["meta"]["errorDetail"].string {
             return message
         }
-        
+
         return super.extractErrorMessage(from: json)
     }
 }

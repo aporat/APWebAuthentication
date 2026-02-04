@@ -32,49 +32,49 @@ import Foundation
 ///
 /// - Note: Some platforms may detect and block non-standard user agents.
 public enum UserAgentMode: String, Codable, Sendable, CaseIterable {
-    
+
     /// System default user agent (typically Safari on iOS).
     ///
     /// Uses the operating system's default user agent string.
     case `default`
-    
+
     /// iOS WebView user agent.
     ///
     /// Mimics a WKWebView or UIWebView user agent string.
     case webView = "webview"
-    
+
     /// Generic iOS Safari user agent.
     ///
     /// Uses a standard iOS Safari user agent without specific device details.
     case ios
-    
+
     /// Chrome on iOS user agent.
     ///
     /// Mimics Google Chrome running on iOS (which actually uses Safari's engine).
     case iosChrome = "ios-chrome"
-    
+
     /// iPhone-specific Safari user agent.
     ///
     /// Uses an iPhone-specific Safari user agent with device identifiers.
     case iphone
-    
+
     /// Android browser user agent.
     ///
     /// Mimics an Android device with either Chrome or Android Browser.
     case android
-    
+
     /// Desktop Safari/Chrome user agent.
     ///
     /// Uses a desktop browser user agent (typically macOS Safari or Chrome).
     case desktop
-    
+
     /// Desktop Firefox user agent.
     ///
     /// Uses a Mozilla Firefox desktop browser user agent.
     case desktopFirefox = "desktop-firefox"
-    
+
     // MARK: - Initialization
-    
+
     /// Creates a `UserAgentMode` from an optional string.
     ///
     /// This convenience initializer safely handles nil values and invalid strings.
@@ -92,12 +92,12 @@ public enum UserAgentMode: String, Codable, Sendable, CaseIterable {
         guard let rawValue = string else {
             return nil
         }
-        
+
         self.init(rawValue: rawValue)
     }
-    
+
     // MARK: - Computed Properties
-    
+
     /// Whether this mode represents a mobile user agent.
     ///
     /// Returns `true` for iOS, iPhone, Android, and WebView modes.
@@ -115,7 +115,7 @@ public enum UserAgentMode: String, Codable, Sendable, CaseIterable {
             return false
         }
     }
-    
+
     /// Whether this mode represents a desktop user agent.
     ///
     /// Returns `true` for desktop and desktop Firefox modes.
@@ -133,7 +133,7 @@ public enum UserAgentMode: String, Codable, Sendable, CaseIterable {
             return false
         }
     }
-    
+
     /// A user-friendly description of the mode.
     ///
     /// **Example:**
@@ -171,7 +171,7 @@ extension UserAgentMode: CustomStringConvertible {
 // MARK: - CustomDebugStringConvertible
 
 extension UserAgentMode: CustomDebugStringConvertible {
-    
+
     /// Detailed debug description showing the mode and its properties.
     ///
     /// **Example:**
@@ -183,4 +183,3 @@ extension UserAgentMode: CustomDebugStringConvertible {
         return "UserAgentMode.\(rawValue)(type: \(type), description: \"\(description)\")"
     }
 }
-

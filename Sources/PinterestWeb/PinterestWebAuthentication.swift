@@ -3,7 +3,7 @@ import Foundation
 
 @MainActor
 public final class PinterestWebAuthentication: SessionAuthentication {
-    
+
     private struct AuthSettings: Codable, Sendable {
         var browserMode: UserAgentMode?
         var customUserAgent: String?
@@ -13,15 +13,15 @@ public final class PinterestWebAuthentication: SessionAuthentication {
         var username: String?
         var isAuthenticated: Bool
     }
-    
+
     var appId = "ad0e169"
     public var username: String?
     public var isAuthenticated: Bool = false
-    
+
     override public var isAuthorized: Bool {
         return isAuthenticated
     }
-    
+
     public func loadAuthTokens(forceLoad: Bool = false) {
         if forceLoad || sessionId == nil || csrfToken == nil {
             cookieStorage.cookies?.forEach {
@@ -35,9 +35,9 @@ public final class PinterestWebAuthentication: SessionAuthentication {
             }
         }
     }
-    
+
     // MARK: - Auth Settings
-    
+
     override public func save() async {
         let settings = AuthSettings(
             browserMode: browserMode,
@@ -48,32 +48,32 @@ public final class PinterestWebAuthentication: SessionAuthentication {
             username: username,
             isAuthenticated: isAuthenticated
         )
-        
+
         guard let authSettingsURL = authSettingsURL else { return }
-        
+
         do {
             let data = try PropertyListEncoder().encode(settings)
-            
+
             try await Task.detached {
                 try data.write(to: authSettingsURL)
             }.value
         } catch {
             print("⚠️ Failed to store Pinterest settings: \(error)")
         }
-        
+
         await storeCookiesSettings()
     }
-    
+
     override public func load() async {
         guard let authSettingsURL = authSettingsURL else { return }
-        
+
         do {
             let data = try await Task.detached {
                 try Data(contentsOf: authSettingsURL)
             }.value
-            
+
             let settings = try PropertyListDecoder().decode(AuthSettings.self, from: data)
-            
+
             browserMode = settings.browserMode ?? browserMode
             customUserAgent = settings.customUserAgent ?? customUserAgent
             appId = settings.appId ?? appId
@@ -81,25 +81,24 @@ public final class PinterestWebAuthentication: SessionAuthentication {
             csrfToken = settings.csrfToken ?? csrfToken
             username = settings.username ?? username
             isAuthenticated = settings.isAuthenticated
-            
+
         } catch {
             print("⚠️ Failed to load Pinterest settings: \(error)")
         }
-        
+
         await loadCookiesSettings()
     }
-    
-    
+
     // MARK: - Configuration
-    
-    public override func configure(with options: JSON?) {
+
+    override public func configure(with options: JSON?) {
         super.configure(with: options)
-        
+
         // Keep device settings flag
         if let value = options?["keep_device_settings"].bool {
             keepDeviceSettings = value
         }
-        
+
         // App ID
         if let value = options?["app_id"].string {
             appId = value

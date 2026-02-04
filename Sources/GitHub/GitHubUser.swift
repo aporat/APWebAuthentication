@@ -3,7 +3,7 @@ import Foundation
 
 // MARK: - GitHubUser
 
-public final class GitHubUser: GenericUser {
+public final class GitHubUser: GenericUser, @unchecked Sendable {
 
     // MARK: - Initialization
 

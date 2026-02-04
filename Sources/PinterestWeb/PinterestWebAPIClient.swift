@@ -1,5 +1,5 @@
-import Foundation
 import Alamofire
+import Foundation
 @preconcurrency import SwiftyJSON
 
 // MARK: - PinterestWebAPIClient
@@ -24,29 +24,28 @@ public final class PinterestWebAPIClient: AuthClient {
         self.interceptor = requestInterceptor
         super.init(accountType: AccountStore.pinterest, baseURLString: baseURLString, requestInterceptor: requestInterceptor)
     }
-    
+
     // MARK: - Session Configuration
-    
-    public override func makeSessionConfiguration() -> URLSessionConfiguration {
+
+    override public func makeSessionConfiguration() -> URLSessionConfiguration {
         let configuration = URLSessionConfiguration.ephemeral
         configuration.httpCookieStorage = auth.cookieStorage
         return configuration
     }
-    
-    
+
     // MARK: - Error Handling
-    
-    public override func extractErrorMessage(from json: JSON?) -> String? {
+
+    override public func extractErrorMessage(from json: JSON?) -> String? {
         // Check nested error structure
         if let message = json?["resource_response"]["error"]["message"].string {
             return message
         }
-        
+
         // Check simple error structure
         if let message = json?["error"]["message"].string {
             return message
         }
-        
+
         return super.extractErrorMessage(from: json)
     }
 }

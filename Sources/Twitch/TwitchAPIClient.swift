@@ -1,5 +1,5 @@
-import Foundation
 import Alamofire
+import Foundation
 
 // MARK: - TwitchAPIClient
 
@@ -17,5 +17,5 @@ public final class TwitchAPIClient: OAuth2Client {
     public init(baseURLString: String, requestInterceptor: TwitchInterceptor) {
         super.init(accountType: AccountStore.twitch, baseURLString: baseURLString, requestInterceptor: requestInterceptor)
     }
-    
+
 }

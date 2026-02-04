@@ -8,7 +8,7 @@ import UIKit
 /// These extensions provide convenient access to app information from Info.plist.
 @MainActor
 public extension UIApplication {
-    
+
     /// The app's display name from Info.plist.
     ///
     /// Returns the display name shown to users on the home screen and in settings.
@@ -31,12 +31,12 @@ public extension UIApplication {
         if let displayName = Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String {
             return displayName
         }
-        
+
         // Fall back to bundle name
         if let bundleName = Bundle.main.object(forInfoDictionaryKey: "CFBundleName") as? String {
             return bundleName
         }
-        
+
         // Last resort
         return ""
     }

@@ -1,5 +1,5 @@
-import XCTest
 @testable import APWebAuthentication
+import XCTest
 
 final class APWebAuthenticationLinkTests: XCTestCase {
 
@@ -42,7 +42,7 @@ final class APWebAuthenticationLinkTests: XCTestCase {
         XCTAssertEqual(links[1].uri, "https://b.com")
         XCTAssertEqual(links[1].relationType, "next")
     }
-    
+
     func testFindLinkInHTTPURLResponse() {
         let headerFields = ["Link": "<https://api.example.com?page=2>; rel=\"next\""]
         let url = URL(string: "https://api.example.com?page=1")!

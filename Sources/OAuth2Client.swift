@@ -1,6 +1,5 @@
-import Foundation
-import Foundation
 import Alamofire
+import Foundation
 
 /// HTTP client for OAuth 2.0 authenticated APIs.
 ///
@@ -41,16 +40,15 @@ import Alamofire
 /// - Note: OAuth 2.0 is used by platforms like Reddit, GitHub, Pinterest, and many modern APIs.
 @MainActor
 open class OAuth2Client: AuthClient {
-    
+
     // MARK: - Properties
-    
+
     /// The OAuth 2.0 request interceptor handling bearer token injection.
     ///
     /// This interceptor adds the `Authorization: Bearer` header to each request
     /// and may handle automatic token refresh if configured.
     public var interceptor: OAuth2Interceptor
-    
-    
+
     /// Creates a new OAuth 2.0 client with a custom request interceptor.
     ///
     /// Use this initializer when you need to provide a custom OAuth2Interceptor
@@ -80,5 +78,5 @@ open class OAuth2Client: AuthClient {
         self.interceptor = requestInterceptor
         super.init(accountType: accountType, baseURLString: baseURLString, requestInterceptor: requestInterceptor)
     }
-    
+
 }

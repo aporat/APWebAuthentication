@@ -1,5 +1,5 @@
-import Foundation
 import Alamofire
+import Foundation
 @preconcurrency import SwiftyJSON
 
 // MARK: - PinterestAPIClient
@@ -17,15 +17,15 @@ public final class PinterestAPIClient: OAuth2Client {
     public init(baseURLString: String, requestInterceptor: OAuth2Interceptor) {
         super.init(accountType: AccountStore.pinterest, baseURLString: baseURLString, requestInterceptor: requestInterceptor)
     }
-    
+
     // MARK: - Error Handling
-    
-    public override func extractErrorMessage(from json: JSON?) -> String? {
+
+    override public func extractErrorMessage(from json: JSON?) -> String? {
         // Check modern API v5 error format
         if let message = json?["message"].string {
             return message
         }
-        
+
         // Check legacy error formats for backward compatibility
         if let message = json?["resource_response"]["error"]["message"].string {
             return message
@@ -33,7 +33,7 @@ public final class PinterestAPIClient: OAuth2Client {
         if let message = json?["error"]["message"].string {
             return message
         }
-        
+
         return super.extractErrorMessage(from: json)
     }
 }

@@ -12,7 +12,7 @@ import Foundation
 /// - Timestamps in various formats
 /// - IDs as either strings or integers
 public extension JSON {
-    
+
     /// Safely returns a string representation of an ID from various formats.
     ///
     /// Instagram's API inconsistently returns IDs as either strings or integers.
@@ -93,12 +93,12 @@ public extension JSON {
         if let value = self.int32 {
             return value
         }
-        
+
         // Priority 2: Int value or string parsed as Int
         if let intValue = self.int ?? self.string.flatMap(Int.init) {
             return Int32(intValue)
         }
-        
+
         return nil
     }
 
@@ -142,8 +142,7 @@ public extension JSON {
         guard let finalTimestamp = timestamp, finalTimestamp > 0 else {
             return nil
         }
-        
+
         return Date(timeIntervalSince1970: finalTimestamp)
     }
 }
-

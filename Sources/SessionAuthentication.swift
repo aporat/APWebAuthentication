@@ -15,7 +15,7 @@ private struct CodableHTTPCookie: Codable, Sendable {
     let expiresDate: Date?
     let isSecure: Bool
     let isHTTPOnly: Bool
-    
+
     /// Creates a codable cookie from an `HTTPCookie`.
     ///
     /// - Parameter cookie: The HTTP cookie to wrap
@@ -29,7 +29,7 @@ private struct CodableHTTPCookie: Codable, Sendable {
         self.isSecure = cookie.isSecure
         self.isHTTPOnly = cookie.isHTTPOnly
     }
-    
+
     /// Converts the codable cookie back to an `HTTPCookie`.
     ///
     /// - Returns: An `HTTPCookie` instance, or `nil` if conversion fails
@@ -42,7 +42,7 @@ private struct CodableHTTPCookie: Codable, Sendable {
         properties[.expires] = expiresDate
         properties[.secure] = isSecure
         properties[.init(rawValue: "HttpOnly")] = isHTTPOnly
-        
+
         return HTTPCookie(properties: properties)
     }
 }
@@ -85,9 +85,9 @@ private struct CodableHTTPCookie: Codable, Sendable {
 /// - Note: All operations must be performed on the main actor.
 @MainActor
 open class SessionAuthentication: Authentication {
-    
+
     // MARK: - Configuration
-    
+
     /// Whether to preserve device settings across sessions.
     ///
     /// When `true`, device-specific settings (like fingerprints) are retained
@@ -98,7 +98,7 @@ open class SessionAuthentication: Authentication {
     /// auth.keepDeviceSettings = true // Persist device identity
     /// ```
     public var keepDeviceSettings = true
-    
+
     /// Unique identifier for this session's cookie storage.
     ///
     /// Automatically generated with a random suffix to isolate cookie storage
@@ -106,9 +106,9 @@ open class SessionAuthentication: Authentication {
     ///
     /// **Format:** `"session-{20 random characters}"`
     public var sessionIdentifier = "session-" + String.random(ofLength: 20)
-    
+
     // MARK: - Session Credentials
-    
+
     /// The session ID identifying the authenticated user.
     ///
     /// This is typically stored in a cookie (e.g., `sessionid`) and sent with
@@ -119,7 +119,7 @@ open class SessionAuthentication: Authentication {
     /// auth.sessionId = "abc123def456"
     /// ```
     public var sessionId: String?
-    
+
     /// The CSRF (Cross-Site Request Forgery) token for security.
     ///
     /// Many web APIs require a CSRF token to prevent cross-site attacks.
@@ -131,9 +131,9 @@ open class SessionAuthentication: Authentication {
     /// // Send in header: X-CSRFToken: csrf_token_value
     /// ```
     public var csrfToken: String?
-    
+
     // MARK: - Authorization Status
-    
+
     /// Whether the authentication has a valid session.
     ///
     /// Returns `true` if a session ID is present and non-empty.
@@ -157,9 +157,9 @@ open class SessionAuthentication: Authentication {
         }
         return false
     }
-    
+
     // MARK: - Cookie Storage
-    
+
     /// The URL where cookies are stored on disk.
     ///
     /// Automatically generated from the `accountIdentifier` and documents directory.
@@ -173,11 +173,11 @@ open class SessionAuthentication: Authentication {
               let documentsURL = FileManager.documentsDirectoryURL else {
             return nil
         }
-        
+
         let fileName = "account_" + currentAccountIdentifier + ".cookies"
         return documentsURL.appendingPathComponent(fileName)
     }
-    
+
     /// The HTTP cookie storage for this session.
     ///
     /// Uses a shared cookie storage container identified by `sessionIdentifier`.
@@ -192,14 +192,14 @@ open class SessionAuthentication: Authentication {
     /// let cookies = auth.cookieStorage.cookies
     /// print("Stored cookies: \(cookies?.count ?? 0)")
     /// ```
-    lazy open var cookieStorage: HTTPCookieStorage = {
+    open lazy var cookieStorage: HTTPCookieStorage = {
         let storage = HTTPCookieStorage.sharedCookieStorage(forGroupContainerIdentifier: sessionIdentifier)
         storage.cookieAcceptPolicy = .always
         return storage
     }()
-    
+
     // MARK: - Persistence
-    
+
     /// Deletes session credentials from disk and memory.
     ///
     /// This method:
@@ -221,9 +221,9 @@ open class SessionAuthentication: Authentication {
         csrfToken = nil
         await clearCookiesSettings()
     }
-    
+
     // MARK: - Cookie Management
-    
+
     /// Stores all current cookies to disk.
     ///
     /// Saves cookies from `cookieStorage` to a property list file.
@@ -240,13 +240,13 @@ open class SessionAuthentication: Authentication {
     /// - Note: Errors are logged but not thrown
     open func storeCookiesSettings() async {
         guard let cookiesURL = cookiesURL, let cookies = cookieStorage.cookies else { return }
-        
+
         let codableCookies = cookies.compactMap { CodableHTTPCookie(from: $0) }
         let encoder = PropertyListEncoder()
-        
+
         do {
             let data = try encoder.encode(codableCookies)
-            
+
             try await Task.detached {
                 try data.write(to: cookiesURL)
             }.value
@@ -254,7 +254,7 @@ open class SessionAuthentication: Authentication {
             print("⚠️ Failed to store cookies: \(error)")
         }
     }
-    
+
     /// Loads cookies from disk and adds them to cookie storage.
     ///
     /// Reads cookies from the property list file and sets them in `cookieStorage`.
@@ -271,29 +271,29 @@ open class SessionAuthentication: Authentication {
     @discardableResult
     open func loadCookiesSettings() async -> [HTTPCookie]? {
         guard let cookiesURL = cookiesURL else { return nil }
-        
+
         do {
             let data = try await Task.detached {
                 try Data(contentsOf: cookiesURL)
             }.value
-            
+
             let decoder = PropertyListDecoder()
             let codableCookies = try decoder.decode([CodableHTTPCookie].self, from: data)
             let cookies = codableCookies.compactMap { $0.httpCookie }
-            
+
             // Apply domain filter and set cookies
             cookies.forEach { cookie in
                 cookieStorage.setCookie(cookie)
             }
-            
+
             return cookies
         } catch {
             print("⚠️ Failed to load cookies: \(error)")
         }
-        
+
         return nil
     }
-    
+
     /// Deletes the cookies file from disk.
     ///
     /// Removes the property list file containing saved cookies.
@@ -306,12 +306,12 @@ open class SessionAuthentication: Authentication {
     /// ```
     public func clearCookiesSettings() async {
         guard let cookiesURL = cookiesURL else { return }
-        
+
         try? await Task.detached {
             try FileManager.default.removeItem(at: cookiesURL)
         }.value
     }
-    
+
     /// Clears all cookies from cookie storage.
     ///
     /// Removes all cookies from memory but doesn't affect the cookies file on disk.
@@ -325,7 +325,7 @@ open class SessionAuthentication: Authentication {
     public func clearCookies() {
         cookieStorage.cookies?.forEach(cookieStorage.deleteCookie)
     }
-    
+
     /// Sets cookies in cookie storage with domain filtering.
     ///
     /// Adds the provided cookies to `cookieStorage`
@@ -343,7 +343,7 @@ open class SessionAuthentication: Authentication {
             self.cookieStorage.setCookie($0)
         }
     }
-    
+
     /// Retrieves all cookies from cookie storage.
     ///
     /// Returns all cookies currently stored in `cookieStorage`.

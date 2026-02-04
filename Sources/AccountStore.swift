@@ -1,7 +1,7 @@
 import Foundation
-import UIKit
 import SwifterSwift
 @preconcurrency import SwiftyUserDefaults
+import UIKit
 
 // MARK: - User Defaults Keys
 
@@ -14,52 +14,52 @@ import SwifterSwift
 ///
 /// **Default Value:** All services default to `false` (disabled)
 public extension DefaultsKeys {
-    
+
     /// Instagram service enabled state
     var Instagram: DefaultsKey<Bool> {
         .init("kServiceInstagram", defaultValue: false)
     }
-    
+
     /// Twitter/X service enabled state
     var Twitter: DefaultsKey<Bool> {
         .init("kServiceTwitter", defaultValue: false)
     }
-    
+
     /// Pinterest service enabled state
     var Pinterest: DefaultsKey<Bool> {
         .init("kServicePinterest", defaultValue: false)
     }
-    
+
     /// Tumblr service enabled state
     var Tumblr: DefaultsKey<Bool> {
         .init("kServiceTumblr", defaultValue: false)
     }
-    
+
     /// Foursquare service enabled state
     var Foursquare: DefaultsKey<Bool> {
         .init("kServiceFoursquare", defaultValue: false)
     }
-    
+
     /// Reddit service enabled state
     var Reddit: DefaultsKey<Bool> {
         .init("kServiceReddit", defaultValue: false)
     }
-    
+
     /// GitHub service enabled state
     var Github: DefaultsKey<Bool> {
         .init("kServiceGithub", defaultValue: false)
     }
-    
+
     /// Twitch service enabled state
     var Twitch: DefaultsKey<Bool> {
         .init("kServiceTwitch", defaultValue: false)
     }
-    
+
     /// 500px service enabled state
     var FiveHundredpx: DefaultsKey<Bool> {
         .init("kServiceFiveHundredpx", defaultValue: false)
     }
-    
+
     /// TikTok service enabled state
     var TikTok: DefaultsKey<Bool> {
         .init("kServiceTikTok", defaultValue: false)
@@ -69,7 +69,7 @@ public extension DefaultsKeys {
 // MARK: - AccountType.Code + Defaults
 
 private extension AccountType.Code {
-    
+
     /// Maps an account type code to its corresponding user defaults key.
     ///
     /// This computed property provides a centralized mapping between account codes
@@ -138,81 +138,81 @@ private extension AccountType.Code {
 /// }
 /// ```
 public final class AccountStore {
-    
+
     // MARK: - Account Type Definitions
-    
+
     /// Instagram account type configuration
     public static let instagram = AccountType(
         code: .instagram,
         webAddress: "instagram.com",
         description: "Instagram"
     )
-    
+
     /// Twitter/X account type configuration
     public static let twitter = AccountType(
         code: .twitter,
         webAddress: "x.com",
         description: "X"
     )
-    
+
     /// Pinterest account type configuration
     public static let pinterest = AccountType(
         code: .pinterest,
         webAddress: "pinterest.com",
         description: "Pinterest"
     )
-    
+
     /// Tumblr account type configuration
     public static let tumblr = AccountType(
         code: .tumblr,
         webAddress: "tumblr.com",
         description: "Tumblr"
     )
-    
+
     /// Twitch account type configuration
     public static let twitch = AccountType(
         code: .twitch,
         webAddress: "twitch.tv",
         description: "Twitch"
     )
-    
+
     /// Reddit account type configuration
     public static let reddit = AccountType(
         code: .reddit,
         webAddress: "reddit.com",
         description: "Reddit"
     )
-    
+
     /// Foursquare account type configuration
     public static let foursquare = AccountType(
         code: .foursquare,
         webAddress: "foursquare.com",
         description: "Foursquare"
     )
-    
+
     /// GitHub account type configuration
     public static let github = AccountType(
         code: .github,
         webAddress: "github.com",
         description: "GitHub"
     )
-    
+
     /// 500px account type configuration
     public static let fiveHundredpx = AccountType(
         code: .fiveHundredpx,
         webAddress: "500px.com",
         description: "500px"
     )
-    
+
     /// TikTok account type configuration
     public static let tiktok = AccountType(
         code: .tiktok,
         webAddress: "tiktok.com",
         description: "TikTok"
     )
-    
+
     // MARK: - Account Type Collections
-    
+
     /// Complete list of all supported account types.
     ///
     /// This array contains all social media platforms that the app supports,
@@ -232,7 +232,7 @@ public final class AccountStore {
         fiveHundredpx,
         tiktok
     ]
-    
+
     /// List of account types that are currently enabled by the user.
     ///
     /// This computed property filters the complete list of account types based on
@@ -252,9 +252,9 @@ public final class AccountStore {
             return Defaults[key: key]
         }
     }
-    
+
     // MARK: - Lookup Methods
-    
+
     /// Finds an account type by its code.
     ///
     /// This method searches the complete list of supported platforms for one
@@ -273,7 +273,7 @@ public final class AccountStore {
     public static func accountType(for code: AccountType.Code) -> AccountType? {
         all.first { $0.code == code }
     }
-    
+
     /// Checks if a specific account type is enabled by the user.
     ///
     /// This is a convenience method that checks the UserDefaults value for
@@ -288,7 +288,7 @@ public final class AccountStore {
         }
         return Defaults[key: key]
     }
-    
+
     /// Enables or disables a specific account type.
     ///
     /// This method updates the UserDefaults value for the given account code,
@@ -304,9 +304,9 @@ public final class AccountStore {
         }
         Defaults[key: key] = enabled
     }
-    
+
     // MARK: - Initialization
-    
+
     /// Private initializer to prevent instantiation.
     ///
     /// `AccountStore` is designed as a namespace for static properties and methods only.

@@ -1,22 +1,22 @@
-import Foundation
 import Alamofire
 import CryptoSwift
+import Foundation
 
 // MARK: - OAuth 1.0a Error
 
 /// Errors that can occur during OAuth 1.0a request signing.
 public enum OAuth1Error: Error, Sendable {
-    
+
     /// The request is missing a URL.
     ///
     /// OAuth 1.0a requires a URL to generate signatures.
     case missingURLInRequest
-    
+
     /// The request body could not be encoded as UTF-8.
     ///
     /// OAuth 1.0a needs to parse form-encoded body parameters for signature generation.
     case requestBodyNotUTF8Encodable
-    
+
     /// Failed to generate the HMAC-SHA1 signature.
     ///
     /// This occurs when cryptographic operations fail.
@@ -78,20 +78,20 @@ public enum OAuth1Error: Error, Sendable {
 /// - Note: The interceptor is marked `@unchecked Sendable` because it accesses
 ///         `@MainActor`-isolated authentication properties.
 public final class OAuth1Interceptor: RequestInterceptor, Sendable {
-    
+
     // MARK: - Properties
-    
+
     /// The OAuth consumer key identifying the application.
     ///
     /// This is obtained when registering your app with the OAuth provider.
     private let consumerKey: String
-    
+
     /// The OAuth consumer secret used for signing requests.
     ///
     /// This is the app's secret key, obtained during registration.
     /// It must be kept secure and never exposed in client code.
     private let consumerSecret: String
-    
+
     /// The authentication manager containing user tokens and configuration.
     ///
     /// Provides access to the user's access token and secret.
@@ -99,7 +99,7 @@ public final class OAuth1Interceptor: RequestInterceptor, Sendable {
     public let auth: Auth1Authentication
 
     // MARK: - Initialization
-    
+
     /// Creates a new OAuth 1.0a request interceptor.
     ///
     /// - Parameters:
@@ -114,7 +114,7 @@ public final class OAuth1Interceptor: RequestInterceptor, Sendable {
     }
 
     // MARK: - RequestAdapter
-    
+
     /// Adapts requests by adding OAuth 1.0a authentication.
     ///
     /// This method:
@@ -151,7 +151,7 @@ public final class OAuth1Interceptor: RequestInterceptor, Sendable {
             let authToken = await auth.token
             let authSecret = await auth.secret
             let userAgent = await auth.userAgent
-            
+
             var adaptedRequest = urlRequest
             var formParameters: [String: String] = [:]
 
@@ -161,7 +161,7 @@ public final class OAuth1Interceptor: RequestInterceptor, Sendable {
                     completion(.failure(OAuth1Error.requestBodyNotUTF8Encodable))
                     return
                 }
-                
+
                 // Parse form-encoded parameters
                 if let components = URLComponents(string: "?\(bodyString)") {
                     formParameters = components.queryItems?.reduce(into: [String: String]()) { result, item in
@@ -169,7 +169,7 @@ public final class OAuth1Interceptor: RequestInterceptor, Sendable {
                     } ?? [:]
                 }
             }
-            
+
             // Generate OAuth signature and authorization header
             do {
                 let authHeader = try authorizationHeader(
@@ -189,7 +189,7 @@ public final class OAuth1Interceptor: RequestInterceptor, Sendable {
             if let userAgent = userAgent, !userAgent.isEmpty {
                 adaptedRequest.headers.add(.userAgent(userAgent))
             }
-            
+
             // Add Accept header
             adaptedRequest.headers.add(.accept("application/json"))
 
@@ -201,7 +201,7 @@ public final class OAuth1Interceptor: RequestInterceptor, Sendable {
 // MARK: - OAuth 1.0a Signature Generation
 
 private extension OAuth1Interceptor {
-    
+
     /// Generates the OAuth 1.0a Authorization header value.
     ///
     /// This method implements the OAuth 1.0a signature generation algorithm:
@@ -234,22 +234,22 @@ private extension OAuth1Interceptor {
         authToken: String?,
         authSecret: String?
     ) throws -> String {
-        
+
         // Build OAuth parameters (consumer key, nonce, timestamp, etc.)
         var oauthParameters = buildOAuthParameters(token: authToken)
 
         // Combine all parameters for signing
         let allParameters = oauthParameters
-            .merging(formParameters, uniquingKeysWith: { _, new in new })
-            .merging(url.parameters, uniquingKeysWith: { _, new in new })
-        
+            .merging(formParameters) { _, new in new }
+            .merging(url.parameters) { _, new in new }
+
         // Create sorted parameter string
         let parameterString = allParameters
             .map { ($0.key.urlEscaped, $0.value.urlEscaped) }
             .sorted { $0.0 < $1.0 }
             .map { "\($0.0)=\($0.1)" }
             .joined(separator: "&")
-        
+
         // Create signature base string
         let signatureBase = [
             method.uppercased().urlEscaped,
@@ -269,7 +269,7 @@ private extension OAuth1Interceptor {
         else {
             throw OAuth1Error.signatureGenerationFailed
         }
-        
+
         oauthParameters["oauth_signature"] = signature
 
         // Format OAuth header
@@ -303,14 +303,14 @@ private extension OAuth1Interceptor {
             "oauth_signature_method": "HMAC-SHA1",
             "oauth_version": "1.0",
             "oauth_timestamp": String(Int(Date().timeIntervalSince1970)),
-            "oauth_nonce": UUID().uuidString.replacingOccurrences(of: "-", with: ""),
+            "oauth_nonce": UUID().uuidString.replacingOccurrences(of: "-", with: "")
         ]
-        
+
         // Add token if available
         if let token = token, !token.isEmpty {
             parameters["oauth_token"] = token
         }
-        
+
         return parameters
     }
 }

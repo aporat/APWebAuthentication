@@ -1,5 +1,5 @@
-import UIKit
 import SnapKit
+import UIKit
 
 // MARK: - AuthNavBarView
 
@@ -22,26 +22,26 @@ import SnapKit
 /// ```
 @MainActor
 public final class AuthNavBarView: UIView {
-    
+
     // MARK: - Constants
-    
+
     private enum Constants {
         static let lockIconSize: CGFloat = 20
         static let lockIconSpacing: CGFloat = 5
         static let titleCenterOffset: CGFloat = 10
         static let titleFontSize: CGFloat = 17
     }
-    
+
     // MARK: - Public Properties
-    
+
     /// The text to display in the title label
     public var title: String? {
         get { titleLabel.text }
         set { titleLabel.text = newValue }
     }
-    
+
     // MARK: - Private UI Components
-    
+
     private lazy var lockImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.image = UIImage(systemName: "lock.fill")
@@ -69,9 +69,9 @@ public final class AuthNavBarView: UIView {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     // MARK: - Public Methods
-    
+
     /// Shows the security lock icon next to the title.
     ///
     /// The lock icon appears to the left of the title text, and the title is
@@ -101,19 +101,19 @@ public final class AuthNavBarView: UIView {
         lockImageView.isHidden = true
         updateConstraintsForNonSecureState()
     }
-    
+
     // MARK: - Private Methods - Setup
 
     private func setupView() {
         addSubview(lockImageView)
         addSubview(titleLabel)
-        
+
         // Initialize in hidden state (no lock icon)
         hideSecure()
     }
-    
+
     // MARK: - Private Methods - Layout
-    
+
     private func updateConstraintsForSecureState() {
         lockImageView.snp.remakeConstraints { make in
             make.size.equalTo(Constants.lockIconSize)
@@ -126,7 +126,7 @@ public final class AuthNavBarView: UIView {
             make.centerY.equalToSuperview()
         }
     }
-    
+
     private func updateConstraintsForNonSecureState() {
         lockImageView.snp.removeConstraints()
 

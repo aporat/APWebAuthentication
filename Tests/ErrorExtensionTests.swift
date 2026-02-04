@@ -1,6 +1,6 @@
-import XCTest
 import Alamofire
 @testable import APWebAuthentication
+import XCTest
 
 final class ErrorExtensionTests: XCTestCase {
 

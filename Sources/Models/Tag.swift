@@ -12,4 +12,3 @@ public protocol Tag: Sendable {
     /// A failable initializer to create a tag from a JSON object.
     init?(info: JSON)
 }
-

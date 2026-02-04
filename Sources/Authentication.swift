@@ -1,6 +1,5 @@
-import Foundation
-import Foundation
 import APUserAgentGenerator
+import Foundation
 @preconcurrency import SwiftyJSON
 
 /// Base class for authentication management across different OAuth versions.
@@ -30,9 +29,9 @@ import APUserAgentGenerator
 /// - Note: All operations must be performed on the main actor.
 @MainActor
 open class Authentication {
-    
+
     // MARK: - Account Identification
-    
+
     /// Unique identifier for the authenticated account.
     ///
     /// This is typically the username, email, or user ID that uniquely identifies
@@ -47,7 +46,7 @@ open class Authentication {
     /// // Settings will be saved to: john_doe.settings
     /// ```
     public var accountIdentifier: String?
-    
+
     /// The URL where authentication settings are stored on disk.
     ///
     /// Automatically generated from the `accountIdentifier` and documents directory.
@@ -68,13 +67,13 @@ open class Authentication {
               let documentsURL = FileManager.documentsDirectoryURL else {
             return nil
         }
-        
+
         let fileName = currentAccountIdentifier + ".settings"
         return documentsURL.appendingPathComponent(fileName)
     }
-    
+
     // MARK: - User Agent Configuration
-    
+
     /// The browser mode for user agent generation.
     ///
     /// Determines what browser/device combination to mimic in HTTP requests.
@@ -82,7 +81,7 @@ open class Authentication {
     ///
     /// - Note: Set to `nil` or `.default` to use the default iOS Safari user agent.
     open var browserMode: UserAgentMode?
-    
+
     /// Custom user agent string override.
     ///
     /// When set, this overrides automatic user agent generation and uses
@@ -93,7 +92,7 @@ open class Authentication {
     /// auth.customUserAgent = "MyApp/1.0 (iPhone; iOS 17.0)"
     /// ```
     open var customUserAgent: String?
-    
+
     /// The generated user agent string for HTTP requests.
     ///
     /// Returns the user agent based on priority:
@@ -115,13 +114,13 @@ open class Authentication {
         if let currentUserAgent = customUserAgent, !currentUserAgent.isEmpty {
             return currentUserAgent
         }
-        
+
         // Priority 2: Generate based on browser mode
         if browserMode == nil || browserMode == .default || browserMode == .ios || browserMode == .iphone {
             return APWebBrowserAgentBuilder.builder().generate()
         } else if browserMode == .iosChrome {
             return APWebBrowserAgentBuilder.builder()
-                .withDevice(iOSDevice())
+                .withDevice(IOSDevice())
                 .withBrowser(ChromeBrowser())
                 .generate()
         } else if browserMode == .webView {
@@ -142,12 +141,12 @@ open class Authentication {
                 .withBrowser(FirefoxBrowser())
                 .generate()
         }
-        
+
         return nil
     }
-    
+
     // MARK: - Locale Configuration
-    
+
     /// The locale identifier in format `language_REGION` (e.g., "en_US").
     ///
     /// Uses the current device locale, with a fallback to "en_US" for generic "en".
@@ -162,7 +161,7 @@ open class Authentication {
         }
         return Locale.current.identifier
     }
-    
+
     /// The region code (country) from the current locale (e.g., "US", "GB", "FR").
     ///
     /// Falls back to "US" if the region cannot be determined.
@@ -177,7 +176,7 @@ open class Authentication {
         }
         return "US"
     }
-    
+
     /// The language code from the current locale (e.g., "en", "es", "fr").
     ///
     /// Falls back to "en" if the language cannot be determined.
@@ -192,7 +191,7 @@ open class Authentication {
         }
         return "en"
     }
-    
+
     /// The locale identifier in web format `language-REGION` (e.g., "en-US").
     ///
     /// Converts underscores to hyphens for HTTP Accept-Language headers.
@@ -204,16 +203,16 @@ open class Authentication {
     open var localeWebIdentifier: String {
         localeIdentifier.replacingOccurrences(of: "_", with: "-")
     }
-    
+
     // MARK: - Initialization
-    
+
     /// Creates a new authentication instance with default configuration.
     ///
     /// Subclasses must implement this required initializer.
     public required init() {}
-    
+
     // MARK: - Persistence
-    
+
     /// Loads credentials and settings from disk.
     ///
     /// Subclasses should override this method to load their specific credentials and configuration.
@@ -228,7 +227,7 @@ open class Authentication {
     /// }
     /// ```
     open func load() async {}
-    
+
     /// Saves credentials and settings to disk.
     ///
     /// Subclasses should override this method to save their specific credentials and configuration.
@@ -243,7 +242,7 @@ open class Authentication {
     /// }
     /// ```
     open func save() async {}
-    
+
     /// Deletes credentials and settings from disk.
     ///
     /// Deletes the settings file from the file system.
@@ -262,15 +261,14 @@ open class Authentication {
         guard let url = authSettingsURL else {
             return
         }
-        
+
         try? await Task.detached {
             try FileManager.default.removeItem(at: url)
         }.value
     }
-    
-    
+
     // MARK: - Configuration
-    
+
     /// Loads configuration settings from a JSON options object.
     ///
     /// This method updates the authentication configuration based on provided options.
@@ -294,7 +292,7 @@ open class Authentication {
         if let value = UserAgentMode(options?["browser_mode"].string) {
             browserMode = value
         }
-        
+
         // Update custom user agent
         if let value = options?["custom_user_agent"].string {
             customUserAgent = value

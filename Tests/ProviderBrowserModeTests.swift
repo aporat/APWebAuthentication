@@ -1,5 +1,5 @@
-import XCTest
 @testable import APWebAuthentication
+import XCTest
 
 final class UserAgentModeTests: XCTestCase {
 

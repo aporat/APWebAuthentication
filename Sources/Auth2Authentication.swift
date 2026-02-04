@@ -42,9 +42,9 @@ import Foundation
 /// - Note: All operations must be performed on the main actor.
 @MainActor
 public final class Auth2Authentication: Authentication {
-    
+
     // MARK: - Settings Storage
-    
+
     /// Internal structure for encoding/decoding OAuth 2.0 settings.
     ///
     /// This structure is used for property list serialization of credentials.
@@ -53,9 +53,9 @@ public final class Auth2Authentication: Authentication {
         let refreshToken: String?
         let clientId: String?
     }
-    
+
     // MARK: - OAuth 2.0 Credentials
-    
+
     /// The OAuth client ID.
     ///
     /// This identifies your application to the OAuth provider.
@@ -66,7 +66,7 @@ public final class Auth2Authentication: Authentication {
     /// auth.clientId = "abc123def456"
     /// ```
     public var clientId: String?
-    
+
     /// The OAuth access token.
     ///
     /// This token is sent with every authenticated request as a Bearer token.
@@ -79,7 +79,7 @@ public final class Auth2Authentication: Authentication {
     /// // Authorization: Bearer ya29.a0AfH6SMBx...
     /// ```
     public var accessToken: String?
-    
+
     /// The OAuth refresh token.
     ///
     /// This token is used to obtain new access tokens when they expire,
@@ -93,21 +93,21 @@ public final class Auth2Authentication: Authentication {
     ///
     /// - Note: Not all OAuth flows provide refresh tokens (implicit flow doesn't)
     public var refreshToken: String?
-    
+
     // MARK: - Initialization
-    
+
     /// Creates a new OAuth 2.0 authentication instance.
     public required init() {}
-    
+
     // MARK: - Configuration
-    
+
     /// Sets the browser mode for user agent generation.
     ///
     /// - Parameter mode: The desired browser/device mode
     func setBrowserMode(_ mode: UserAgentMode) {
         self.browserMode = mode
     }
-    
+
     /// Sets a custom user agent string.
     ///
     /// When set, this overrides automatic user agent generation.
@@ -116,9 +116,9 @@ public final class Auth2Authentication: Authentication {
     func setCustomUserAgent(_ agent: String) {
         self.customUserAgent = agent
     }
-    
+
     // MARK: - Authorization Status
-    
+
     /// Whether the authentication has a valid access token.
     ///
     /// Returns `true` if an access token is present and non-empty.
@@ -144,9 +144,9 @@ public final class Auth2Authentication: Authentication {
         }
         return false
     }
-    
+
     // MARK: - Persistence
-    
+
     /// Saves OAuth 2.0 credentials to disk.
     ///
     /// Saves the access token, refresh token, and client ID to a property list file
@@ -169,12 +169,12 @@ public final class Auth2Authentication: Authentication {
             refreshToken: self.refreshToken,
             clientId: self.clientId
         )
-        
+
         guard let authSettingsURL = authSettingsURL else { return }
-        
+
         do {
             let data = try PropertyListEncoder().encode(settings)
-            
+
             try await Task.detached {
                 try data.write(to: authSettingsURL)
             }.value
@@ -182,7 +182,7 @@ public final class Auth2Authentication: Authentication {
             print("⚠️ Failed to store OAuth 2.0 settings: \(error)")
         }
     }
-    
+
     /// Loads OAuth 2.0 credentials from disk.
     ///
     /// Reads the access token, refresh token, and client ID from the property list
@@ -200,12 +200,12 @@ public final class Auth2Authentication: Authentication {
     /// - Note: Errors are logged but not thrown; properties remain nil on failure
     override public func load() async {
         guard let authSettingsURL = authSettingsURL else { return }
-        
+
         do {
             let data = try await Task.detached {
                 try Data(contentsOf: authSettingsURL)
             }.value
-            
+
             let settings = try PropertyListDecoder().decode(AuthSettings.self, from: data)
             self.accessToken = settings.accessToken
             self.refreshToken = settings.refreshToken
@@ -214,7 +214,7 @@ public final class Auth2Authentication: Authentication {
             print("⚠️ Failed to load OAuth 2.0 settings: \(error)")
         }
     }
-    
+
     /// Deletes OAuth 2.0 credentials from disk and memory.
     ///
     /// This method:
@@ -235,13 +235,12 @@ public final class Auth2Authentication: Authentication {
         refreshToken = nil
         clientId = nil
     }
-    
-    
+
     // MARK: - Runtime Configuration
-    
-    public override func configure(with options: JSON?) {
+
+    override public func configure(with options: JSON?) {
         super.configure(with: options)
-        
+
         if let value = options?["client_id"].string {
             clientId = value
         }

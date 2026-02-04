@@ -4,19 +4,19 @@ import Foundation
 // MARK: - PinterestUser
 
 public final class PinterestUser: GenericUser, @unchecked Sendable {
-    
+
     // MARK: - Initialization
-    
+
     public required init?(info: JSON) {
         // Extract user ID (try 'id' first, fallback to 'username')
         guard let id = info["id"].idString ?? info["username"].idString else {
             return nil
         }
-        
+
         // Extract basic profile information
         let username = info["username"].string
         let avatarPicture = info["profile_image"].url
-        
+
         // Construct full name from available fields
         let constructedFullname: String?
         if let fullname = info["display_name"].string {

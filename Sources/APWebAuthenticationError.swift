@@ -35,9 +35,9 @@ import Foundation
 ///
 /// - Note: All cases are `Sendable` and can be safely passed across concurrency boundaries.
 public enum APWebAuthenticationError: Error, Sendable, Equatable {
-    
+
     // MARK: - General Errors
-    
+
     /// A general failure occurred.
     ///
     /// This is a catch-all error for failures that don't fit other categories.
@@ -46,7 +46,7 @@ public enum APWebAuthenticationError: Error, Sendable, Equatable {
     ///   - reason: Human-readable description of the failure
     ///   - responseJSON: Optional JSON response from the server
     case failed(reason: String?, responseJSON: JSON? = nil)
-    
+
     /// A network connection error occurred.
     ///
     /// This typically indicates no internet connectivity or unreachable server.
@@ -55,7 +55,7 @@ public enum APWebAuthenticationError: Error, Sendable, Equatable {
     ///   - reason: Human-readable description of the connection issue
     ///   - responseJSON: Optional JSON response from the server
     case connectionError(reason: String?, responseJSON: JSON? = nil)
-    
+
     /// A server-side error occurred (5xx status codes).
     ///
     /// This indicates the server encountered an error processing the request.
@@ -64,34 +64,34 @@ public enum APWebAuthenticationError: Error, Sendable, Equatable {
     ///   - reason: Human-readable description of the server error
     ///   - responseJSON: Optional JSON response from the server
     case serverError(reason: String?, responseJSON: JSON? = nil)
-    
+
     /// The operation was canceled by the user or system.
     ///
     /// This occurs when a request is explicitly canceled or interrupted.
     case canceled
-    
+
     /// The requested resource was not found (404 status code).
     ///
     /// This indicates the endpoint or resource doesn't exist.
     case notFound
-    
+
     /// The request was invalid or malformed (400 status code).
     ///
     /// This indicates the request couldn't be processed due to invalid data.
     case badRequest
-    
+
     /// An unknown or unexpected error occurred.
     ///
     /// This is used when the error doesn't match any known category.
     case unknown
-    
+
     /// The request timed out.
     ///
     /// This occurs when the server takes too long to respond.
     case timeout
-    
+
     // MARK: - Authentication Errors
-    
+
     /// Login attempt failed.
     ///
     /// This occurs when credentials are invalid or login is not allowed.
@@ -100,7 +100,7 @@ public enum APWebAuthenticationError: Error, Sendable, Equatable {
     ///   - reason: Human-readable description of why login failed
     ///   - responseJSON: Optional JSON response with error details
     case loginFailed(reason: String?, responseJSON: JSON? = nil)
-    
+
     /// User feedback or action is required to proceed.
     ///
     /// This occurs when Instagram requires user confirmation or feedback.
@@ -109,7 +109,7 @@ public enum APWebAuthenticationError: Error, Sendable, Equatable {
     ///   - reason: Human-readable description of the required action
     ///   - responseJSON: Optional JSON response with details
     case feedbackRequired(reason: String?, responseJSON: JSON? = nil)
-    
+
     /// An external action is required (e.g., verify email, phone).
     ///
     /// This occurs when the user must complete an action outside the app.
@@ -118,7 +118,7 @@ public enum APWebAuthenticationError: Error, Sendable, Equatable {
     ///   - reason: Human-readable description of the required action
     ///   - responseJSON: Optional JSON response with action details
     case externalActionRequired(reason: String?, responseJSON: JSON? = nil)
-    
+
     /// The user's session has expired (web/cookie-based auth).
     ///
     /// This occurs when authentication tokens or cookies are no longer valid.
@@ -127,9 +127,9 @@ public enum APWebAuthenticationError: Error, Sendable, Equatable {
     ///   - reason: Human-readable description of the expiration
     ///   - responseJSON: Optional JSON response from the server
     case sessionExpired(reason: String?, responseJSON: JSON? = nil)
-   
+
     // MARK: - Rate Limiting & Restrictions
-    
+
     /// The request was rate limited.
     ///
     /// This occurs when too many requests are made in a short time period.
@@ -138,25 +138,25 @@ public enum APWebAuthenticationError: Error, Sendable, Equatable {
     ///   - reason: Human-readable description of the rate limit
     ///   - responseJSON: Optional JSON response with retry information
     case rateLimit(reason: String?, responseJSON: JSON? = nil)
-    
+
     // MARK: - Security Checkpoints
-    
+
     /// A security checkpoint is required (web/cookie-based auth).
     ///
     /// This occurs when Instagram requires additional verification (e.g., CAPTCHA, phone verification).
     ///
     /// - Parameter responseJSON: JSON response containing checkpoint details and URL
     case checkPointRequired(responseJSON: JSON?)
-    
+
     /// Two-factor authentication is required.
     ///
     /// This occurs when 2FA is enabled and a verification code is needed.
     ///
     /// - Parameter responseJSON: JSON response with 2FA instructions
     case twoFactorRequired(responseJSON: JSON?)
- 
+
     // MARK: - Response JSON Access
-    
+
     /// The raw JSON response from the server, if available.
     ///
     /// This property extracts the JSON response from errors that include it.
@@ -185,7 +185,7 @@ public enum APWebAuthenticationError: Error, Sendable, Equatable {
              let .twoFactorRequired(json),
              let .checkPointRequired(json):
             return json
-            
+
         case .canceled, .notFound, .badRequest, .unknown, .timeout:
             return nil
         }
@@ -195,7 +195,7 @@ public enum APWebAuthenticationError: Error, Sendable, Equatable {
 // MARK: - LocalizedError Conformance
 
 extension APWebAuthenticationError: LocalizedError {
-    
+
     /// User-facing error title for display in alerts and UI.
     ///
     /// Provides short, descriptive titles for each error category.
@@ -226,7 +226,7 @@ extension APWebAuthenticationError: LocalizedError {
             return "Error"
         }
     }
-    
+
     /// Detailed user-facing error description for display in alerts and UI.
     ///
     /// Provides helpful, actionable error messages that guide users on what to do next.
@@ -235,40 +235,40 @@ extension APWebAuthenticationError: LocalizedError {
     /// - Returns: A localized error description string
     public var errorDescription: String? {
         switch self {
-            
+
         // MARK: - Session Errors
-            
+
         case let .sessionExpired(reason, _):
             return reason ?? "Your session has expired. Please log in again."
-            
+
         // MARK: - Login & Access Errors
-            
+
         case let .loginFailed(reason, _):
             return reason ?? "Unable to login. Please check your credentials and try again."
-            
+
         case let .checkPointRequired(json):
             return json?["message"].string ?? "A security checkpoint is required to continue."
-            
+
         case let .feedbackRequired(reason, _),
              let .externalActionRequired(reason, _):
             return reason ?? "This action cannot be completed at this time. Instagram may restrict certain activities to protect the community."
-            
+
         case let .rateLimit(reason, _):
             return reason ?? "You are doing this too fast. Please try again later."
-            
+
         // MARK: - Network & Server Errors
-            
+
         case let .connectionError(reason, _):
             return reason ?? "The Internet connection appears to be offline."
-            
+
         case let .serverError(reason, _):
             return reason ?? "The server encountered an error and could not complete your request. Please try again later."
-            
+
         case let .failed(reason, _):
             return reason ?? "An unknown error occurred."
-            
+
         // MARK: - Other Errors
-            
+
         case .twoFactorRequired:
             return "Two-factor authentication is required."
         case .notFound:
@@ -283,7 +283,7 @@ extension APWebAuthenticationError: LocalizedError {
             return "An unexpected error occurred."
         }
     }
-    
+
     /// Machine-readable error code for logging and analytics.
     ///
     /// Provides stable identifiers for each error type that can be used in
@@ -359,7 +359,7 @@ extension APWebAuthenticationError {
             return false
         }
     }
-    
+
     /// Whether this error is temporary and the operation can be retried.
     ///
     /// Returns `true` for errors that may succeed on retry:
@@ -383,7 +383,7 @@ extension APWebAuthenticationError {
             return false
         }
     }
-    
+
     /// Whether this error requires user action to resolve.
     ///
     /// Returns `true` for errors that need the user to do something:
@@ -415,7 +415,7 @@ extension APWebAuthenticationError {
 // MARK: - CustomDebugStringConvertible
 
 extension APWebAuthenticationError: CustomDebugStringConvertible {
-    
+
     /// Detailed debug description for logging and debugging.
     ///
     /// Includes the error code, reason (if available), and indicates if JSON response is present.
@@ -427,7 +427,7 @@ extension APWebAuthenticationError: CustomDebugStringConvertible {
     public var debugDescription: String {
         let code = errorCode ?? "unknown"
         var parts = ["APWebAuthenticationError.\(code)"]
-        
+
         // Add reason if available
         switch self {
         case let .failed(reason, _),
@@ -444,13 +444,12 @@ extension APWebAuthenticationError: CustomDebugStringConvertible {
         default:
             break
         }
-        
+
         // Indicate if JSON is present
         if responseJSON != nil {
             parts.append("hasJSON: true")
         }
-        
+
         return parts.count > 1 ? "\(parts[0])(\(parts.dropFirst().joined(separator: ", ")))" : parts[0]
     }
 }
-

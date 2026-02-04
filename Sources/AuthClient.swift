@@ -1,8 +1,8 @@
-import Foundation
 @preconcurrency import Alamofire
 import CryptoKit
-@preconcurrency import SwiftyJSON
+import Foundation
 import HTTPStatusCodes
+@preconcurrency import SwiftyJSON
 
 // MARK: - Auth Client
 
@@ -42,15 +42,15 @@ import HTTPStatusCodes
 /// - Note: All operations must be performed on the main actor.
 @MainActor
 open class AuthClient {
-    
+
     // MARK: - Properties
-    
+
     /// The base URL for all API requests.
     ///
     /// Requests with relative paths are resolved against this base URL.
     /// Absolute URLs bypass the base URL.
     public var baseURLString: String
-    
+
     /// The Alamofire session manager for executing requests.
     ///
     /// Lazily initialized with the configuration from `makeSessionConfiguration()`
@@ -58,13 +58,13 @@ open class AuthClient {
     open lazy var sessionManager: Session = makeSessionManager(
         configuration: makeSessionConfiguration()
     )
-    
+
     /// The request interceptor for adding authentication headers and handling retries.
     ///
     /// The interceptor is typically an OAuth1Interceptor, OAuth2Interceptor, or custom subclass
     /// that adds platform-specific authentication.
     public let requestInterceptor: RequestInterceptor
-    
+
     /// The account type/platform this client targets.
     ///
     /// This property identifies which social platform (Twitter, Reddit, GitHub, etc.)
@@ -72,20 +72,20 @@ open class AuthClient {
     ///
     /// Subclasses should set this property in their initializer to identify their platform.
     private var accountType: AccountType
-    
+
     /// Whether request reloading has been cancelled by the user.
     ///
     /// Set this to `true` to indicate that automatic retry attempts should stop.
     public var isReloadingCancelled: Bool = false
-    
+
     /// Whether to always show the login screen again after authentication errors.
     ///
     /// When `true`, authentication errors will always prompt for login
     /// rather than attempting automatic token refresh.
     public var shouldAlwaysShowLoginAgain: Bool = false
-    
+
     // MARK: - Initialization
-    
+
     /// Creates a new auth client with the specified base URL and request interceptor.
     ///
     /// - Parameters:
@@ -96,9 +96,9 @@ open class AuthClient {
         self.baseURLString = baseURLString
         self.requestInterceptor = requestInterceptor
     }
-    
+
     // MARK: - Session Configuration
-    
+
     /// Creates the Alamofire session manager with the given configuration.
     ///
     /// Override this method to customize session creation, such as adding
@@ -110,17 +110,17 @@ open class AuthClient {
         print("🏗️ AuthClient.makeSessionManager() called for \(type(of: self))")
         print("   Interceptor: \(type(of: requestInterceptor))")
         print("   Cookie storage: \(configuration.httpCookieStorage?.cookies?.count ?? 0) cookies")
-        
+
         let session = Session(
             configuration: configuration,
             delegate: SessionDelegate(),
             interceptor: requestInterceptor
         )
-        
+
         print("✅ Session created with interceptor: \(session.interceptor != nil)")
         return session
     }
-    
+
     /// Creates the URL session configuration for the client.
     ///
     /// The default implementation creates an ephemeral configuration with cookies disabled.
@@ -145,9 +145,9 @@ open class AuthClient {
         configuration.httpShouldSetCookies = false
         return configuration
     }
-    
+
     // MARK: - API Requests
-    
+
     /// Executes an HTTP request and returns the JSON response.
     ///
     /// This is the primary method for making API requests. It automatically:
@@ -178,14 +178,14 @@ open class AuthClient {
         headers: HTTPHeaders? = nil
     ) async throws(APWebAuthenticationError) -> JSON {
         let url = try url(for: path)
-        
+
         let dataTask = sessionManager
             .request(url, method: method, parameters: parameters, encoding: encoding, headers: headers)
             .validate()
             .serializingDecodable(JSON.self)
-        
+
         let response = await dataTask.response
-        
+
         switch response.result {
         case .success(let value):
             return value
@@ -193,7 +193,7 @@ open class AuthClient {
             throw generateError(from: response)
         }
     }
-    
+
     /// Executes an HTTP request and returns both the JSON response and HTTP response.
     ///
     /// Use this method when you need access to HTTP headers, status codes, or other
@@ -223,18 +223,18 @@ open class AuthClient {
         headers: HTTPHeaders? = nil
     ) async throws(APWebAuthenticationError) -> (json: JSON, response: HTTPURLResponse) {
         let url = try url(for: path)
-        
+
         let dataTask = sessionManager
             .request(url, method: method, parameters: parameters, encoding: encoding, headers: headers)
             .validate()
             .serializingDecodable(JSON.self)
-        
+
         let response = await dataTask.response
-        
+
         guard let httpResponse = response.response else {
             throw generateError(from: response)
         }
-        
+
         switch response.result {
         case .success(let value):
             return (json: value, response: httpResponse)
@@ -242,7 +242,7 @@ open class AuthClient {
             throw generateError(from: response)
         }
     }
-    
+
     /// Executes an HTTP request and returns only the status code.
     ///
     /// Useful for testing endpoint availability or checking if resources exist
@@ -273,14 +273,14 @@ open class AuthClient {
         headers: HTTPHeaders? = nil
     ) async throws(APWebAuthenticationError) -> Int {
         let url = try url(for: path)
-        
+
         let dataTask = sessionManager
             .request(url, method: method, parameters: parameters, encoding: encoding, headers: headers)
             .validate(statusCode: 200..<600)
             .serializingDecodable(JSON.self)
-        
+
         let response = await dataTask.response
-        
+
         guard let httpResponse = response.response else {
             if let afError = response.error {
                 let dummyDataResponse = DataResponse<JSON, AFError>(
@@ -296,12 +296,12 @@ open class AuthClient {
                 throw APWebAuthenticationError.unknown
             }
         }
-        
+
         return httpResponse.statusCode
     }
-    
+
     // MARK: - Error Generation
-    
+
     /// Generates an appropriate `APWebAuthenticationError` from an Alamofire response.
     ///
     /// This method analyzes the response and classifies the error into specific categories:
@@ -319,13 +319,13 @@ open class AuthClient {
     /// - Returns: An appropriate `APWebAuthenticationError`
     open func generateError(from response: DataResponse<JSON, AFError>) -> APWebAuthenticationError {
         let json = parseJson(from: response)
-        
+
         // Check for explicitly cancelled requests
         if let afError = response.error {
             if afError.isExplicitlyCancelledError {
                 return .canceled
             }
-            
+
             // Check for network/connection errors
             if afError.isSessionTaskError {
                 let errorJson = parseJson(from: response)
@@ -339,12 +339,12 @@ open class AuthClient {
                 return .connectionError(reason: reason, responseJSON: errorJson)
             }
         }
-        
+
         // Extract error messages
         let jsonErrorMessage = extractErrorMessage(from: json)
         let underlyingErrorMessage = extractUnderlyingErrorMessage(from: response)
         let reason = jsonErrorMessage ?? underlyingErrorMessage
-        
+
         // Check for specific error types
         if isServerError(response: response, json: json) {
             let serverReason = underlyingErrorMessage ?? String(
@@ -353,31 +353,31 @@ open class AuthClient {
             )
             return .serverError(reason: serverReason, responseJSON: json)
         }
-        
+
         if isCheckpointRequired(response: response, json: json) {
             return .checkPointRequired(responseJSON: json)
         }
-        
+
         if isRateLimitError(response: response, json: json) {
             return .rateLimit(reason: reason, responseJSON: json)
         }
-        
+
         if isSessionExpiredError(response: response, json: json) {
             return .sessionExpired(reason: reason, responseJSON: json)
         }
-        
+
         if let message = jsonErrorMessage {
             return .failed(reason: message, responseJSON: json)
         }
-        
+
         if let message = underlyingErrorMessage {
             return .failed(reason: message, responseJSON: json)
         }
-        
+
         return .failed(reason: "Unknown error.", responseJSON: json)
     }
     // MARK: - Error Classification
-    
+
     /// Determines if a response represents a server error (5xx status code).
     ///
     /// The default implementation checks for HTTP status codes in the 500-599 range.
@@ -391,7 +391,7 @@ open class AuthClient {
     open func isServerError(response: DataResponse<JSON, AFError>, json: JSON?) -> Bool {
         response.response?.statusCodeValue?.isServerError ?? false
     }
-    
+
     /// Determines if a response represents a rate limit error (429 status code).
     ///
     /// The default implementation checks for HTTP 429 Too Many Requests.
@@ -405,7 +405,7 @@ open class AuthClient {
     open func isRateLimitError(response: DataResponse<JSON, AFError>, json: JSON?) -> Bool {
         response.response?.statusCodeValue == .tooManyRequests
     }
-    
+
     /// Determines if a response represents a session expiration (401 status code).
     ///
     /// The default implementation checks for HTTP 401 Unauthorized.
@@ -419,7 +419,7 @@ open class AuthClient {
     open func isSessionExpiredError(response: DataResponse<JSON, AFError>, json: JSON?) -> Bool {
         response.response?.statusCodeValue == .unauthorized
     }
-    
+
     /// Determines if a response requires a security checkpoint.
     ///
     /// The default implementation always returns `false`. Subclasses should override
@@ -440,7 +440,7 @@ open class AuthClient {
     open func isCheckpointRequired(response: DataResponse<JSON, AFError>, json: JSON?) -> Bool {
         false
     }
-    
+
     /// Extracts an error message from the JSON response.
     ///
     /// The default implementation checks multiple common JSON fields:
@@ -476,9 +476,9 @@ open class AuthClient {
         }
         return nil
     }
-    
+
     // MARK: - Helper Methods
-    
+
     /// Parses JSON from an Alamofire response.
     ///
     /// Attempts to get JSON from the successful response value first,
@@ -494,7 +494,7 @@ open class AuthClient {
         }
         return nil
     }
-    
+
     /// Extracts an error message from the underlying Alamofire error.
     ///
     /// Attempts to get a localized description from the underlying error,
@@ -510,9 +510,9 @@ open class AuthClient {
         }
         return nil
     }
-    
+
     // MARK: - Request Management
-    
+
     /// Cancels all pending and active requests for this client.
     ///
     /// This method:
@@ -533,7 +533,7 @@ open class AuthClient {
             tasks.forEach { $0.cancel() }
         }
     }
-    
+
     /// Constructs a URL from a path string.
     ///
     /// This method:
@@ -559,12 +559,12 @@ open class AuthClient {
         if let absoluteURL = URL(string: path), absoluteURL.scheme != nil {
             return absoluteURL
         }
-        
+
         // Construct URL relative to base
         guard let baseURL = URL(string: baseURLString)?.appendingPathComponent(path) else {
             throw APWebAuthenticationError.unknown
         }
-        
+
         return baseURL
     }
 }

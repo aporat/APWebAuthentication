@@ -1,5 +1,5 @@
-import Foundation
 import Alamofire
+import Foundation
 
 // MARK: - PinterestWebHTMLAPIClient
 
@@ -23,10 +23,10 @@ public final class PinterestWebHTMLAPIClient: AuthClient {
         self.interceptor = requestInterceptor
         super.init(accountType: AccountStore.pinterest, baseURLString: baseURLString, requestInterceptor: requestInterceptor)
     }
-    
+
     // MARK: - Session Configuration
-    
-    public override func makeSessionConfiguration() -> URLSessionConfiguration {
+
+    override public func makeSessionConfiguration() -> URLSessionConfiguration {
         let configuration = URLSessionConfiguration.ephemeral
         configuration.httpCookieStorage = auth.cookieStorage
         return configuration

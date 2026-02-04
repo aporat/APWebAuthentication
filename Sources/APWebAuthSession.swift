@@ -1,6 +1,6 @@
-import UIKit
-import SwiftyBeaver
 import SwifterSwift
+import SwiftyBeaver
+import UIKit
 
 // MARK: - Web Authentication Result
 
@@ -35,7 +35,7 @@ public struct APWebAuthResult: Sendable {
 // MARK: - Appearance Styles
 
 extension APWebAuthSession {
-    
+
     /// Visual presentation styles for the authentication interface.
     ///
     /// Different styles provide distinct user experiences:
@@ -48,7 +48,7 @@ extension APWebAuthSession {
     /// session.appearanceStyle = .safari // Shows Safari-like UI
     /// ```
     public enum AppearanceStyle: Int, Sendable {
-        
+
         /// Standard app-styled presentation.
         ///
         /// Features:
@@ -56,7 +56,7 @@ extension APWebAuthSession {
         /// - Simpler navigation controls
         /// - Better for in-app authentication flows
         case normal
-        
+
         /// Safari-style browser presentation.
         ///
         /// Features:
@@ -91,7 +91,7 @@ extension APWebAuthSession {
 ///         with Objective-C runtime features and weak references.
 @MainActor
 public protocol APWebAuthenticationPresentationContextProviding: NSObjectProtocol {
-    
+
     /// Returns the view controller to present the authentication interface from.
     ///
     /// The returned view controller should be:
@@ -178,9 +178,9 @@ public let log = SwiftyBeaver.self
 /// - Note: All methods must be called from the main actor/thread.
 @MainActor
 public final class APWebAuthSession {
-    
+
     // MARK: - Public Properties
-    
+
     /// The status bar style for the authentication interface.
     ///
     /// Controls the appearance of the status bar while the authentication
@@ -193,7 +193,7 @@ public final class APWebAuthSession {
     ///
     /// - Note: Only applies when using `.normal` appearance style
     public var statusBarStyle: UIStatusBarStyle = .default
-    
+
     /// The visual presentation style for the authentication interface.
     ///
     /// Choose between:
@@ -202,7 +202,7 @@ public final class APWebAuthSession {
     ///
     /// Default is `.normal`.
     public var appearanceStyle: APWebAuthSession.AppearanceStyle = .normal
-    
+
     /// The web view controller used for authentication.
     ///
     /// You can provide a pre-configured view controller or let the session
@@ -216,7 +216,7 @@ public final class APWebAuthSession {
     /// session.loginViewController = webVC
     /// ```
     public var loginViewController: WebAuthViewController?
-    
+
     /// The object that provides the view controller for presenting authentication.
     ///
     /// Set this to your coordinator, view controller, or other object that can
@@ -228,14 +228,14 @@ public final class APWebAuthSession {
     /// session.presentationContextProvider = self
     /// ```
     public weak var presentationContextProvider: APWebAuthenticationPresentationContextProviding?
-    
+
     // MARK: - Private Properties
-    
+
     /// The account type/platform being authenticated.
     private let accountType: AccountType
-    
+
     // MARK: - Initialization
-    
+
     /// Creates a new web authentication session for the specified account type.
     ///
     /// - Parameter accountType: The social media platform or service being authenticated
@@ -247,9 +247,9 @@ public final class APWebAuthSession {
     public init(accountType: AccountType) {
         self.accountType = accountType
     }
-    
+
     // MARK: - Authentication Flow
-    
+
     /// Starts the authentication flow with the specified URLs.
     ///
     /// This convenience method creates a `WebAuthViewController` with the provided
@@ -286,7 +286,7 @@ public final class APWebAuthSession {
         loginViewController = WebAuthViewController(authURL: URL, redirectURL: callbackURL)
         return try await start()
     }
-    
+
     /// Starts the authentication flow using the existing login view controller.
     ///
     /// This method expects `loginViewController` to already be configured.
@@ -322,19 +322,19 @@ public final class APWebAuthSession {
                     throw APWebAuthenticationError.canceled
                 }
             }
-            
+
             // Bridge callback-based web view to async/await
             return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<APWebAuthResult?, Error>) in
-                
+
                 guard let loginVC = self.loginViewController else {
                     log.error("loginViewController is nil before completionHandler can be set.")
                     continuation.resume(throwing: APWebAuthenticationError.canceled)
                     return
                 }
-                
+
                 // Set up completion handler for web view controller
                 loginVC.completionHandler = { [weak self] (result: Result<[String: any Sendable]?, APWebAuthenticationError>) in
-                    
+
                     switch result {
                     case .success(let params):
                         if let params = params {
@@ -343,20 +343,20 @@ public final class APWebAuthSession {
                         } else {
                             continuation.resume(returning: nil)
                         }
-                        
+
                     case .failure(let error):
                         log.error("completionHandler: Failure. Resuming with error: \(error.localizedDescription)")
                         continuation.resume(throwing: error)
                     }
-                    
+
                     // Clean up after authentication completes
                     guard let self else { return }
-                    
+
                     self.loginViewController?.dismiss(animated: true) {
                         self.loginViewController = nil
                     }
                 }
-                
+
                 // Present the authentication interface
                 do {
                     if appearanceStyle == .safari {
@@ -373,13 +373,13 @@ public final class APWebAuthSession {
         } catch {
             log.error("APWebAuthSession start() threw an error: \(error.localizedDescription)")
             self.loginViewController = nil
-            
+
             throw (error as? APWebAuthenticationError) ?? .failed(reason: error.localizedDescription)
         }
     }
-    
+
     // MARK: - Permission Dialog
-    
+
     /// Shows the Safari-style login permission dialog.
     ///
     /// Displays an alert asking the user for permission to use the website
@@ -401,7 +401,7 @@ public final class APWebAuthSession {
             let title = String(format: NSLocalizedString("“%@” Wants to Use “%@” to Sign In", comment: ""), UIApplication.shared.shortAppName, self.accountType.webAddress)
             let message = NSLocalizedString("This allows the app and website to share information about you.", comment: "")
             let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-            
+
             alert.addAction(title: NSLocalizedString("Cancel", comment: ""), style: .cancel) { _ in
                 continuation.resume(returning: false)
             }
@@ -409,7 +409,7 @@ public final class APWebAuthSession {
                 continuation.resume(returning: true)
             }
             alert.preferredAction = alert.actions.last
-            
+
             if let vc = self.presentationContextProvider?.presentationAnchor(for: self), vc.isVisible {
                 vc.present(alert, animated: true)
             } else {
@@ -417,9 +417,9 @@ public final class APWebAuthSession {
             }
         }
     }
-    
+
     // MARK: - Presentation Methods
-    
+
     /// Presents the authentication interface with normal (app-styled) appearance.
     ///
     /// This method configures the view controller with app branding and presents
@@ -432,7 +432,7 @@ public final class APWebAuthSession {
             log.error("presentNormalStyle: loginViewController is nil.")
             throw APWebAuthenticationError.canceled
         }
-        
+
         // Configure view controller
         loginViewController.title = String(
             format: NSLocalizedString("Sign in to %@", comment: ""),
@@ -440,18 +440,18 @@ public final class APWebAuthSession {
         )
         loginViewController.progressView.tintColor = UIColor(named: "TintColor")
         loginViewController.statusBarStyle = statusBarStyle
-        
+
         let navController = UINavigationController(rootViewController: loginViewController)
-        
+
         // Present from context provider
         guard let vc = presentationContextProvider?.presentationAnchor(for: self), vc.isVisible else {
             log.error("presentNormalStyle: No presentationContextProvider or anchor VC is not visible.")
             throw APWebAuthenticationError.failed(reason: "Could not find a valid view controller to present from.")
         }
-        
+
         vc.present(navController, animated: true)
     }
-    
+
     /// Presents the authentication interface with Safari-style appearance.
     ///
     /// This method configures the view controller to look like Safari, including
@@ -465,38 +465,38 @@ public final class APWebAuthSession {
             log.error("presentSafariStyle: loginViewController is nil.")
             throw APWebAuthenticationError.canceled
         }
-        
+
         // Configure custom navigation bar view
         let navView = AuthNavBarView()
         navView.hideSecure()
         navView.title = accountType.webAddress
-        
+
         loginViewController.navigationItem.titleView = navView
         loginViewController.appearanceStyle = .safari
         loginViewController.dismissButtonStyle = .cancel
-        
+
         let navController = UINavigationController(rootViewController: loginViewController)
-        
+
         // Apply Safari-like styling based on color scheme
         let isDark = loginViewController.traitCollection.userInterfaceStyle == .dark
-        
+
         navController.navigationBar.tintColor = isDark ? UIColor(hex: 0x5A91F7) : UIColor(hex: 0x0079FF)
         navController.navigationBar.titleTextAttributes = [
             .foregroundColor: (isDark ? UIColor(hex: 0x5A91F7) : UIColor(hex: 0x0079FF))!
         ]
         navController.navigationBar.barTintColor = isDark ? UIColor(hex: 0x565656) : UIColor(hex: 0xF8F8F8)
-        
+
         navController.navigationBar.shadowImage = nil
         navController.navigationBar.barStyle = .default
         navController.navigationBar.isTranslucent = false
         navController.modalPresentationStyle = .formSheet
-        
+
         // Present from context provider
         guard let vc = presentationContextProvider?.presentationAnchor(for: self), vc.isVisible else {
             log.error("presentSafariStyle: No presentationContextProvider or anchor VC is not visible.")
             throw APWebAuthenticationError.failed(reason: "Could not find a valid view controller to present from.")
         }
-        
+
         vc.present(navController, animated: true)
     }
 }

@@ -30,9 +30,9 @@ import Foundation
 /// }
 /// ```
 public extension URL {
-    
+
     // MARK: - OAuth Utilities
-    
+
     /// The normalized base URL for OAuth 1.0 signature generation.
     ///
     /// Returns a URL string suitable for OAuth 1.0 signature calculation according
@@ -64,20 +64,20 @@ public extension URL {
         guard var components = URLComponents(url: self, resolvingAgainstBaseURL: false) else {
             return nil
         }
-        
+
         // Remove components not included in OAuth base string
         components.query = nil
         components.fragment = nil
         components.user = nil
         components.password = nil
-        
+
         // URLComponents automatically omits default ports (80 for http, 443 for https)
         // when generating the string, simplifying the logic.
         return components.string
     }
-    
+
     // MARK: - URL Validation
-    
+
     /// Determines whether the URL uses a web-compatible scheme.
     ///
     /// Checks if the URL's scheme is either `http` or `https`, indicating
@@ -107,9 +107,9 @@ public extension URL {
         }
         return ["http", "https"].contains(scheme)
     }
-    
+
     // MARK: - URL Manipulation
-    
+
     /// Creates a new URL with the scheme component removed.
     ///
     /// Returns a modified version of the URL without its scheme, which can be
@@ -136,7 +136,7 @@ public extension URL {
         return components?.url
     }
     // MARK: - Parameter Extraction
-    
+
     /// Extracts all parameters from the URL's query string and fragment.
     ///
     /// This property parses both the query string and fragment identifier to extract
@@ -179,12 +179,12 @@ public extension URL {
         guard let components = URLComponents(url: self, resolvingAgainstBaseURL: false) else {
             return [:]
         }
-        
+
         // Parse the main query string
         let queryParams = components.queryItems?.reduce(into: [String: String]()) { result, item in
             result[item.name] = item.value
         } ?? [:]
-        
+
         // Also parse the fragment, as it's often used in OAuth redirects
         var fragmentParams: [String: String] = [:]
         if let fragment = components.fragment,
@@ -193,12 +193,12 @@ public extension URL {
                 result[item.name] = item.value
             } ?? [:]
         }
-        
+
         // Merge the two, with fragment values overwriting query values for duplicate keys.
-        return queryParams.merging(fragmentParams, uniquingKeysWith: { _, new in new })
+        return queryParams.merging(fragmentParams) { _, new in new }
     }
     // MARK: - Authentication Response Parsing
-    
+
     /// Parses the URL as an authentication callback to determine success or failure.
     ///
     /// This method analyzes the URL's parameters to detect authentication results,
@@ -270,13 +270,13 @@ public extension URL {
 
         // Check for various error keys used in OAuth and other APIs.
         let errorReason = params["error_description"] ?? params["error_message"] ?? params["error"]
-        
+
         if let reason = errorReason?.replacingOccurrences(of: "+", with: " ").removingPercentEncoding {
             // Check for specific error types
             if params["error_type"] == "login_failed" {
                 return .failure(.loginFailed(reason: reason))
             }
-            
+
             // Generic failure for other errors
             return .failure(.failed(reason: reason))
         }

@@ -37,9 +37,9 @@ import Foundation
 ///
 /// - Note: Conforms to `Equatable`, `Hashable`, and `Sendable` for safe use across threads.
 public struct APWebAuthenticationLink: Equatable, Hashable, Sendable {
-    
+
     // MARK: - Properties
-    
+
     /// The URI for the link.
     ///
     /// This can be an absolute or relative URL. When parsed from HTTP headers,
@@ -67,7 +67,7 @@ public struct APWebAuthenticationLink: Equatable, Hashable, Sendable {
     public let parameters: [String: String]
 
     // MARK: - Initialization
-    
+
     /// Initializes a link with a given URI and parameters.
     ///
     /// **Example:**
@@ -87,7 +87,7 @@ public struct APWebAuthenticationLink: Equatable, Hashable, Sendable {
     }
 
     // MARK: - Hashable Conformance
-    
+
     /// Hashes the link based on its URI and parameters.
     ///
     /// - Parameter hasher: The hasher to combine values into
@@ -110,7 +110,7 @@ public struct APWebAuthenticationLink: Equatable, Hashable, Sendable {
     }
 
     // MARK: - Common Parameters
-    
+
     /// The relation type of the link (e.g., "next", "prev", "canonical").
     ///
     /// This is the most important parameter, indicating the relationship between
@@ -181,7 +181,7 @@ public struct APWebAuthenticationLink: Equatable, Hashable, Sendable {
 // MARK: - HTML Conversion
 
 extension APWebAuthenticationLink {
-    
+
     /// Encodes the link into an HTML `<link>` element string.
     ///
     /// Converts the link to an HTML element suitable for inclusion in HTML documents.
@@ -202,7 +202,7 @@ extension APWebAuthenticationLink {
         let paramString = parameters.map { key, value in
             "\(key)=\"\(value)\""
         }.joined(separator: " ")
-        
+
         return "<link href=\"\(uri)\" \(paramString) />"
     }
 }
@@ -210,7 +210,7 @@ extension APWebAuthenticationLink {
 // MARK: - HTTP Header Conversion
 
 extension APWebAuthenticationLink {
-    
+
     /// Encodes the link into a `Link` header string, as per RFC 5988.
     ///
     /// Converts the link to the format used in HTTP Link headers.
@@ -232,7 +232,7 @@ extension APWebAuthenticationLink {
         let paramString = parameters.map { key, value in
             "; \(key)=\"\(value)\""
         }.joined()
-        
+
         return "<\(uri)>\(paramString)"
     }
 
@@ -317,7 +317,7 @@ public func parseLinkHeader(_ header: String) -> [APWebAuthenticationLink] {
 // MARK: - HTTPURLResponse Extension
 
 extension HTTPURLResponse {
-    
+
     /// Parses links from the response's `Link` header.
     ///
     /// Automatically extracts and parses the Link header from the HTTP response.
@@ -338,7 +338,7 @@ extension HTTPURLResponse {
         guard let linkHeader = allHeaderFields["Link"] as? String else {
             return []
         }
-        
+
         return parseLinkHeader(linkHeader).map { link in
             // Handle relative URIs by resolving them against the response's base URL
             if let baseURL = self.url, let resolvedURL = URL(string: link.uri, relativeTo: baseURL) {

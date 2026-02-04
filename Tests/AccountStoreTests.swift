@@ -1,6 +1,6 @@
-import XCTest
-@preconcurrency import SwiftyUserDefaults
 @testable import APWebAuthentication
+@preconcurrency import SwiftyUserDefaults
+import XCTest
 
 @MainActor
 final class AccountStoreTests: XCTestCase {

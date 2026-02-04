@@ -1,6 +1,6 @@
-import XCTest
 @testable import APWebAuthentication
 import SwiftyJSON
+import XCTest
 
 final class APWebAuthenticationErrorTests: XCTestCase {
 

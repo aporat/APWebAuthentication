@@ -1,18 +1,18 @@
-import Foundation
 import Alamofire
+import Foundation
 
 // MARK: - Token Location
 
 /// Specifies where the OAuth 2.0 access token should be included in requests.
 public enum TokenLocation: Int, Sendable {
-    
+
     /// Include the token in the Authorization header (recommended).
     ///
     /// **Format:** `Authorization: Bearer {access_token}`
     ///
     /// This is the recommended approach per RFC 6750 (OAuth 2.0 Bearer Token Usage).
     case authorizationHeader
-    
+
     /// Include the token as a query/form parameter.
     ///
     /// **Format:** `?access_token={access_token}`
@@ -70,9 +70,9 @@ public enum TokenLocation: Int, Sendable {
 ///
 
 public class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
-    
+
     // MARK: - Configuration
-    
+
     /// The parameter name when sending the token as a query/form parameter.
     ///
     /// Used when `tokenLocation` is set to `.params`.
@@ -85,7 +85,7 @@ public class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
     /// // Results in: ?token={access_token}
     /// ```
     let tokenParamName: String
-    
+
     /// The authorization scheme name when sending the token in the header.
     ///
     /// Used when `tokenLocation` is set to `.authorizationHeader`.
@@ -98,7 +98,7 @@ public class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
     /// // Results in: Authorization: Bearer {access_token}
     /// ```
     let tokenHeaderParamName: String
-    
+
     /// Specifies where the access token should be included in requests.
     ///
     /// **Options:**
@@ -118,7 +118,7 @@ public class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
     /// // ?access_token={token}
     /// ```
     let tokenLocation: TokenLocation
-    
+
     /// The authentication manager containing the access token.
     ///
     /// Provides access to the user's OAuth 2.0 access token.
@@ -126,9 +126,9 @@ public class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
     /// - Note: Marked `nonisolated(unsafe)` because it's immutable after initialization
     ///         and MainActor-isolated properties are accessed safely within Task contexts.
     let auth: Auth2Authentication
-    
+
     // MARK: - Initialization
-    
+
     /// Creates a new OAuth 2.0 request interceptor.
     ///
     /// **Example:**
@@ -163,9 +163,9 @@ public class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
         self.tokenParamName = tokenParamName
         self.tokenHeaderParamName = tokenHeaderParamName
     }
-    
+
     // MARK: - RequestAdapter
-    
+
     /// Adapts requests by adding OAuth 2.0 bearer token authentication.
     ///
     /// This method:
@@ -197,27 +197,27 @@ public class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
     ) {
         Task {
             var urlRequest = urlRequest
-            
+
             // Add user agent if available
             if let currentUserAgent = await auth.userAgent, !currentUserAgent.isEmpty {
                 urlRequest.headers.add(.userAgent(currentUserAgent))
             }
-            
+
             // Get access token
             let currentAccessToken = await auth.accessToken
-            
+
             // Add token to Authorization header (recommended)
             if let currentAccessToken, !currentAccessToken.isEmpty, tokenLocation == .authorizationHeader {
                 urlRequest.headers.add(.authorization("\(tokenHeaderParamName) \(currentAccessToken)"))
             }
-            
+
             // Add Accept header
             urlRequest.headers.add(.accept("application/json"))
-            
+
             // Add token as parameter (alternative)
             if let currentAccessToken, !currentAccessToken.isEmpty, tokenLocation == .params {
                 let params: Parameters = [tokenParamName: currentAccessToken]
-                
+
                 do {
                     let encodedRequest = try URLEncoding.default.encode(urlRequest, with: params)
                     completion(.success(encodedRequest))
@@ -226,7 +226,7 @@ public class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
                 }
                 return
             }
-            
+
             completion(.success(urlRequest))
         }
     }
