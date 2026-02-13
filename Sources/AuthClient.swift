@@ -22,7 +22,7 @@ import HTTPStatusCodes
 /// - `isServerError()` - Custom server error detection
 /// - `isRateLimitError()` - Custom rate limit detection
 /// - `isSessionExpiredError()` - Custom session expiration detection
-/// - `isCheckpointRequired()` - Custom checkpoint detection
+/// - `isCheckpointError()` - Custom checkpoint detection
 /// - `extractErrorMessage()` - Custom error message extraction
 ///
 /// **Example:**
@@ -320,13 +320,11 @@ open class AuthClient {
     open func generateError(from response: DataResponse<JSON, AFError>) -> APWebAuthenticationError {
         let json = parseJson(from: response)
 
-        // Check for explicitly cancelled requests
         if let afError = response.error {
             if afError.isExplicitlyCancelledError {
                 return .canceled
             }
 
-            // Check for network/connection errors
             if afError.isSessionTaskError {
                 let errorJson = parseJson(from: response)
                 let reason = String(
@@ -340,12 +338,10 @@ open class AuthClient {
             }
         }
 
-        // Extract error messages
         let jsonErrorMessage = extractErrorMessage(from: json)
         let underlyingErrorMessage = extractUnderlyingErrorMessage(from: response)
         let reason = jsonErrorMessage ?? underlyingErrorMessage
 
-        // Check for specific error types
         if isServerError(response: response, json: json) {
             let serverReason = underlyingErrorMessage ?? String(
                 format: "Internal server error. %@ might be down.",
@@ -354,8 +350,12 @@ open class AuthClient {
             return .serverError(reason: serverReason, responseJSON: json)
         }
 
-        if isCheckpointRequired(response: response, json: json) {
-            return .checkPointRequired(responseJSON: json)
+        if isTwoFactorError(response: response, json: json) {
+            return .twoFactorRequired(responseJSON: json)
+        }
+
+        if isCheckpointError(response: response, json: json) {
+            return .checkPointRequired(reason: reason, responseJSON: json)
         }
 
         if isRateLimitError(response: response, json: json) {
@@ -420,6 +420,27 @@ open class AuthClient {
         response.response?.statusCodeValue == .unauthorized
     }
 
+    /// Determines if a response requires two-factor authentication.
+    ///
+    /// The default implementation always returns `false`. Subclasses should override
+    /// this method to detect platform-specific two-factor authentication requirements.
+    ///
+    /// **Example:**
+    /// ```swift
+    /// override func isTwoFactorError(response: DataResponse<JSON, AFError>, json: JSON?) -> Bool {
+    ///     json?["error_type"].string == "two_factor_required"
+    /// }
+    /// ```
+    ///
+    /// - Parameters:
+    ///   - response: The Alamofire data response
+    ///   - json: The parsed JSON response (if available)
+    ///
+    /// - Returns: `true` if two-factor authentication is required, `false` otherwise
+    open func isTwoFactorError(response: DataResponse<JSON, AFError>, json: JSON?) -> Bool {
+        false
+    }
+
     /// Determines if a response requires a security checkpoint.
     ///
     /// The default implementation always returns `false`. Subclasses should override
@@ -427,7 +448,7 @@ open class AuthClient {
     ///
     /// **Example:**
     /// ```swift
-    /// override func isCheckpointRequired(response: DataResponse<JSON, AFError>, json: JSON?) -> Bool {
+    /// override func isCheckpointError(response: DataResponse<JSON, AFError>, json: JSON?) -> Bool {
     ///     json?["checkpoint_required"].bool ?? false
     /// }
     /// ```
@@ -437,7 +458,7 @@ open class AuthClient {
     ///   - json: The parsed JSON response (if available)
     ///
     /// - Returns: `true` if a checkpoint is required, `false` otherwise
-    open func isCheckpointRequired(response: DataResponse<JSON, AFError>, json: JSON?) -> Bool {
+    open func isCheckpointError(response: DataResponse<JSON, AFError>, json: JSON?) -> Bool {
         false
     }
 

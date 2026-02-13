@@ -92,15 +92,6 @@ public enum APWebAuthenticationError: Error, Sendable, Equatable {
 
     // MARK: - Authentication Errors
 
-    /// Login attempt failed.
-    ///
-    /// This occurs when credentials are invalid or login is not allowed.
-    ///
-    /// - Parameters:
-    ///   - reason: Human-readable description of why login failed
-    ///   - responseJSON: Optional JSON response with error details
-    case loginFailed(reason: String?, responseJSON: JSON? = nil)
-
     /// User feedback or action is required to proceed.
     ///
     /// This occurs when Instagram requires user confirmation or feedback.
@@ -146,7 +137,7 @@ public enum APWebAuthenticationError: Error, Sendable, Equatable {
     /// This occurs when Instagram requires additional verification (e.g., CAPTCHA, phone verification).
     ///
     /// - Parameter responseJSON: JSON response containing checkpoint details and URL
-    case checkPointRequired(responseJSON: JSON?)
+    case checkPointRequired(reason: String?, responseJSON: JSON?)
 
     /// Two-factor authentication is required.
     ///
@@ -177,13 +168,12 @@ public enum APWebAuthenticationError: Error, Sendable, Equatable {
         case let .failed(_, json),
              let .connectionError(_, json),
              let .serverError(_, json),
-             let .loginFailed(_, json),
              let .feedbackRequired(_, json),
              let .externalActionRequired(_, json),
              let .sessionExpired(_, json),
              let .rateLimit(_, json),
              let .twoFactorRequired(json),
-             let .checkPointRequired(json):
+             let .checkPointRequired(_, json):
             return json
 
         case .canceled, .notFound, .badRequest, .unknown, .timeout:
@@ -206,8 +196,6 @@ extension APWebAuthenticationError: LocalizedError {
     /// - `"Rate Limit Reached"` for rate limiting
     public var errorTitle: String {
         switch self {
-        case .loginFailed:
-            return "Login Failed"
         case .connectionError:
             return "Network Error"
         case .serverError:
@@ -243,11 +231,8 @@ extension APWebAuthenticationError: LocalizedError {
 
         // MARK: - Login & Access Errors
 
-        case let .loginFailed(reason, _):
-            return reason ?? "Unable to login. Please check your credentials and try again."
-
-        case let .checkPointRequired(json):
-            return json?["message"].string ?? "A security checkpoint is required to continue."
+        case let .checkPointRequired(reason, json):
+            return reason ?? "A security checkpoint is required to continue."
 
         case let .feedbackRequired(reason, _),
              let .externalActionRequired(reason, _):
@@ -303,8 +288,6 @@ extension APWebAuthenticationError: LocalizedError {
             return "connection_error"
         case .serverError:
             return "server_error"
-        case .loginFailed:
-            return "login_failed"
         case .checkPointRequired:
             return "checkpoint_required"
         case .feedbackRequired:
@@ -316,7 +299,7 @@ extension APWebAuthenticationError: LocalizedError {
         case .rateLimit:
             return "rate_limit"
         case .twoFactorRequired:
-            return "app_two_factor_required"
+            return "two_factor_required"
         case .canceled:
             return "canceled"
         case .notFound:
@@ -350,8 +333,7 @@ extension APWebAuthenticationError {
     /// ```
     public var isLoginError: Bool {
         switch self {
-        case .loginFailed,
-             .sessionExpired,
+        case .sessionExpired,
              .feedbackRequired,
              .checkPointRequired:
             return true
@@ -433,7 +415,6 @@ extension APWebAuthenticationError: CustomDebugStringConvertible {
         case let .failed(reason, _),
              let .connectionError(reason, _),
              let .serverError(reason, _),
-             let .loginFailed(reason, _),
              let .feedbackRequired(reason, _),
              let .externalActionRequired(reason, _),
              let .sessionExpired(reason, _),

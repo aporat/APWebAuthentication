@@ -274,7 +274,7 @@ public extension URL {
         if let reason = errorReason?.replacingOccurrences(of: "+", with: " ").removingPercentEncoding {
             // Check for specific error types
             if params["error_type"] == "login_failed" {
-                return .failure(.loginFailed(reason: reason))
+                return .failure(.sessionExpired(reason: reason))
             }
 
             // Generic failure for other errors

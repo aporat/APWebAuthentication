@@ -7,7 +7,7 @@ final class APWebAuthenticationErrorTests: XCTestCase {
     // MARK: - Test Error Titles
 
     func testErrorTitle() {
-        XCTAssertEqual(APWebAuthenticationError.loginFailed(reason: nil).errorTitle, "Login Failed")
+        XCTAssertEqual(APWebAuthenticationError.sessionExpired(reason: nil).errorTitle, "Login Failed")
         XCTAssertEqual(APWebAuthenticationError.connectionError(reason: nil).errorTitle, "Network Error")
         XCTAssertEqual(APWebAuthenticationError.serverError(reason: nil).errorTitle, "Server Error")
         XCTAssertEqual(APWebAuthenticationError.sessionExpired(reason: nil).errorTitle, "Session Expired")
@@ -21,7 +21,7 @@ final class APWebAuthenticationErrorTests: XCTestCase {
     // MARK: - Test Error Descriptions
 
     func testErrorDescriptionWithReason() {
-        let loginError = APWebAuthenticationError.loginFailed(reason: "Invalid credentials")
+        let loginError = APWebAuthenticationError.sessionExpired(reason: "Invalid credentials")
         XCTAssertEqual(loginError.errorDescription, "Invalid credentials")
 
         let connectionError = APWebAuthenticationError.connectionError(reason: "No internet")
@@ -37,7 +37,7 @@ final class APWebAuthenticationErrorTests: XCTestCase {
     // MARK: - Test Error Codes
 
     func testErrorCode() {
-        XCTAssertEqual(APWebAuthenticationError.loginFailed(reason: nil).errorCode, "login_failed")
+        XCTAssertEqual(APWebAuthenticationError.sessionExpired(reason: nil).errorCode, "login_failed")
         XCTAssertEqual(APWebAuthenticationError.connectionError(reason: nil).errorCode, "connection_error")
         XCTAssertEqual(APWebAuthenticationError.serverError(reason: nil).errorCode, "server_error")
         XCTAssertEqual(APWebAuthenticationError.rateLimit(reason: nil).errorCode, "rate_limit")
@@ -59,7 +59,7 @@ final class APWebAuthenticationErrorTests: XCTestCase {
         let twoFactorError = APWebAuthenticationError.twoFactorRequired(responseJSON: json)
         XCTAssertEqual(twoFactorError.responseJSON, json)
 
-        let loginError = APWebAuthenticationError.loginFailed(reason: nil)
+        let loginError = APWebAuthenticationError.sessionExpired(reason: nil)
         XCTAssertNil(loginError.responseJSON)
 
         let noJSONCheckpoint = APWebAuthenticationError.checkPointRequired(responseJSON: nil)
@@ -68,7 +68,7 @@ final class APWebAuthenticationErrorTests: XCTestCase {
 
     // MARK: - Test Error Categories
     func testIsLoginError() {
-        XCTAssertTrue(APWebAuthenticationError.loginFailed(reason: nil).isLoginError)
+        XCTAssertTrue(APWebAuthenticationError.sessionExpired(reason: nil).isLoginError)
         XCTAssertTrue(APWebAuthenticationError.sessionExpired(reason: nil).isLoginError)
         XCTAssertTrue(APWebAuthenticationError.feedbackRequired(reason: nil).isLoginError)
         XCTAssertFalse(APWebAuthenticationError.connectionError(reason: nil).isLoginError)

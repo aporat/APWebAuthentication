@@ -94,7 +94,7 @@ public final class PinterestWebAuthController: WebAuthViewController {
             } else {
                 log.error("❌ Pinterest Authorization Failed: Cookies not found after retries")
 
-                let error = APWebAuthenticationError.loginFailed(reason: "Login detected, but session cookies could not be retrieved. Please try again.")
+                let error = APWebAuthenticationError.sessionExpired(reason: "Login detected, but session cookies could not be retrieved. Please try again.")
 
                 self.dismiss(animated: true) {
                     self.completionHandler?(.failure(error))
