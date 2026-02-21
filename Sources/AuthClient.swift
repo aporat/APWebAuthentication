@@ -275,7 +275,7 @@ open class AuthClient {
         parameters: Parameters = Parameters(),
         encoding: ParameterEncoding = URLEncoding.default,
         headers: HTTPHeaders? = nil
-    ) async throws(APWebAuthenticationError) -> Int {
+    ) async throws(APWebAuthenticationError) -> HTTPStatusCode {
         let url = try url(for: path)
 
         let dataTask = sessionManager
@@ -301,7 +301,7 @@ open class AuthClient {
             }
         }
 
-        return httpResponse.statusCode
+        return httpResponse.statusCodeValue ?? .badRequest
     }
 
     // MARK: - Error Generation
