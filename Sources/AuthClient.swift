@@ -330,6 +330,12 @@ open class AuthClient {
             }
 
             if afError.isSessionTaskError {
+                // Check if the underlying error is NSURLErrorCancelled (-999)
+                if let urlError = afError.underlyingError as? URLError,
+                   urlError.code == .cancelled {
+                    return .canceled
+                }
+                
                 let errorJson = parseJson(from: response)
                 let reason = String(
                     format: NSLocalizedString(

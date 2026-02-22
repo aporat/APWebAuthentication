@@ -162,14 +162,9 @@ public extension Error {
             return true
         }
 
-        // Check custom authentication error cancellation
-        if let authError = underlyingAuthenticationError {
-            switch authError {
-            case .canceled:
-                return true
-            default:
-                return false
-            }
+        // Check APWebAuthenticationError's own cancellation property
+        if underlyingAuthenticationError?.isCancelledError == true {
+            return true
         }
 
         return false

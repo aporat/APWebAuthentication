@@ -393,6 +393,31 @@ extension APWebAuthenticationError {
             return false
         }
     }
+
+    /// Whether this error represents a cancelled operation.
+    ///
+    /// Returns `true` if the error is `.canceled`, indicating the operation
+    /// was intentionally cancelled by the user or system.
+    ///
+    /// **Example:**
+    /// ```swift
+    /// catch let error as APWebAuthenticationError {
+    ///     if error.isCancelledError {
+    ///         // Don't show error UI for user cancellations
+    ///         return
+    ///     }
+    ///     // Show error message
+    ///     showError(error)
+    /// }
+    /// ```
+    public var isCancelledError: Bool {
+        switch self {
+        case .canceled:
+            return true
+        default:
+            return false
+        }
+    }
 }
 // MARK: - CustomDebugStringConvertible
 
