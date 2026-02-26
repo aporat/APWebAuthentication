@@ -1,5 +1,4 @@
 @testable import APWebAuthentication
-@preconcurrency import SwiftyUserDefaults
 import XCTest
 
 @MainActor
@@ -8,6 +7,12 @@ final class AccountStoreTests: XCTestCase {
     override func setUp() {
         super.setUp()
         Defaults.removeAll()
+        AccountStore.disableAll()
+    }
+    
+    override func tearDown() {
+        AccountStore.disableAll()
+        super.tearDown()
     }
 
     func testAccountTypes_emptyDefaults_returnsEmpty() {
@@ -16,8 +21,8 @@ final class AccountStoreTests: XCTestCase {
     }
 
     func testAccountTypes_withEnabledServices_returnsCorrectTypes() {
-        Defaults[\.Twitter] = true
-        Defaults[\.Github] = true
+        AccountStore.setEnabled(AccountType.Code.twitter, enabled: true)
+        AccountStore.setEnabled(AccountType.Code.github, enabled: true)
 
         let accounts = AccountStore.accountTypes
         let codes = accounts.map { $0.code }

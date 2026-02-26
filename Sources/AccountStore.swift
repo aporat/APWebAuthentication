@@ -1,106 +1,75 @@
 import Foundation
 import SwifterSwift
-@preconcurrency import SwiftyUserDefaults
 import UIKit
-
-// MARK: - User Defaults Keys
-
-/// User defaults keys for storing enabled/disabled state of social media services.
-extension DefaultsKeys {
-
-    var Instagram: DefaultsKey<Bool> {
-        .init("kServiceInstagram", defaultValue: false)
-    }
-
-    var Twitter: DefaultsKey<Bool> {
-        .init("kServiceTwitter", defaultValue: false)
-    }
-
-    var Pinterest: DefaultsKey<Bool> {
-        .init("kServicePinterest", defaultValue: false)
-    }
-
-    var Tumblr: DefaultsKey<Bool> {
-        .init("kServiceTumblr", defaultValue: false)
-    }
-
-    var Foursquare: DefaultsKey<Bool> {
-        .init("kServiceFoursquare", defaultValue: false)
-    }
-
-    var Reddit: DefaultsKey<Bool> {
-        .init("kServiceReddit", defaultValue: false)
-    }
-
-    var Github: DefaultsKey<Bool> {
-        .init("kServiceGithub", defaultValue: false)
-    }
-
-    var Twitch: DefaultsKey<Bool> {
-        .init("kServiceTwitch", defaultValue: false)
-    }
-
-    var FiveHundredpx: DefaultsKey<Bool> {
-        .init("kServiceFiveHundredpx", defaultValue: false)
-    }
-
-    var TikTok: DefaultsKey<Bool> {
-        .init("kServiceTikTok", defaultValue: false)
-    }
-}
-
-// MARK: - AccountType.Code + Defaults
-
-private extension AccountType.Code {
-
-    /// Maps an account type code to its corresponding user defaults key.
-    var defaultsKey: DefaultsKey<Bool>? {
-        switch self {
-        case .instagram:
-            return .init("kServiceInstagram", defaultValue: false)
-        case .twitter:
-            return .init("kServiceTwitter", defaultValue: false)
-        case .pinterest:
-            return .init("kServicePinterest", defaultValue: false)
-        case .tumblr:
-            return .init("kServiceTumblr", defaultValue: false)
-        case .twitch:
-            return .init("kServiceTwitch", defaultValue: false)
-        case .reddit:
-            return .init("kServiceReddit", defaultValue: false)
-        case .foursquare:
-            return .init("kServiceFoursquare", defaultValue: false)
-        case .github:
-            return .init("kServiceGithub", defaultValue: false)
-        case .fiveHundredpx:
-            return .init("kServiceFiveHundredpx", defaultValue: false)
-        case .tiktok:
-            return .init("kServiceTikTok", defaultValue: false)
-        }
-    }
-}
 
 // MARK: - Account Store
 
 /// Central registry for all supported social media account types.
 ///
-/// Provides static definitions for platforms, filtering based on user preferences,
+/// Provides static definitions for platforms, filtering based on enabled/disabled state,
 /// and lookup by account code.
 ///
 /// **Example Usage:**
 /// ```swift
+/// // Enable specific platforms
+/// AccountStore.setEnabled(.instagram, enabled: true)
+/// AccountStore.setEnabled(.twitter, enabled: true)
+///
 /// // Get all supported platforms
 /// let allPlatforms = AccountStore.all
 ///
 /// // Get only enabled platforms
-/// let enabledPlatforms = await AccountStore.accountTypes
+/// let enabledPlatforms = AccountStore.accountTypes
 ///
-/// // Look up specific platform
-/// if let instagram = AccountStore.accountType(for: .instagram) {
-///     print(instagram.description)
+/// // Check if a platform is enabled
+/// if AccountStore.isEnabled(.instagram) {
+///     print("Instagram is enabled")
 /// }
 /// ```
+@MainActor
 public final class AccountStore {
+    
+    // MARK: - Configuration
+    
+    /// Set of currently enabled account type codes.
+    private static var enabledCodes: Set<AccountType.Code> = []
+    
+    /// Enables or disables a specific account type.
+    ///
+    /// - Parameters:
+    ///   - code: The account type code to update
+    ///   - enabled: Whether to enable or disable the account type
+    public static func setEnabled(_ code: AccountType.Code, enabled: Bool) {
+        if enabled {
+            enabledCodes.insert(code)
+        } else {
+            enabledCodes.remove(code)
+        }
+    }
+    
+    /// Enables multiple account types at once.
+    ///
+    /// - Parameter codes: The account type codes to enable
+    public static func enable(_ codes: AccountType.Code...) {
+        enabledCodes.formUnion(codes)
+    }
+    
+    /// Disables multiple account types at once.
+    ///
+    /// - Parameter codes: The account type codes to disable
+    public static func disable(_ codes: AccountType.Code...) {
+        enabledCodes.subtract(codes)
+    }
+    
+    /// Enables all account types.
+    public static func enableAll() {
+        enabledCodes = Set(AccountType.Code.allCases)
+    }
+    
+    /// Disables all account types.
+    public static func disableAll() {
+        enabledCodes.removeAll()
+    }
 
     // MARK: - Account Type Definitions
 
@@ -182,17 +151,11 @@ public final class AccountStore {
         tiktok
     ]
 
-    /// List of account types that are currently enabled by the user.
+    /// List of account types that are currently enabled.
     ///
-    /// Filters based on user preferences stored in UserDefaults.
-    @MainActor
+    /// Filters based on the enabled codes set.
     public static var accountTypes: [AccountType] {
-        all.filter { type in
-            guard let key = type.code.defaultsKey else {
-                return false
-            }
-            return Defaults[key: key]
-        }
+        all.filter { enabledCodes.contains($0.code) }
     }
 
     // MARK: - Lookup Methods
@@ -205,29 +168,12 @@ public final class AccountStore {
         all.first { $0.code == code }
     }
 
-    /// Checks if a specific account type is enabled by the user.
+    /// Checks if a specific account type is enabled.
     ///
     /// - Parameter code: The account type code to check
     /// - Returns: True if enabled, false otherwise
-    @MainActor
     public static func isEnabled(_ code: AccountType.Code) -> Bool {
-        guard let key = code.defaultsKey else {
-            return false
-        }
-        return Defaults[key: key]
-    }
-
-    /// Enables or disables a specific account type.
-    ///
-    /// - Parameters:
-    ///   - code: The account type code to update
-    ///   - enabled: Whether to enable or disable the account type
-    @MainActor
-    public static func setEnabled(_ code: AccountType.Code, enabled: Bool) {
-        guard let key = code.defaultsKey else {
-            return
-        }
-        Defaults[key: key] = enabled
+        enabledCodes.contains(code)
     }
 
     // MARK: - Initialization
