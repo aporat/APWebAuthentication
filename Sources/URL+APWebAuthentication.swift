@@ -4,22 +4,13 @@ import Foundation
 
 /// Extensions to `URL` for web authentication and OAuth workflows.
 ///
-/// This extension provides utilities for:
-/// - OAuth URL manipulation and signature generation
-/// - URL scheme validation
-/// - Parameter extraction from query strings and fragments
-/// - Authentication response parsing
+/// Provides utilities for OAuth URL manipulation, parameter extraction,
+/// and authentication response parsing.
 ///
-/// **Common Use Cases:**
+/// **Example:**
 /// ```swift
 /// // Extract parameters from callback URL
-/// let params = callbackURL.parameters
-/// let token = params["access_token"]
-///
-/// // Check if URL is web-accessible
-/// if url.isWebURL() {
-///     // Load in web view
-/// }
+/// let token = callbackURL.parameters["access_token"]
 ///
 /// // Parse authentication response
 /// switch callbackURL.getResponse() {
@@ -35,31 +26,15 @@ public extension URL {
 
     /// The normalized base URL for OAuth 1.0 signature generation.
     ///
-    /// Returns a URL string suitable for OAuth 1.0 signature calculation according
-    /// to RFC 5849 (The OAuth 1.0 Protocol). This normalized form:
-    /// - Excludes the query string
-    /// - Excludes the fragment identifier
-    /// - Excludes user credentials (username/password)
-    /// - Excludes default ports (80 for HTTP, 443 for HTTPS)
-    ///
-    /// **OAuth Signature Base String:**
-    ///
-    /// According to RFC 5849 Section 3.4.1.2, the base string URI is constructed by:
-    /// 1. Setting the scheme and host to lowercase
-    /// 2. Including the port only if it's not the default for the scheme
-    /// 3. Excluding the query and fragment components
+    /// Returns a URL string suitable for OAuth 1.0 signature calculation (RFC 5849).
+    /// Excludes query string, fragment, user credentials, and default ports.
     ///
     /// **Example:**
     /// ```swift
-    /// let url = URL(string: "https://api.twitter.com:443/oauth/request_token?foo=bar#section")!
+    /// let url = URL(string: "https://api.twitter.com:443/oauth/request_token?foo=bar")!
     /// print(url.oAuthBaseURL)
-    /// // Output: "https://api.twitter.com/oauth/request_token"
+    /// // "https://api.twitter.com/oauth/request_token"
     /// ```
-    ///
-    /// - Returns: The normalized base URL string, or `nil` if the URL cannot be parsed
-    ///
-    /// - Note: `URLComponents` automatically handles port normalization,
-    ///         removing default ports when converting to string.
     var oAuthBaseURL: String? {
         guard var components = URLComponents(url: self, resolvingAgainstBaseURL: false) else {
             return nil
@@ -71,36 +46,15 @@ public extension URL {
         components.user = nil
         components.password = nil
 
-        // URLComponents automatically omits default ports (80 for http, 443 for https)
-        // when generating the string, simplifying the logic.
+        // URLComponents automatically omits default ports
         return components.string
     }
 
     // MARK: - URL Validation
 
-    /// Determines whether the URL uses a web-compatible scheme.
+    /// Determines whether the URL uses a web-compatible scheme (http/https).
     ///
-    /// Checks if the URL's scheme is either `http` or `https`, indicating
-    /// it can be loaded in a web view or browser. Useful for validating URLs
-    /// before presenting web authentication interfaces.
-    ///
-    /// **Example:**
-    /// ```swift
-    /// let webURL = URL(string: "https://example.com")!
-    /// let appURL = URL(string: "myapp://callback")!
-    ///
-    /// print(webURL.isWebURL())  // true
-    /// print(appURL.isWebURL())  // false
-    /// ```
-    ///
-    /// **Use Cases:**
-    /// - Validating authentication URLs before loading
-    /// - Determining whether to open in Safari vs. custom handler
-    /// - Filtering web-compatible links from deep links
-    ///
-    /// - Returns: `true` if the scheme is HTTP or HTTPS (case-insensitive), `false` otherwise
-    ///
-    /// - Note: Returns `false` for URLs without a scheme
+    /// - Returns: True if the scheme is HTTP or HTTPS (case-insensitive)
     func isWebURL() -> Bool {
         guard let scheme = self.scheme?.lowercased() else {
             return false
@@ -112,69 +66,30 @@ public extension URL {
 
     /// Creates a new URL with the scheme component removed.
     ///
-    /// Returns a modified version of the URL without its scheme, which can be
-    /// useful for URL comparison or manipulation in authentication flows.
-    ///
-    /// **Example:**
-    /// ```swift
-    /// let url = URL(string: "https://example.com/path?query=value")!
-    /// print(url.withoutScheme?.absoluteString)
-    /// // Output: "//example.com/path?query=value"
-    /// ```
-    ///
-    /// **Use Cases:**
-    /// - Comparing URLs regardless of HTTP/HTTPS
-    /// - Building relative URLs
-    /// - Protocol-agnostic URL matching
-    ///
-    /// - Returns: A new URL without the scheme, or `nil` if URL components cannot be created
-    ///
-    /// - Note: The resulting URL string will start with `//` followed by the host
+    /// - Returns: A new URL without the scheme, or nil if invalid
     var withoutScheme: URL? {
         var components = URLComponents(url: self, resolvingAgainstBaseURL: false)
         components?.scheme = nil
         return components?.url
     }
+
     // MARK: - Parameter Extraction
 
     /// Extracts all parameters from the URL's query string and fragment.
     ///
-    /// This property parses both the query string and fragment identifier to extract
-    /// key-value pairs. This is essential for OAuth and web authentication flows where
-    /// parameters can be passed in either location.
-    ///
-    /// **Parsing Rules:**
-    /// - Parameters from both query (`?key=value`) and fragment (`#key=value`) are included
-    /// - When a key appears in both locations, the fragment value takes precedence
-    /// - URL-encoded values are preserved as-is (not decoded)
-    /// - Parameters without values are included with empty string values
+    /// Parses both query (`?key=value`) and fragment (`#key=value`) parameters.
+    /// Fragment values take precedence for duplicate keys.
     ///
     /// **Example:**
     /// ```swift
-    /// // Standard query parameters
+    /// // Query parameters
     /// let url1 = URL(string: "myapp://callback?code=abc123&state=xyz")!
-    /// print(url1.parameters)
-    /// // ["code": "abc123", "state": "xyz"]
+    /// print(url1.parameters) // ["code": "abc123", "state": "xyz"]
     ///
-    /// // Fragment parameters (common in OAuth implicit flow)
+    /// // Fragment parameters (OAuth implicit flow)
     /// let url2 = URL(string: "myapp://callback#access_token=abc&expires_in=3600")!
-    /// print(url2.parameters)
-    /// // ["access_token": "abc", "expires_in": "3600"]
-    ///
-    /// // Combined (fragment takes precedence)
-    /// let url3 = URL(string: "myapp://callback?token=old#token=new")!
-    /// print(url3.parameters["token"])
-    /// // "new"
+    /// print(url2.parameters) // ["access_token": "abc", "expires_in": "3600"]
     /// ```
-    ///
-    /// **OAuth Flows:**
-    /// - **Authorization Code Flow**: Parameters in query string (`?code=...`)
-    /// - **Implicit Flow**: Parameters in fragment (`#access_token=...`)
-    /// - **Error Responses**: Can use either location
-    ///
-    /// - Returns: A dictionary of parameter name-value pairs
-    ///
-    /// - Note: Returns an empty dictionary if the URL has no parameters
     var parameters: [String: String] {
         guard let components = URLComponents(url: self, resolvingAgainstBaseURL: false) else {
             return [:]
@@ -185,7 +100,7 @@ public extension URL {
             result[item.name] = item.value
         } ?? [:]
 
-        // Also parse the fragment, as it's often used in OAuth redirects
+        // Parse the fragment (used in OAuth redirects)
         var fragmentParams: [String: String] = [:]
         if let fragment = components.fragment,
            let fragmentComponents = URLComponents(string: "?\(fragment)") {
@@ -194,81 +109,41 @@ public extension URL {
             } ?? [:]
         }
 
-        // Merge the two, with fragment values overwriting query values for duplicate keys.
+        // Merge, with fragment values overwriting query values for duplicate keys
         return queryParams.merging(fragmentParams) { _, new in new }
     }
+
     // MARK: - Authentication Response Parsing
 
     /// Parses the URL as an authentication callback to determine success or failure.
     ///
-    /// This method analyzes the URL's parameters to detect authentication results,
-    /// following common OAuth and web authentication conventions. It checks for
-    /// standard error parameters and returns appropriate error types.
+    /// Checks for standard OAuth error parameters and returns appropriate results.
     ///
-    /// **Error Detection:**
-    ///
-    /// The method checks for errors in this order of precedence:
-    /// 1. `error_description` - Detailed error message (OAuth 2.0 standard)
-    /// 2. `error_message` - Alternative error message format
+    /// **Error Detection Priority:**
+    /// 1. `error_description` - Detailed error message
+    /// 2. `error_message` - Alternative error format
     /// 3. `error` - Basic error indicator
     ///
-    /// **Error Type Mapping:**
-    /// - If `error_type=login_failed`: Returns `.loginFailed`
-    /// - For any other error: Returns `.failed`
-    /// - No error detected: Returns `.success` with all parameters
-    ///
-    /// **Example Usage:**
+    /// **Example:**
     /// ```swift
-    /// // Success response
-    /// let successURL = URL(string: "myapp://callback?code=abc123&state=xyz")!
-    /// switch successURL.getResponse() {
-    /// case .success(let params):
-    ///     let code = params["code"] // "abc123"
-    ///     // Exchange code for token
-    /// case .failure(let error):
-    ///     print("Error:", error)
+    /// // Success
+    /// let url = URL(string: "myapp://callback?code=abc123")!
+    /// if case .success(let params) = url.getResponse() {
+    ///     let code = params["code"]
     /// }
     ///
-    /// // Error response
-    /// let errorURL = URL(string: "myapp://callback?error=access_denied&error_description=User+cancelled")!
-    /// switch errorURL.getResponse() {
-    /// case .success:
-    ///     // Won't reach here
-    ///     break
-    /// case .failure(let error):
-    ///     print(error.errorDescription) // "User cancelled"
-    /// }
-    ///
-    /// // Login failure
-    /// let loginURL = URL(string: "myapp://callback?error_type=login_failed&error=Invalid+credentials")!
-    /// if case .failure(.loginFailed(let reason, _)) = loginURL.getResponse() {
-    ///     print(reason) // "Invalid credentials"
+    /// // Error
+    /// let errorURL = URL(string: "myapp://callback?error=access_denied")!
+    /// if case .failure(let error) = errorURL.getResponse() {
+    ///     print(error.errorDescription)
     /// }
     /// ```
     ///
-    /// **OAuth 2.0 Error Responses:**
-    ///
-    /// According to RFC 6749, OAuth 2.0 error responses include:
-    /// - `error`: Error code (e.g., "access_denied", "invalid_request")
-    /// - `error_description`: Human-readable error description
-    /// - `error_uri`: Optional URI with error information
-    ///
-    /// **Text Processing:**
-    ///
-    /// Error messages are automatically cleaned:
-    /// - Plus signs (`+`) are converted to spaces
-    /// - Percent-encoding is removed (e.g., `%20` → space)
-    ///
-    /// - Returns: A `Result` containing either:
-    ///   - `.success`: Dictionary of all URL parameters
-    ///   - `.failure`: An `APWebAuthenticationError` with error details
-    ///
-    /// - Note: This method is compatible with the refactored `APWebAuthenticationError`
-    ///         where the `responseJSON` parameter defaults to `nil`.
+    /// - Returns: Result containing either parameters or an authentication error
     func getResponse() -> Result<[String: String], APWebAuthenticationError> {
         let params = self.parameters
 
-        // Check for various error keys used in OAuth and other APIs.
+        // Check for error parameters
         let errorReason = params["error_description"] ?? params["error_message"] ?? params["error"]
 
         if let reason = errorReason?.replacingOccurrences(of: "+", with: " ").removingPercentEncoding {
@@ -277,11 +152,11 @@ public extension URL {
                 return .failure(.sessionExpired(reason: reason))
             }
 
-            // Generic failure for other errors
+            // Generic failure
             return .failure(.failed(reason: reason))
         }
 
-        // No error detected - return all parameters as success
+        // No error - return all parameters as success
         return .success(params)
     }
 }

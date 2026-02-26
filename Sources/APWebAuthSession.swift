@@ -107,15 +107,6 @@ public protocol APWebAuthenticationPresentationContextProviding: NSObjectProtoco
 // MARK: - Logging
 
 /// Global logger instance for the authentication system.
-///
-/// Uses SwiftyBeaver for structured logging with support for console, file,
-/// and cloud destinations.
-///
-/// **Usage:**
-/// ```swift
-/// log.info("Starting authentication")
-/// log.error("Failed to present: \(error)")
-/// ```
 public let log = SwiftyBeaver.self
 
 // MARK: - Web Authentication Session

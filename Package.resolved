@@ -1,5 +1,5 @@
 {
-  "originHash" : "765e9bd0427e562f52b3ba54321b62c272d043c2e1166839e4cb7abbbb064f8b",
+  "originHash" : "395d8eda8957a04ba95be82878f252cab574f4f7ffd4dd45256072855c24207a",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -15,8 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/aporat/APUserAgentGenerator.git",
       "state" : {
-        "revision" : "c7f84df52f5b338eb5901156a900fd139052b271",
-        "version" : "1.5.0"
+        "branch" : "main",
+        "revision" : "c7f84df52f5b338eb5901156a900fd139052b271"
       }
     },
     {
