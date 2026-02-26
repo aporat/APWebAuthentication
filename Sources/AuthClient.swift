@@ -386,6 +386,7 @@ open class AuthClient {
 
         return .failed(reason: "Unknown error.", responseJSON: json)
     }
+
     // MARK: - Error Classification
 
     /// Determines if a response represents a server error (5xx status code).
