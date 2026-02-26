@@ -7,7 +7,8 @@ final class APWebAuthenticationErrorTests: XCTestCase {
     // MARK: - Test Error Titles
 
     func testErrorTitle() {
-        XCTAssertEqual(APWebAuthenticationError.sessionExpired(reason: nil).errorTitle, "Login Failed")
+        // Each error case maps to a distinct user-facing title
+        XCTAssertEqual(APWebAuthenticationError.checkPointRequired(reason: nil, responseJSON: nil).errorTitle, "Security Check")
         XCTAssertEqual(APWebAuthenticationError.connectionError(reason: nil).errorTitle, "Network Error")
         XCTAssertEqual(APWebAuthenticationError.serverError(reason: nil).errorTitle, "Server Error")
         XCTAssertEqual(APWebAuthenticationError.sessionExpired(reason: nil).errorTitle, "Session Expired")
@@ -37,12 +38,13 @@ final class APWebAuthenticationErrorTests: XCTestCase {
     // MARK: - Test Error Codes
 
     func testErrorCode() {
-        XCTAssertEqual(APWebAuthenticationError.sessionExpired(reason: nil).errorCode, "login_failed")
+        // Each error case has a unique, stable machine-readable code
+        XCTAssertEqual(APWebAuthenticationError.failed(reason: nil).errorCode, "failed")
         XCTAssertEqual(APWebAuthenticationError.connectionError(reason: nil).errorCode, "connection_error")
         XCTAssertEqual(APWebAuthenticationError.serverError(reason: nil).errorCode, "server_error")
         XCTAssertEqual(APWebAuthenticationError.rateLimit(reason: nil).errorCode, "rate_limit")
         XCTAssertEqual(APWebAuthenticationError.sessionExpired(reason: nil).errorCode, "session_expired")
-        XCTAssertEqual(APWebAuthenticationError.checkPointRequired(responseJSON: nil).errorCode, "checkpoint_required")
+        XCTAssertEqual(APWebAuthenticationError.checkPointRequired(reason: nil, responseJSON: nil).errorCode, "checkpoint_required")
         XCTAssertEqual(APWebAuthenticationError.canceled.errorCode, "canceled")
         XCTAssertEqual(APWebAuthenticationError.timeout.errorCode, "timeout")
         XCTAssertEqual(APWebAuthenticationError.badRequest.errorCode, "bad_request")
@@ -53,7 +55,7 @@ final class APWebAuthenticationErrorTests: XCTestCase {
 
     func testResponseJSONExtraction() {
         let json = JSON(["key": "value"])
-        let checkpointError = APWebAuthenticationError.checkPointRequired(responseJSON: json)
+        let checkpointError = APWebAuthenticationError.checkPointRequired(reason: nil, responseJSON: json)
         XCTAssertEqual(checkpointError.responseJSON, json)
 
         let twoFactorError = APWebAuthenticationError.twoFactorRequired(responseJSON: json)
@@ -62,15 +64,18 @@ final class APWebAuthenticationErrorTests: XCTestCase {
         let loginError = APWebAuthenticationError.sessionExpired(reason: nil)
         XCTAssertNil(loginError.responseJSON)
 
-        let noJSONCheckpoint = APWebAuthenticationError.checkPointRequired(responseJSON: nil)
+        let noJSONCheckpoint = APWebAuthenticationError.checkPointRequired(reason: nil, responseJSON: nil)
         XCTAssertNil(noJSONCheckpoint.responseJSON)
     }
 
     // MARK: - Test Error Categories
+
     func testIsLoginError() {
+        // All login-related errors should return true
         XCTAssertTrue(APWebAuthenticationError.sessionExpired(reason: nil).isLoginError)
-        XCTAssertTrue(APWebAuthenticationError.sessionExpired(reason: nil).isLoginError)
+        XCTAssertTrue(APWebAuthenticationError.checkPointRequired(reason: nil, responseJSON: nil).isLoginError)
         XCTAssertTrue(APWebAuthenticationError.feedbackRequired(reason: nil).isLoginError)
+        // Non-login errors should return false
         XCTAssertFalse(APWebAuthenticationError.connectionError(reason: nil).isLoginError)
         XCTAssertFalse(APWebAuthenticationError.timeout.isLoginError)
     }
