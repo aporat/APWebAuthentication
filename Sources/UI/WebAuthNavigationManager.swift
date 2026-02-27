@@ -294,9 +294,9 @@ public final class WebAuthNavigationManager {
             .foregroundColor: UIColor(named: "TintColor")!
         ]
 
-        refreshBarButtonItem.setTitleTextAttributes([.foregroundColor: UIColor.black], for: .normal)
-        activityBarButtonItem.setTitleTextAttributes([.foregroundColor: UIColor.black], for: .normal)
+        // Set black color for dismiss button text (only needs to be set here since it's a text button)
         dismissBarButtonItem.setTitleTextAttributes([.foregroundColor: UIColor.black], for: .normal)
+        dismissBarButtonItem.setTitleTextAttributes([.foregroundColor: UIColor.black], for: .highlighted)
 
         viewController.navigationController?.navigationBar.standardAppearance = navBarAppearance
         viewController.navigationController?.navigationBar.scrollEdgeAppearance = navBarAppearance
@@ -393,6 +393,7 @@ public final class WebAuthNavigationManager {
         button.addTarget(self, action: selector, for: .touchUpInside)
         button.frame = CGRect(x: 0, y: 0, width: 30, height: 30)
         button.imageView?.contentMode = .scaleAspectFit
+        button.tintColor = .black  // Set black color immediately
         return UIBarButtonItem(customView: button)
     }
 
@@ -402,6 +403,7 @@ public final class WebAuthNavigationManager {
         button.addTarget(self, action: selector, for: .touchUpInside)
         button.frame = CGRect(x: 0, y: 0, width: 40, height: 30)
         button.imageView?.contentMode = .scaleAspectFit
+        button.tintColor = .black  // Set black color immediately
         return UIBarButtonItem(customView: button)
     }
 
