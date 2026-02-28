@@ -391,7 +391,7 @@ public final class WebAuthNavigationManager {
         button.addTarget(self, action: selector, for: .touchUpInside)
         button.frame = CGRect(x: 0, y: 0, width: 30, height: 30)
         button.imageView?.contentMode = .scaleAspectFit
-        button.tintColor = UIColor(named: "TintColor")
+        button.tintColor = UIColor.black
         return UIBarButtonItem(customView: button)
     }
     
@@ -401,7 +401,7 @@ public final class WebAuthNavigationManager {
         button.addTarget(self, action: selector, for: .touchUpInside)
         button.frame = CGRect(x: 0, y: 0, width: 40, height: 30)
         button.imageView?.contentMode = .scaleAspectFit
-        button.tintColor = UIColor(named: "TintColor")
+        button.tintColor = UIColor.black
         return UIBarButtonItem(customView: button)
     }
     
