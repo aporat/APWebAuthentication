@@ -199,13 +199,7 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
         removeProgressObserver()
     }
 
-    override open func updateViewConstraints() {
-        super.updateViewConstraints()
 
-        webView.snp.makeConstraints { make in
-            make.edges.equalTo(view.safeAreaLayoutGuide)
-        }
-    }
 
     override open var preferredStatusBarStyle: UIStatusBarStyle {
         statusBarStyle
@@ -216,7 +210,10 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
     private func setupWebView() {
         webView.navigationDelegate = self
         view.addSubview(webView)
-        view.setNeedsUpdateConstraints()
+        
+        webView.snp.makeConstraints { make in
+            make.edges.equalTo(view.safeAreaLayoutGuide)
+        }
     }
 
     private func setupNavigation() {
