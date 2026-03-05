@@ -31,8 +31,6 @@ public final class PinterestWebAuthController: WebAuthViewController {
 
         log.debug("Pinterest Check Redirect: \(urlString)")
 
-        // Only check for redirect AFTER the initial page has loaded
-        // This prevents immediate dismissal on first navigation
         guard initialLoaded else {
             log.debug("⏭️ Skipping redirect check - initial page not yet loaded")
             return false
@@ -60,13 +58,11 @@ public final class PinterestWebAuthController: WebAuthViewController {
     // MARK: - WKNavigationDelegate Override
 
     override public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        // Check for custom redirect first
         if checkForRedirect(url: webView.url) {
             didStopLoading()
             return
         }
 
-        // Otherwise, call super to handle default behavior
         super.webView(webView, didFinish: navigation)
     }
 
@@ -87,9 +83,20 @@ public final class PinterestWebAuthController: WebAuthViewController {
             if success {
                 log.info("🔐 Pinterest Authorization Successful")
 
-                self.dismiss(animated: true) {
-                    self.completionHandler?(.success([:]))
-                    self.completionHandler = nil
+                let cookies = await getCookies()
+
+                var result: [String: any Sendable] = [
+                    "cookies": cookies,
+                ]
+                
+                if let value = auth.sessionId { result["session_id"] = value }
+                if let value = auth.csrfToken { result["csrf_token"] = value }
+                
+                let handler = completionHandler
+                completionHandler = nil
+                
+                dismiss(animated: true) {
+                    handler?(.success(result))
                 }
             } else {
                 log.error("❌ Pinterest Authorization Failed: Cookies not found after retries")
