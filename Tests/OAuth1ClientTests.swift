@@ -8,8 +8,8 @@ final class OAuth1ClientTests: XCTestCase {
     var auth: Auth1Authentication!
     var client: OAuth1Client!
 
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         auth = Auth1Authentication()
         client = OAuth1Client(
             accountType: AccountStore.twitter,

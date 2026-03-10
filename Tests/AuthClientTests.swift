@@ -8,8 +8,8 @@ final class AuthClientTests: XCTestCase {
     var client: OAuth2Client!
     var auth: Auth2Authentication!
 
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         auth = Auth2Authentication()
         client = OAuth2Client(
             accountType: AccountStore.github,

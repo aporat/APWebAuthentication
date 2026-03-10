@@ -6,11 +6,11 @@ final class AccountStoreTests: XCTestCase {
 
     override func setUp() async throws {
         try await super.setUp()
-        await AccountStore.disableAll()
+        AccountStore.disableAll()
     }
     
     override func tearDown() async throws {
-        await AccountStore.disableAll()
+        AccountStore.disableAll()
         try await super.tearDown()
     }
 

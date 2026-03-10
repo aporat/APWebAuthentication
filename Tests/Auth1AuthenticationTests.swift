@@ -6,8 +6,8 @@ final class Auth1AuthenticationTests: XCTestCase {
 
     var auth: Auth1Authentication!
 
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         auth = Auth1Authentication()
         auth.accountIdentifier = UUID().uuidString
     }
