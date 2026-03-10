@@ -2,7 +2,7 @@ import UIKit
 
 // Use a private struct for the associated object key to avoid conflicts.
 private enum AssociatedKeys {
-    @MainActor static var progressView = "navigationControllerProgressView"
+    @MainActor static var progressView: UInt8 = 0
 }
 
 /// An extension to add a progress bar to a `UINavigationController`.

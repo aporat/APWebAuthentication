@@ -370,25 +370,22 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
     open func webView(
         _ webView: WKWebView,
         decidePolicyFor navigationAction: WKNavigationAction,
-        preferences: WKWebpagePreferences,
-        decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void
-    ) {
+        preferences: WKWebpagePreferences
+    ) async -> (WKNavigationActionPolicy, WKWebpagePreferences) {
         let urlString = navigationAction.request.url?.absoluteString ?? "nil URL"
         let navType = navigationAction.navigationType.rawValue
         log.debug("🕸 WKWebView Navigation Action: \(urlString) | Type: \(navType)")
 
         // Allow subclasses to check for custom redirects first
         if checkForRedirect(url: navigationAction.request.url) {
-            decisionHandler(.cancel, preferences)
-            return
+            return (.cancel, preferences)
         }
 
         if handleRedirect(url: navigationAction.request.url) {
-            decisionHandler(.cancel, preferences)
-            return
+            return (.cancel, preferences)
         }
 
-        decisionHandler(.allow, preferences)
+        return (.allow, preferences)
     }
 
     /// Override this method in subclasses to provide custom redirect detection logic.
@@ -403,23 +400,21 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
 
     open func webView(
         _ webView: WKWebView,
-        decidePolicyFor navigationResponse: WKNavigationResponse,
-        decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void
-    ) {
+        decidePolicyFor navigationResponse: WKNavigationResponse
+    ) async -> WKNavigationResponsePolicy {
         let urlString = navigationResponse.response.url?.absoluteString ?? "nil URL"
         let mimeType = navigationResponse.response.mimeType ?? "unknown"
         log.debug("🕸 WKWebView Navigation Response: \(urlString) | MIME: \(mimeType)")
 
         if handleRedirect(url: navigationResponse.response.url) {
-            decisionHandler(.cancel)
-            return
+            return .cancel
         }
 
         if let mimeType = navigationResponse.response.mimeType {
             isJSONContentType = mimeType == "application/json"
         }
 
-        decisionHandler(.allow)
+        return .allow
     }
 
     open func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
@@ -518,13 +513,12 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
         didStopLoading()
     }
 
-    open func webView(
+    nonisolated open func webView(
         _ webView: WKWebView,
-        didReceive challenge: URLAuthenticationChallenge,
-        completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void
-    ) {
+        didReceive challenge: URLAuthenticationChallenge
+    ) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
         log.debug("🔐 WKWebView Received Authentication Challenge: \(challenge.protectionSpace.authenticationMethod)")
-        completionHandler(.performDefaultHandling, nil)
+        return (.performDefaultHandling, nil)
     }
 }
 
