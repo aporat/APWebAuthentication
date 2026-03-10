@@ -40,4 +40,23 @@ extension Data {
     var allBytes: [UInt8] {
         [UInt8](self)
     }
+
+    /// Returns a Base64URL-encoded string (RFC 4648 §5) without padding.
+    ///
+    /// This encoding is required for PKCE code challenges, DPoP JWTs, and other
+    /// OAuth / AT Protocol values that must use URL-safe Base64 without `=` padding.
+    ///
+    /// **Example:**
+    /// ```swift
+    /// let digest = SHA256.hash(data: Data("hello".utf8))
+    /// let encoded = Data(digest).base64URLEncodedString()
+    /// ```
+    ///
+    /// - Returns: A URL-safe, unpadded Base64 string.
+    func base64URLEncodedString() -> String {
+        base64EncodedString()
+            .replacingOccurrences(of: "+", with: "-")
+            .replacingOccurrences(of: "/", with: "_")
+            .replacingOccurrences(of: "=", with: "")
+    }
 }
