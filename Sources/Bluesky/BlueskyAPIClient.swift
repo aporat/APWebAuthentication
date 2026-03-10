@@ -84,11 +84,11 @@ public final class BlueskyAPIClient: OAuth2Client {
     /// ```json
     /// { "error": "InvalidToken", "message": "Token has been revoked" }
     /// ```
-    override public func extractErrorMessage(from json: JSON) -> String? {
-        if let message = json["message"].string, !message.isEmpty {
+    override public func extractErrorMessage(from json: JSON?) -> String? {
+        if let message = json?["message"].string, !message.isEmpty {
             return message
         }
-        if let error = json["error"].string, !error.isEmpty {
+        if let error = json?["error"].string, !error.isEmpty {
             return error
         }
         return nil

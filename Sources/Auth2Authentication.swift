@@ -19,7 +19,7 @@ import Foundation
 /// }
 /// ```
 @MainActor
-public final class Auth2Authentication: Authentication {
+public class Auth2Authentication: Authentication {
 
     // MARK: - Settings Storage
 

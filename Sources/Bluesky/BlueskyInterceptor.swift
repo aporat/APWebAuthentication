@@ -105,35 +105,6 @@ public final class BlueskyInterceptor: OAuth2Interceptor, @unchecked Sendable {
         }
     }
 
-    // MARK: - RequestRetrier
-
-    /// Retries the request once when the server signals that a DPoP nonce is required.
-    ///
-    /// When a 401 response includes `WWW-Authenticate: DPoP error="use_dpop_nonce"`,
-    /// the server also sends a fresh nonce in `DPoP-Nonce`. We cache the nonce and
-    /// retry the request exactly once so the next `adapt` call includes it.
-    override public func retry(
-        _ request: Request,
-        for session: Session,
-        dueTo error: Error,
-        completion: @escaping (RetryResult) -> Void
-    ) {
-        guard
-            let response = request.task?.response as? HTTPURLResponse,
-            (response.statusCode == 400 || response.statusCode == 401),
-            let wwwAuth = response.value(forHTTPHeaderField: "WWW-Authenticate"),
-            wwwAuth.contains("use_dpop_nonce"),
-            let nonce = response.value(forHTTPHeaderField: "DPoP-Nonce"),
-            request.retryCount == 0
-        else {
-            completion(.doNotRetry)
-            return
-        }
-
-        let host = request.request?.url?.host ?? "bsky.social"
-        dpopNonces[host] = nonce
-        completion(.retry)
-    }
 
     // MARK: - Nonce Management
 

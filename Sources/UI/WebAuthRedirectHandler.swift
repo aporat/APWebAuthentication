@@ -185,8 +185,13 @@ private extension URL {
 
         // Check for errors
         if let error = params["error"] as? String {
+            // Decode error description: replace + with spaces and decode percent encoding
             let description = params["error_description"] as? String
-            return .failure(.failed(reason: description ?? error))
+            let decodedDescription = description?
+                .replacingOccurrences(of: "+", with: " ")
+                .removingPercentEncoding
+            
+            return .failure(.failed(reason: decodedDescription ?? description ?? error))
         }
 
         // If we have parameters, return success
