@@ -44,9 +44,9 @@ final class BlueskyDPoPManagerTests: XCTestCase {
         XCTAssertNotNil(jwk["y"])
     }
 
-    func testCodeChallengeIsBase64URL() {
-        let verifier = BlueskyAuthentication.generateCodeVerifier()
-        let challenge = BlueskyAuthentication.codeChallenge(for: verifier)
+    func testCodeChallengeIsBase64URL() async {
+        let verifier = await BlueskyAuthentication.generateCodeVerifier()
+        let challenge = await BlueskyAuthentication.codeChallenge(for: verifier)
 
         // Base64URL uses only A-Z, a-z, 0-9, -, _  (no +, /, or =)
         XCTAssertFalse(challenge.contains("+"))
@@ -55,8 +55,8 @@ final class BlueskyDPoPManagerTests: XCTestCase {
         XCTAssertFalse(challenge.isEmpty)
     }
 
-    func testCodeVerifierIsURLSafe() {
-        let verifier = BlueskyAuthentication.generateCodeVerifier()
+    func testCodeVerifierIsURLSafe() async {
+        let verifier = await BlueskyAuthentication.generateCodeVerifier()
 
         XCTAssertFalse(verifier.isEmpty)
         XCTAssertFalse(verifier.contains("+"))
@@ -64,9 +64,9 @@ final class BlueskyDPoPManagerTests: XCTestCase {
         XCTAssertFalse(verifier.contains("="))
     }
 
-    func testAuthorizationURLBuildsCorrectly() {
+    func testAuthorizationURLBuildsCorrectly() async {
         let endpoint = URL(string: "https://bsky.social/oauth/authorize")!
-        let url = BlueskyAuthentication.authorizationURL(
+        let url = await BlueskyAuthentication.authorizationURL(
             authorizationEndpoint: endpoint,
             clientId: "https://myapp.example.com/client-metadata.json",
             redirectUri: "myapp://callback",
