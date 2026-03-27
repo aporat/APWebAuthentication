@@ -58,14 +58,14 @@ jobs:
             ./TestResults.xcresult > ./test-results.xml
 
       - name: Upload Code Coverage to Codecov
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: ${{ github.repository }}
           files: ./coverage/cobertura.xml
 
       - name: Upload Test Results to Codecov
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           report_type: test_results
