@@ -8,7 +8,7 @@ import Foundation
 /// **Example Usage:**
 /// ```swift
 /// let auth = Auth1Authentication()
-/// auth.accountIdentifier = "twitter_user"
+/// auth.accountIdentifier = "x_user"
 /// auth.token = "user_token"
 /// auth.secret = "user_secret"
 ///
@@ -25,6 +25,8 @@ public final class Auth1Authentication: Authentication {
     private struct AuthSettings: Codable, Sendable {
         let token: String?
         let secret: String?
+        let consumerKey: String?
+        let consumerSecret: String?
     }
 
     // MARK: - OAuth 1.0a Credentials
@@ -34,6 +36,12 @@ public final class Auth1Authentication: Authentication {
 
     /// The OAuth access token secret.
     public var secret: String?
+
+    /// The OAuth consumer key.
+    public var consumerKey: String?
+
+    /// The OAuth consumer secret.
+    public var consumerSecret: String?
 
     // MARK: - Initialization
 
@@ -69,7 +77,7 @@ public final class Auth1Authentication: Authentication {
 
     /// Saves OAuth 1.0a credentials to disk.
     override public func save() async {
-        let settings = AuthSettings(token: token, secret: secret)
+        let settings = AuthSettings(token: token, secret: secret, consumerKey: consumerKey, consumerSecret: consumerSecret)
         guard let authSettingsURL = authSettingsURL else { return }
 
         do {
@@ -95,6 +103,8 @@ public final class Auth1Authentication: Authentication {
             let settings = try PropertyListDecoder().decode(AuthSettings.self, from: data)
             self.token = settings.token
             self.secret = settings.secret
+            self.consumerKey = settings.consumerKey
+            self.consumerSecret = settings.consumerSecret
         } catch {
             print("⚠️ Failed to load OAuth 1.0a settings: \(error)")
         }
@@ -105,5 +115,7 @@ public final class Auth1Authentication: Authentication {
         await super.delete()
         token = nil
         secret = nil
+        consumerKey = nil
+        consumerSecret = nil
     }
 }

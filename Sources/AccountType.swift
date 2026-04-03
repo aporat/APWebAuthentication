@@ -81,7 +81,7 @@ public extension AccountType {
     /// Each code uses reverse domain notation (e.g., `com.apple.instagram`)
     /// to ensure global uniqueness.
     enum Code: String, Hashable, Sendable, CaseIterable {
-        case twitter = "com.apple.twitter"
+        case x = "com.apple.x"
         case instagram = "com.apple.instagram"
         case fiveHundredpx = "com.apple.500px"
         case tiktok = "com.apple.tiktok"
@@ -98,8 +98,8 @@ public extension AccountType {
         /// Returns a user-friendly platform name.
         public var platformName: String {
             switch self {
-            case .twitter:
-                return "Twitter"
+            case .x:
+                return "X"
             case .instagram:
                 return "Instagram"
             case .fiveHundredpx:

@@ -1,7 +1,7 @@
 import Foundation
 @preconcurrency import SwiftyJSON
 
-public final class TwitterPost: MediaItem, Hashable, @unchecked Sendable {
+public final class XPost: MediaItem, Hashable, @unchecked Sendable {
     public var type = MediaItemType.post
     public var mediaId: String
     public var shortcode: String?
@@ -42,7 +42,7 @@ public final class TwitterPost: MediaItem, Hashable, @unchecked Sendable {
         hasher.combine(mediaId.hashValue)
     }
 
-    public static func == (lhs: TwitterPost, rhs: TwitterPost) -> Bool {
+    public static func == (lhs: XPost, rhs: XPost) -> Bool {
         lhs.mediaId == rhs.mediaId
     }
 

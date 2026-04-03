@@ -11,11 +11,11 @@ final class OAuth1ClientTests: XCTestCase {
     override func setUp() async throws {
         try await super.setUp()
         auth = Auth1Authentication()
+        auth.consumerKey = "key123"
+        auth.consumerSecret = "secret456"
         client = OAuth1Client(
             accountType: AccountStore.twitter,
             baseURLString: "https://api.example.com",
-            consumerKey: "key123",
-            consumerSecret: "secret456",
             auth: auth
         )
     }

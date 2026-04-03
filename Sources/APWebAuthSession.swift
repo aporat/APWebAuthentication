@@ -148,7 +148,7 @@ public let log = SwiftyBeaver.self
 ///
 /// **Advanced Configuration:**
 /// ```swift
-/// let session = APWebAuthSession(accountType: twitter)
+/// let session = APWebAuthSession(accountType: x)
 ///
 /// // Customize appearance
 /// session.appearanceStyle = .normal

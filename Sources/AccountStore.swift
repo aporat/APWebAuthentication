@@ -13,7 +13,7 @@ import UIKit
 /// ```swift
 /// // Enable specific platforms
 /// AccountStore.setEnabled(.instagram, enabled: true)
-/// AccountStore.setEnabled(.twitter, enabled: true)
+/// AccountStore.setEnabled(.x, enabled: true)
 ///
 /// // Get all supported platforms
 /// let allPlatforms = AccountStore.all
@@ -79,8 +79,8 @@ public final class AccountStore {
         description: "Instagram"
     )
 
-    public static let twitter = AccountType(
-        code: .twitter,
+    public static let x = AccountType(
+        code: .x,
         webAddress: "x.com",
         description: "X"
     )
@@ -146,7 +146,7 @@ public final class AccountStore {
     /// Order determines display order in UI (settings, account lists).
     public static let all: [AccountType] = [
         instagram,
-        twitter,
+        x,
         pinterest,
         tumblr,
         twitch,

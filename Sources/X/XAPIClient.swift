@@ -2,19 +2,19 @@ import Alamofire
 import Foundation
 @preconcurrency import SwiftyJSON
 
-// MARK: - TwitterAPIClient
+// MARK: - XAPIClient
 
-public final class TwitterAPIClient: OAuth1Client {
+public final class XAPIClient: OAuth2Client {
 
     // MARK: - Initialization
 
-    public convenience init(consumerKey: String, consumerSecret: String, auth: Auth1Authentication) {
+    public convenience init(auth: Auth2Authentication) {
+        let interceptor = OAuth2Interceptor(auth: auth, tokenLocation: .authorizationHeader)
+
         self.init(
-            accountType: AccountStore.twitter,
-            baseURLString: "https://api.twitter.com/2/",
-            consumerKey: consumerKey,
-            consumerSecret: consumerSecret,
-            auth: auth
+            accountType: AccountStore.x,
+            baseURLString: "https://api.x.com/2/",
+            requestInterceptor: interceptor
         )
     }
 

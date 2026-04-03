@@ -20,15 +20,12 @@ import Foundation
 ///
 /// **Example:**
 /// ```swift
-/// let auth = Auth1Authentication(
-///     consumerKey: "your_key",
-///     consumerSecret: "your_secret"
-/// )
+/// let auth = Auth1Authentication()
+/// auth.consumerKey = "your_key"
+/// auth.consumerSecret = "your_secret"
 ///
 /// let client = OAuth1Client(
 ///     baseURLString: "https://api.twitter.com/1.1/",
-///     consumerKey: "your_key",
-///     consumerSecret: "your_secret",
 ///     auth: auth
 /// )
 ///
@@ -54,21 +51,13 @@ open class OAuth1Client: AuthClient {
     /// - Parameters:
     ///   - accountType: The account type/platform this client targets
     ///   - baseURLString: The base URL for all API requests
-    ///   - consumerKey: The OAuth consumer key (identifies your app)
-    ///   - consumerSecret: The OAuth consumer secret (your app's secret key)
-    ///   - auth: The authentication object containing user tokens
+    ///   - auth: The authentication object containing consumer and user tokens
     public init(
         accountType: AccountType,
         baseURLString: String,
-        consumerKey: String,
-        consumerSecret: String,
         auth: Auth1Authentication
     ) {
-        let interceptor = OAuth1Interceptor(
-            consumerKey: consumerKey,
-            consumerSecret: consumerSecret,
-            auth: auth
-        )
+        let interceptor = OAuth1Interceptor(auth: auth)
 
         self.interceptor = interceptor
         super.init(accountType: accountType, baseURLString: baseURLString, requestInterceptor: interceptor)

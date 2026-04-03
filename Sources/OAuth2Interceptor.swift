@@ -127,6 +127,30 @@ public class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
     ///         and MainActor-isolated properties are accessed safely within Task contexts.
     let auth: Auth2Authentication
 
+    /// The URL for the OAuth 2.0 token refresh endpoint.
+    ///
+    /// When set, the interceptor will automatically attempt to refresh the access token
+    /// using the refresh token grant when a 401 Unauthorized response is received.
+    ///
+    /// **Example:**
+    /// ```swift
+    /// interceptor.refreshTokenURL = "https://api.tumblr.com/v2/oauth2/token"
+    /// ```
+    ///
+    /// - Note: Requires `auth.refreshToken`, `auth.clientId`, and `auth.clientSecret` to be set.
+    let refreshTokenURL: String?
+
+    // MARK: - Refresh Token State
+
+    /// Whether a token refresh is currently in progress.
+    private var isRefreshing = false
+
+    /// Queued retry completions waiting for the token refresh to finish.
+    private var requestsToRetry: [(RetryResult) -> Void] = []
+
+    /// Lock for thread-safe access to refresh state.
+    private let lock = NSLock()
+
     // MARK: - Initialization
 
     /// Creates a new OAuth 2.0 request interceptor.
@@ -145,6 +169,13 @@ public class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
     ///     tokenParamName: "token",
     ///     tokenHeaderParamName: "Bearer"
     /// )
+    ///
+    /// // With refresh token support:
+    /// let interceptor = OAuth2Interceptor(
+    ///     auth: auth,
+    ///     tokenLocation: .authorizationHeader,
+    ///     refreshTokenURL: "https://api.example.com/oauth2/token"
+    /// )
     /// ```
     ///
     /// - Parameters:
@@ -152,16 +183,19 @@ public class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
     ///   - tokenLocation: Where to include the token (default: `.params`)
     ///   - tokenParamName: Parameter name for token (default: `"access_token"`)
     ///   - tokenHeaderParamName: Authorization scheme name (default: `"Bearer"`)
+    ///   - refreshTokenURL: The token endpoint URL for refresh grants (default: `nil`, disabling auto-refresh)
     public init(
         auth: Auth2Authentication,
         tokenLocation: TokenLocation = .params,
         tokenParamName: String = "access_token",
-        tokenHeaderParamName: String = "Bearer"
+        tokenHeaderParamName: String = "Bearer",
+        refreshTokenURL: String? = nil
     ) {
         self.auth = auth
         self.tokenLocation = tokenLocation
         self.tokenParamName = tokenParamName
         self.tokenHeaderParamName = tokenHeaderParamName
+        self.refreshTokenURL = refreshTokenURL
     }
 
     // MARK: - RequestAdapter
@@ -229,5 +263,134 @@ public class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
 
             completion(.success(urlRequest))
         }
+    }
+
+    // MARK: - RequestRetrier
+
+    /// Retries failed requests by refreshing the access token when a 401 is received.
+    ///
+    /// This method:
+    /// 1. Checks if the failure is a 401 and refresh is configured
+    /// 2. Queues the retry completion if a refresh is already in progress
+    /// 3. Calls the token endpoint with the refresh token grant
+    /// 4. Updates the auth credentials and retries all queued requests on success
+    /// 5. Fails all queued requests if the refresh fails
+    ///
+    /// Only one refresh attempt is made per request (`retryCount == 0`) to prevent infinite loops.
+    ///
+    /// - Parameters:
+    ///   - request: The failed Alamofire request
+    ///   - session: The Alamofire session
+    ///   - error: The error that caused the failure
+    ///   - completion: Completion handler with retry decision
+    public func retry(
+        _ request: Request,
+        for session: Session,
+        dueTo error: Error,
+        completion: @escaping @Sendable (RetryResult) -> Void
+    ) {
+        // Only retry once per request to prevent loops
+        guard request.retryCount == 0,
+              let refreshTokenURL,
+              let response = request.task?.response as? HTTPURLResponse,
+              response.statusCode == 401 else {
+            completion(.doNotRetry)
+            return
+        }
+
+        lock.lock()
+        requestsToRetry.append(completion)
+
+        guard !isRefreshing else {
+            lock.unlock()
+            return
+        }
+
+        isRefreshing = true
+        lock.unlock()
+
+        Task { @MainActor in
+            let succeeded = await self.refreshAccessToken(url: refreshTokenURL)
+
+            let completions = self.lock.withLock {
+                let completions = self.requestsToRetry
+                self.requestsToRetry.removeAll()
+                self.isRefreshing = false
+                return completions
+            }
+
+            completions.forEach { $0(succeeded ? .retry : .doNotRetry) }
+        }
+    }
+
+    // MARK: - Token Refresh
+
+    /// Calls the OAuth 2.0 token endpoint with the refresh token grant.
+    ///
+    /// Sends a POST request with:
+    /// - `grant_type=refresh_token`
+    /// - `client_id`
+    /// - `client_secret`
+    /// - `refresh_token`
+    ///
+    /// On success, updates `auth.accessToken` and `auth.refreshToken` and persists them.
+    ///
+    /// - Parameter url: The token endpoint URL
+    /// - Returns: `true` if the token was refreshed successfully, `false` otherwise
+    @MainActor
+    private func refreshAccessToken(url: String) async -> Bool {
+        guard let refreshToken = auth.refreshToken,
+              let clientId = auth.clientId,
+              let clientSecret = auth.clientSecret else {
+            return false
+        }
+
+        let parameters: [String: String] = [
+            "grant_type": "refresh_token",
+            "client_id": clientId,
+            "client_secret": clientSecret,
+            "refresh_token": refreshToken
+        ]
+
+        do {
+            let response = await AF.request(
+                url,
+                method: .post,
+                parameters: parameters,
+                encoder: URLEncodedFormParameterEncoder.default
+            )
+            .validate()
+            .serializingDecodable(TokenResponse.self)
+            .response
+
+            guard let tokenResponse = response.value else {
+                return false
+            }
+
+            auth.accessToken = tokenResponse.accessToken
+            if let newRefreshToken = tokenResponse.refreshToken {
+                auth.refreshToken = newRefreshToken
+            }
+            await auth.save()
+
+            return true
+        }
+    }
+}
+
+// MARK: - Token Response
+
+/// Response from an OAuth 2.0 token endpoint.
+private struct TokenResponse: Decodable, Sendable {
+    let accessToken: String
+    let refreshToken: String?
+    let tokenType: String?
+    let expiresIn: Int?
+
+    enum CodingKeys: String, CodingKey {
+        case accessToken = "access_token"
+        case refreshToken = "refresh_token"
+        case tokenType = "token_type"
+        case expiresIn = "expires_in"
     }
 }

@@ -20,13 +20,13 @@ final class AccountStoreTests: XCTestCase {
     }
 
     func testAccountTypes_withEnabledServices_returnsCorrectTypes() {
-        AccountStore.setEnabled(AccountType.Code.twitter, enabled: true)
+        AccountStore.setEnabled(AccountType.Code.x, enabled: true)
         AccountStore.setEnabled(AccountType.Code.github, enabled: true)
 
         let accounts = AccountStore.accountTypes
         let codes = accounts.map { $0.code }
 
-        XCTAssertTrue(codes.contains(.twitter))
+        XCTAssertTrue(codes.contains(.x))
         XCTAssertTrue(codes.contains(.github))
         XCTAssertEqual(accounts.count, 2)
     }

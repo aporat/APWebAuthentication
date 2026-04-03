@@ -28,12 +28,16 @@ public class Auth2Authentication: Authentication {
         let accessToken: String?
         let refreshToken: String?
         let clientId: String?
+        let clientSecret: String?
     }
 
     // MARK: - OAuth 2.0 Credentials
 
     /// The OAuth client ID.
     public var clientId: String?
+
+    /// The OAuth client secret.
+    public var clientSecret: String?
 
     /// The OAuth access token.
     public var accessToken: String?
@@ -75,7 +79,8 @@ public class Auth2Authentication: Authentication {
         let settings = AuthSettings(
             accessToken: self.accessToken,
             refreshToken: self.refreshToken,
-            clientId: self.clientId
+            clientId: self.clientId,
+            clientSecret: self.clientSecret
         )
 
         guard let authSettingsURL = authSettingsURL else { return }
@@ -104,6 +109,7 @@ public class Auth2Authentication: Authentication {
             self.accessToken = settings.accessToken
             self.refreshToken = settings.refreshToken
             self.clientId = settings.clientId
+            self.clientSecret = settings.clientSecret
         } catch {
             print("⚠️ Failed to load OAuth 2.0 settings: \(error)")
         }
@@ -115,6 +121,7 @@ public class Auth2Authentication: Authentication {
         accessToken = nil
         refreshToken = nil
         clientId = nil
+        clientSecret = nil
     }
 
     // MARK: - Runtime Configuration
@@ -124,6 +131,10 @@ public class Auth2Authentication: Authentication {
 
         if let value = options?["client_id"].string {
             clientId = value
+        }
+
+        if let value = options?["client_secret"].string {
+            clientSecret = value
         }
     }
 }

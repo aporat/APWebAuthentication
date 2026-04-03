@@ -53,19 +53,15 @@ public enum OAuth1Error: Error, Sendable {
 /// **Example Usage:**
 /// ```swift
 /// let auth = Auth1Authentication()
+/// auth.consumerKey = "app_consumer_key"
+/// auth.consumerSecret = "app_consumer_secret"
 /// auth.token = "user_token"
 /// auth.secret = "user_secret"
 ///
-/// let interceptor = OAuth1Interceptor(
-///     consumerKey: "app_consumer_key",
-///     consumerSecret: "app_consumer_secret",
-///     auth: auth
-/// )
+/// let interceptor = OAuth1Interceptor(auth: auth)
 ///
 /// let client = OAuth1Client(
 ///     baseURLString: "https://api.twitter.com/1.1/",
-///     consumerKey: "app_consumer_key",
-///     consumerSecret: "app_consumer_secret",
 ///     auth: auth
 /// )
 /// ```
@@ -81,20 +77,9 @@ public final class OAuth1Interceptor: RequestInterceptor, Sendable {
 
     // MARK: - Properties
 
-    /// The OAuth consumer key identifying the application.
-    ///
-    /// This is obtained when registering your app with the OAuth provider.
-    private let consumerKey: String
-
-    /// The OAuth consumer secret used for signing requests.
-    ///
-    /// This is the app's secret key, obtained during registration.
-    /// It must be kept secure and never exposed in client code.
-    private let consumerSecret: String
-
     /// The authentication manager containing user tokens and configuration.
     ///
-    /// Provides access to the user's access token and secret.
+    /// Provides access to the user's access token, secret, consumer key, and consumer secret.
     @MainActor
     public let auth: Auth1Authentication
 
@@ -102,14 +87,9 @@ public final class OAuth1Interceptor: RequestInterceptor, Sendable {
 
     /// Creates a new OAuth 1.0a request interceptor.
     ///
-    /// - Parameters:
-    ///   - consumerKey: The OAuth consumer key (app identifier)
-    ///   - consumerSecret: The OAuth consumer secret (app secret)
-    ///   - auth: The authentication manager with user tokens
+    /// - Parameter auth: The authentication manager with consumer and user tokens
     @MainActor
-    public init(consumerKey: String, consumerSecret: String, auth: Auth1Authentication) {
-        self.consumerKey = consumerKey
-        self.consumerSecret = consumerSecret
+    public init(auth: Auth1Authentication) {
         self.auth = auth
     }
 
@@ -147,7 +127,9 @@ public final class OAuth1Interceptor: RequestInterceptor, Sendable {
                 return
             }
 
-            // Get user credentials from auth
+            // Get credentials from auth
+            let consumerKey = await auth.consumerKey
+            let consumerSecret = await auth.consumerSecret
             let authToken = await auth.token
             let authSecret = await auth.secret
             let userAgent = await auth.userAgent
@@ -176,6 +158,8 @@ public final class OAuth1Interceptor: RequestInterceptor, Sendable {
                     for: url,
                     method: adaptedRequest.httpMethod ?? "GET",
                     formParameters: formParameters,
+                    consumerKey: consumerKey,
+                    consumerSecret: consumerSecret,
                     authToken: authToken,
                     authSecret: authSecret
                 )
@@ -231,12 +215,14 @@ private extension OAuth1Interceptor {
         for url: URL,
         method: String,
         formParameters: [String: String],
+        consumerKey: String?,
+        consumerSecret: String?,
         authToken: String?,
         authSecret: String?
     ) throws -> String {
 
         // Build OAuth parameters (consumer key, nonce, timestamp, etc.)
-        var oauthParameters = buildOAuthParameters(token: authToken)
+        var oauthParameters = buildOAuthParameters(consumerKey: consumerKey, token: authToken)
 
         // Combine all parameters for signing
         let allParameters = oauthParameters
@@ -260,7 +246,7 @@ private extension OAuth1Interceptor {
         .joined(separator: "&")
 
         // Create signing key
-        let signingKey = "\(consumerSecret.urlEscaped)&\((authSecret ?? "").urlEscaped)"
+        let signingKey = "\((consumerSecret ?? "").urlEscaped)&\((authSecret ?? "").urlEscaped)"
 
         // Generate HMAC-SHA1 signature
         guard let signature = try? HMAC(key: signingKey, variant: .sha1)
@@ -297,9 +283,9 @@ private extension OAuth1Interceptor {
     ///
     /// - Parameter token: The user's OAuth access token (optional)
     /// - Returns: A dictionary of OAuth parameters
-    func buildOAuthParameters(token: String?) -> [String: String] {
+    func buildOAuthParameters(consumerKey: String?, token: String?) -> [String: String] {
         var parameters: [String: String] = [
-            "oauth_consumer_key": consumerKey,
+            "oauth_consumer_key": consumerKey ?? "",
             "oauth_signature_method": "HMAC-SHA1",
             "oauth_version": "1.0",
             "oauth_timestamp": String(Int(Date().timeIntervalSince1970)),
