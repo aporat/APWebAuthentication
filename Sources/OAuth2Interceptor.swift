@@ -364,6 +364,9 @@ public class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
             .response
 
             guard let tokenResponse = response.value else {
+                auth.accessToken = nil
+                auth.refreshToken = nil
+                await auth.save()
                 return false
             }
 
