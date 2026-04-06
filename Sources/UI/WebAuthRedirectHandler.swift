@@ -218,7 +218,7 @@ private extension URL {
             let components = pair.components(separatedBy: "=")
             if components.count == 2 {
                 let key = components[0]
-                let value = components[1].removingPercentEncoding ?? components[1]
+                let value = components[1].replacingOccurrences(of: "+", with: " ").removingPercentEncoding ?? components[1]
                 params[key] = value
             }
         }
