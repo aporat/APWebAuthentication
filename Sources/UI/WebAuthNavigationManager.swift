@@ -391,17 +391,17 @@ public final class WebAuthNavigationManager {
         button.addTarget(self, action: selector, for: .touchUpInside)
         button.frame = CGRect(x: 0, y: 0, width: 30, height: 30)
         button.imageView?.contentMode = .scaleAspectFit
-        button.tintColor = UIColor.black
+        button.tintColor = UIColor.label
         return UIBarButtonItem(customView: button)
     }
-    
+
     private func createToolbarButton(systemName: String, selector: Selector) -> UIBarButtonItem {
         let button = UIButton(type: .system)
         button.setImage(UIImage(systemName: systemName), for: .normal)
         button.addTarget(self, action: selector, for: .touchUpInside)
         button.frame = CGRect(x: 0, y: 0, width: 40, height: 30)
         button.imageView?.contentMode = .scaleAspectFit
-        button.tintColor = UIColor.black
+        button.tintColor = UIColor.label
         return UIBarButtonItem(customView: button)
     }
     
