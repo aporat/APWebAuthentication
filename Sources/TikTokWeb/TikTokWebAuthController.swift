@@ -63,11 +63,12 @@ public final class TikTokWebAuthViewController: WebAuthViewController {
             if self.auth.isAuthorized {
                 self.didStopLoading()
 
-                let result: [String: String] = [:]
+                let handler = self.completionHandler
+                self.completionHandler = nil
 
+                let url = URL(string: "tiktok://auth-complete") ?? URL(string: "about:blank")!
                 self.dismiss(animated: true) {
-                    self.completionHandler?(.success(result))
-                    self.completionHandler = nil
+                    handler?(.success((url, cookies)))
                 }
             }
         }

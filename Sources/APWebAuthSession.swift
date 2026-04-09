@@ -2,36 +2,6 @@ import SwifterSwift
 import SwiftyBeaver
 import UIKit
 
-// MARK: - Web Authentication Result
-
-/// A thread-safe wrapper for web authentication result data.
-///
-/// This struct safely transports dictionary data across async/concurrent boundaries.
-/// The data is constrained to Sendable types only, ensuring true thread safety.
-///
-/// **Usage:**
-/// ```swift
-/// let session = APWebAuthSession(accountType: accountType)
-/// if let result = try await session.start(url: authURL, callbackURL: redirectURL) {
-///     print("Auth data:", result.data)
-/// }
-/// ```
-public struct APWebAuthResult: Sendable {
-
-    /// The authentication response data from the web service.
-    ///
-    /// Typical contents include tokens, user IDs, and other auth-related information.
-    /// Values are constrained to Sendable types for thread safety across async boundaries.
-    public let data: [String: any Sendable]
-
-    /// Creates a new authentication result.
-    ///
-    /// - Parameter data: The dictionary containing authentication response data
-    public init(_ data: [String: any Sendable]) {
-        self.data = data
-    }
-}
-
 // MARK: - Appearance Styles
 
 extension APWebAuthSession {
@@ -273,7 +243,7 @@ public final class APWebAuthSession {
     /// }
     /// ```
     @discardableResult
-    public func start(url URL: URL, callbackURL: URL) async throws(APWebAuthenticationError) -> APWebAuthResult? {
+    public func start(url URL: URL, callbackURL: URL) async throws(APWebAuthenticationError) -> (URL, [HTTPCookie]) {
         loginViewController = WebAuthViewController(authURL: URL, redirectURL: callbackURL)
         return try await start()
     }
@@ -304,7 +274,7 @@ public final class APWebAuthSession {
     /// let result = try await session.start()
     /// ```
     @discardableResult
-    public func start() async throws(APWebAuthenticationError) -> APWebAuthResult? {
+    public func start() async throws(APWebAuthenticationError) -> (URL, [HTTPCookie]) {
         do {
             // Safari style shows a permission dialog first
             if appearanceStyle == .safari {
@@ -315,7 +285,7 @@ public final class APWebAuthSession {
             }
 
             // Bridge callback-based web view to async/await
-            return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<APWebAuthResult?, Error>) in
+            return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<(URL, [HTTPCookie]), Error>) in
 
                 guard let loginVC = self.loginViewController else {
                     log.error("loginViewController is nil before completionHandler can be set.")
@@ -324,16 +294,11 @@ public final class APWebAuthSession {
                 }
 
                 // Set up completion handler for web view controller
-                loginVC.completionHandler = { [weak self] (result: Result<[String: any Sendable]?, APWebAuthenticationError>) in
+                loginVC.completionHandler = { [weak self] (result: Result<(URL, [HTTPCookie]), APWebAuthenticationError>) in
 
                     switch result {
-                    case .success(let params):
-                        if let params = params {
-                            let safeResult = APWebAuthResult(params)
-                            continuation.resume(returning: safeResult)
-                        } else {
-                            continuation.resume(returning: nil)
-                        }
+                    case .success(let value):
+                        continuation.resume(returning: value)
 
                     case .failure(let error):
                         log.error("completionHandler: Failure. Resuming with error: \(error.localizedDescription)")

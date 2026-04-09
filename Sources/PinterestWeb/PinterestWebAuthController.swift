@@ -85,18 +85,12 @@ public final class PinterestWebAuthController: WebAuthViewController {
 
                 let cookies = await getCookies()
 
-                var result: [String: any Sendable] = [
-                    "cookies": cookies,
-                ]
-                
-                if let value = auth.sessionId { result["session_id"] = value }
-                if let value = auth.csrfToken { result["csrf_token"] = value }
-                
                 let handler = completionHandler
                 completionHandler = nil
-                
+
+                let url = URL(string: "pinterest://auth-complete") ?? URL(string: "about:blank")!
                 dismiss(animated: true) {
-                    handler?(.success(result))
+                    handler?(.success((url, cookies)))
                 }
             } else {
                 log.error("❌ Pinterest Authorization Failed: Cookies not found after retries")

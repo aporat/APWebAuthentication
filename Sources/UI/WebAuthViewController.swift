@@ -10,7 +10,7 @@ import UIKit
 // MARK: - Type Aliases
 
 extension WebAuthViewController {
-    public typealias CompletionHandler = (Result<[String: any Sendable]?, APWebAuthenticationError>) -> Void
+    public typealias CompletionHandler = (Result<(URL, [HTTPCookie]), APWebAuthenticationError>) -> Void
     public typealias DismissButtonStyle = WebAuthNavigationManager.DismissButtonStyle
 }
 
@@ -531,22 +531,19 @@ private extension WebAuthViewController {
     /// - Parameter url: The URL to check
     /// - Returns: `true` if the URL matched the redirect URL, `false` otherwise
     func handleRedirect(url: URL?) -> Bool {
-        guard let result = redirectHandler.checkRedirect(url: url) else {
+        guard let url, redirectHandler.checkRedirect(url: url) != nil else {
             return false
         }
 
-        // Complete authentication
-        switch result {
-        case .success(let params):
-            completionHandler?(.success(params))
-        case .failure(let error):
-            completionHandler?(.failure(error))
-        }
-
+        // Capture and clear handler to prevent duplicate calls
+        let handler = completionHandler
         completionHandler = nil
 
-        DispatchQueue.main.async { [weak self] in
-            self?.dismiss(animated: true)
+        // Fetch cookies from the web view before completing
+        Task {
+            let cookies = await webView.configuration.websiteDataStore.httpCookieStore.allCookies()
+            handler?(.success((url, cookies)))
+            dismiss(animated: true)
         }
 
         return true
