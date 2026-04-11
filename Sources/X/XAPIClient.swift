@@ -9,7 +9,7 @@ public final class XAPIClient: OAuth2Client {
     // MARK: - Initialization
 
     public convenience init(auth: Auth2Authentication) {
-        let interceptor = OAuth2Interceptor(auth: auth, tokenLocation: .authorizationHeader)
+        let interceptor = OAuth2Interceptor(auth: auth, tokenLocation: .authorizationHeader, refreshTokenURL: "https://api.x.com/2/oauth2/token")
 
         self.init(
             accountType: AccountStore.x,
