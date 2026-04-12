@@ -1,5 +1,4 @@
 import Foundation
-import SwiftyBeaver
 @preconcurrency import SwiftyJSON
 
 // MARK: - Redirect Handler
@@ -77,13 +76,9 @@ public final class WebAuthRedirectHandler {
             return nil
         }
 
-        log.debug("🔍 Checking Redirect: URL: \(url.absoluteString) vs Redirect: \(currentRedirectURL)")
-
         guard url.absoluteString.hasPrefix(currentRedirectURL) else {
             return nil
         }
-
-        log.info("✅ Redirect URL MATCH detected: \(url.absoluteString)")
 
         return url.getResponse()
     }

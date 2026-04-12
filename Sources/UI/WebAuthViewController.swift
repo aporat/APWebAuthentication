@@ -2,7 +2,6 @@ import Foundation
 import JGProgressHUD
 import SnapKit
 import SwifterSwift
-import SwiftyBeaver
 @preconcurrency import SwiftyJSON
 import UIKit
 @preconcurrency import WebKit
@@ -329,7 +328,6 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
     /// Loads the authentication URL in the web view.
     open func loadRequest() {
         guard let url = authURL else { return }
-        log.debug("🌐 Loading Request: \(url.absoluteString)")
         let request = URLRequest(url: url)
         webView.load(request)
     }
@@ -372,10 +370,6 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
         decidePolicyFor navigationAction: WKNavigationAction,
         preferences: WKWebpagePreferences
     ) async -> (WKNavigationActionPolicy, WKWebpagePreferences) {
-        let urlString = navigationAction.request.url?.absoluteString ?? "nil URL"
-        let navType = navigationAction.navigationType.rawValue
-        log.debug("🕸 WKWebView Navigation Action: \(urlString) | Type: \(navType)")
-
         // Allow subclasses to check for custom redirects first
         if checkForRedirect(url: navigationAction.request.url) {
             return (.cancel, preferences)
@@ -402,10 +396,6 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
         _ webView: WKWebView,
         decidePolicyFor navigationResponse: WKNavigationResponse
     ) async -> WKNavigationResponsePolicy {
-        let urlString = navigationResponse.response.url?.absoluteString ?? "nil URL"
-        let mimeType = navigationResponse.response.mimeType ?? "unknown"
-        log.debug("🕸 WKWebView Navigation Response: \(urlString) | MIME: \(mimeType)")
-
         if handleRedirect(url: navigationResponse.response.url) {
             return .cancel
         }
@@ -418,18 +408,13 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
     }
 
     open func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
-        let urlString = webView.url?.absoluteString ?? "nil URL"
-        log.debug("🚀 WKWebView Started Provisional Navigation: \(urlString)")
         didStartLoading()
     }
 
     open func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
         let nsError = error as NSError
-        log.error("❌ WKWebView Navigation Failed: \(error.localizedDescription) | Domain: \(nsError.domain) | Code: \(nsError.code)")
 
         if let failingURL = nsError.userInfo[NSURLErrorFailingURLErrorKey] as? URL {
-            log.debug("❌ Failing URL: \(failingURL.absoluteString)")
-
             // Check for custom redirect handling first (subclass override)
             if checkForRedirect(url: failingURL) {
                 return
@@ -450,11 +435,8 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
         withError error: Error
     ) {
         let nsError = error as NSError
-        log.error("❌ WKWebView Provisional Navigation Failed: \(error.localizedDescription) | Domain: \(nsError.domain) | Code: \(nsError.code)")
 
         if let failingURL = nsError.userInfo[NSURLErrorFailingURLErrorKey] as? URL {
-            log.debug("❌ Provisional Failing URL: \(failingURL.absoluteString)")
-
             // Check for custom redirect handling first (subclass override)
             if checkForRedirect(url: failingURL) {
                 return
@@ -470,9 +452,6 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
     }
 
     open func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        let urlString = webView.url?.absoluteString ?? "nil URL"
-        log.debug("🏁 WKWebView Finished Navigation: \(urlString)")
-
         initialLoaded = true
         didStopLoading()
 
@@ -488,14 +467,9 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
     }
 
     open func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
-        let urlString = webView.url?.absoluteString ?? "nil URL"
-        log.debug("📝 WKWebView Did Commit Navigation: \(urlString)")
     }
 
     open func webView(_ webView: WKWebView, didReceiveServerRedirectForProvisionalNavigation navigation: WKNavigation!) {
-        let urlString = webView.url?.absoluteString ?? "nil URL"
-        log.debug("🔄 WKWebView Received Server Redirect: \(urlString)")
-
         // Check if this redirect URL should be handled
         if checkForRedirect(url: webView.url) {
             webView.stopLoading()
@@ -509,7 +483,6 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
     }
 
     open func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
-        log.error("💥 WKWebView Web Content Process Terminated")
         didStopLoading()
     }
 
@@ -517,7 +490,6 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
         _ webView: WKWebView,
         didReceive challenge: URLAuthenticationChallenge
     ) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
-        log.debug("🔐 WKWebView Received Authentication Challenge: \(challenge.protectionSpace.authenticationMethod)")
         return (.performDefaultHandling, nil)
     }
 }

@@ -133,7 +133,6 @@ open class SessionAuthentication: Authentication {
                 try data.write(to: cookiesURL)
             }.value
         } catch {
-            log.error("⚠️ Failed to store cookies: \(error)")
         }
     }
 
@@ -160,7 +159,6 @@ open class SessionAuthentication: Authentication {
 
             return cookies
         } catch {
-            log.error("⚠️ Failed to load cookies: \(error)")
         }
 
         return nil

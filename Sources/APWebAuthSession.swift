@@ -1,5 +1,4 @@
 import SwifterSwift
-import SwiftyBeaver
 import UIKit
 
 // MARK: - Appearance Styles
@@ -73,11 +72,6 @@ public protocol APWebAuthenticationPresentationContextProviding: NSObjectProtoco
     /// - Returns: A view controller to present from, or `nil` if unavailable
     func presentationAnchor(for session: APWebAuthSession) -> UIViewController?
 }
-
-// MARK: - Logging
-
-/// Global logger instance for the authentication system.
-public let log = SwiftyBeaver.self
 
 // MARK: - Web Authentication Session
 
@@ -288,7 +282,6 @@ public final class APWebAuthSession {
             return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<(URL, [HTTPCookie]), Error>) in
 
                 guard let loginVC = self.loginViewController else {
-                    log.error("loginViewController is nil before completionHandler can be set.")
                     continuation.resume(throwing: APWebAuthenticationError.canceled)
                     return
                 }
@@ -301,7 +294,6 @@ public final class APWebAuthSession {
                         continuation.resume(returning: value)
 
                     case .failure(let error):
-                        log.error("completionHandler: Failure. Resuming with error: \(error.localizedDescription)")
                         continuation.resume(throwing: error)
                     }
 
@@ -321,13 +313,11 @@ public final class APWebAuthSession {
                         try self.presentNormalStyle()
                     }
                 } catch {
-                    log.error("Failed to present login view controller: \(error.localizedDescription)")
                     let authError = (error as? APWebAuthenticationError) ?? .failed(reason: error.localizedDescription)
                     continuation.resume(throwing: authError)
                 }
             }
         } catch {
-            log.error("APWebAuthSession start() threw an error: \(error.localizedDescription)")
             self.loginViewController = nil
 
             throw (error as? APWebAuthenticationError) ?? .failed(reason: error.localizedDescription)
@@ -385,7 +375,6 @@ public final class APWebAuthSession {
     ///           or no presentation context is available
     private func presentNormalStyle() throws {
         guard let loginViewController = loginViewController else {
-            log.error("presentNormalStyle: loginViewController is nil.")
             throw APWebAuthenticationError.canceled
         }
 
@@ -401,7 +390,6 @@ public final class APWebAuthSession {
 
         // Present from context provider
         guard let vc = presentationContextProvider?.presentationAnchor(for: self), vc.isVisible else {
-            log.error("presentNormalStyle: No presentationContextProvider or anchor VC is not visible.")
             throw APWebAuthenticationError.failed(reason: "Could not find a valid view controller to present from.")
         }
 
@@ -418,7 +406,6 @@ public final class APWebAuthSession {
     ///           or no presentation context is available
     private func presentSafariStyle() throws {
         guard let loginViewController = loginViewController else {
-            log.error("presentSafariStyle: loginViewController is nil.")
             throw APWebAuthenticationError.canceled
         }
 
@@ -449,7 +436,6 @@ public final class APWebAuthSession {
 
         // Present from context provider
         guard let vc = presentationContextProvider?.presentationAnchor(for: self), vc.isVisible else {
-            log.error("presentSafariStyle: No presentationContextProvider or anchor VC is not visible.")
             throw APWebAuthenticationError.failed(reason: "Could not find a valid view controller to present from.")
         }
 

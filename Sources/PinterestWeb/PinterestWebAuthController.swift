@@ -1,5 +1,4 @@
 import Foundation
-import SwiftyBeaver
 import WebKit
 
 @MainActor
@@ -29,15 +28,11 @@ public final class PinterestWebAuthController: WebAuthViewController {
         guard let url = url else { return false }
         let urlString = url.absoluteString
 
-        log.debug("Pinterest Check Redirect: \(urlString)")
-
         guard initialLoaded else {
-            log.debug("⏭️ Skipping redirect check - initial page not yet loaded")
             return false
         }
 
         if let currentRedirectURL = redirectURL?.absoluteString, !currentRedirectURL.isEmpty, urlString.hasPrefix(currentRedirectURL) {
-            log.info("✅ Redirect URL MATCH detected: \(urlString)")
             attemptAuthVerification()
             return true
         }
@@ -46,7 +41,6 @@ public final class PinterestWebAuthController: WebAuthViewController {
             urlString.contains("pinterest.com/me/") ||
             urlString == "https://www.pinterest.com/" {
 
-            log.info("✅ Pinterest Success Page Detected: \(urlString)")
             attemptAuthVerification()
 
             return true
@@ -81,8 +75,6 @@ public final class PinterestWebAuthController: WebAuthViewController {
             self.didStopLoading()
 
             if success {
-                log.info("🔐 Pinterest Authorization Successful")
-
                 let cookies = await getCookies()
 
                 let handler = completionHandler
@@ -93,8 +85,6 @@ public final class PinterestWebAuthController: WebAuthViewController {
                     handler?(.success((url, cookies)))
                 }
             } else {
-                log.error("❌ Pinterest Authorization Failed: Cookies not found after retries")
-
                 let error = APWebAuthenticationError.sessionExpired(reason: "Login detected, but session cookies could not be retrieved. Please try again.")
 
                 self.dismiss(animated: true) {
@@ -109,8 +99,7 @@ public final class PinterestWebAuthController: WebAuthViewController {
 
     /// Polls for cookies. Returns true if authorized, false if timed out.
     private func retryCookieCheck(maxRetries: Int, delaySeconds: Double) async -> Bool {
-        for attempt in 1...maxRetries {
-            log.debug("🍪 Checking cookies (Attempt \(attempt)/\(maxRetries))...")
+        for _ in 1...maxRetries {
 
             let cookies = await self.getCookies()
             self.auth.setCookies(cookies)

@@ -282,7 +282,6 @@ open class WebTokenInterceptorViewController: UIViewController {
     /// Start the web authentication flow
     public func start() async throws(APWebAuthenticationError) {
         guard !state.isFinished else {
-            log.debug("WebTokenInterceptor: Already finished, ignoring start()")
             return
         }
 
@@ -301,7 +300,6 @@ open class WebTokenInterceptorViewController: UIViewController {
 
     /// Stop loading and cleanup
     public func stopLoading() {
-        log.debug("WebTokenInterceptor: Stopping loading")
         timeoutTask?.cancel()
         webView.stopLoading()
         cleanupWebView()
@@ -314,7 +312,6 @@ open class WebTokenInterceptorViewController: UIViewController {
             webView.customUserAgent = userAgent
         }
 
-        log.debug("WebTokenInterceptor: Loading URL: \(configuration.url.absoluteString)")
         webView.load(URLRequest(url: configuration.url))
     }
 
@@ -322,11 +319,8 @@ open class WebTokenInterceptorViewController: UIViewController {
 
     private func startTimeoutIfNeeded() {
         guard !configuration.isInteractive else {
-            log.debug("WebTokenInterceptor: Interactive mode, no timeout")
             return
         }
-
-        log.debug("WebTokenInterceptor: Starting timeout of \(configuration.timeout) seconds")
 
         timeoutTask = Task { [weak self] in
             guard let self else { return }
@@ -341,14 +335,12 @@ open class WebTokenInterceptorViewController: UIViewController {
     private func handleTimeout() {
         guard !state.isFinished else { return }
 
-        log.debug("WebTokenInterceptor: Timeout reached")
         finishWithError(.timeout)
     }
 
     // MARK: - Actions
 
     @objc private func handleCancelTapped() {
-        log.debug("WebTokenInterceptor: User cancelled")
         finishWithError(.canceled)
     }
 
@@ -358,10 +350,8 @@ open class WebTokenInterceptorViewController: UIViewController {
     public func evaluateJavaScript(_ script: String) async throws -> Any? {
         do {
             let result = try await webView.evaluateJavaScript(script)
-            log.debug("WebTokenInterceptor: JavaScript result: \(String(describing: result))")
             return result
         } catch {
-            log.debug("WebTokenInterceptor: JavaScript error: \(error.localizedDescription)")
             throw error
         }
     }
@@ -378,8 +368,6 @@ open class WebTokenInterceptorViewController: UIViewController {
 
     public func loadCookies(_ cookies: [HTTPCookie]) async {
         guard !cookies.isEmpty else { return }
-
-        log.debug("WebTokenInterceptor: Loading \(cookies.count) cookies")
 
         await withTaskGroup(of: Void.self) { group in
             for cookie in cookies {
@@ -404,11 +392,8 @@ open class WebTokenInterceptorViewController: UIViewController {
     /// Called when a request matching the target URL is intercepted
     open func handleInterceptedRequest(_ request: InterceptedRequest) async {
         guard !state.isFinished else {
-            log.debug("WebTokenInterceptor: Already finished, ignoring intercepted request")
             return
         }
-
-        log.debug("WebTokenInterceptor: Request intercepted successfully")
 
         // Notify delegate
         await delegate?.webTokenInterceptor(self, didIntercept: request)
@@ -460,19 +445,13 @@ extension WebTokenInterceptorViewController: WKNavigationDelegate {
         decidePolicyFor navigationAction: WKNavigationAction,
         decisionHandler: @escaping (WKNavigationActionPolicy) -> Void
     ) {
-        if let url = navigationAction.request.url {
-            log.debug("WebTokenInterceptor: Navigating to: \(url.absoluteString)")
-        }
         decisionHandler(.allow)
     }
 
     open func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
-        log.debug("WebTokenInterceptor: Started loading: \(webView.url?.absoluteString ?? "nil")")
     }
 
     open func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-        log.debug("WebTokenInterceptor: Navigation failed: \(error.localizedDescription)")
-
         let nsError = error as NSError
 
         // Ignore cancelled errors
@@ -484,8 +463,6 @@ extension WebTokenInterceptorViewController: WKNavigationDelegate {
     }
 
     open func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        log.debug("WebTokenInterceptor: Finished loading: \(webView.url?.absoluteString ?? "nil")")
-
         state = .waitingForIntercept
 
         // Start timeout for non-interactive mode
@@ -504,11 +481,8 @@ extension WebTokenInterceptorViewController: WKScriptMessageHandler {
         guard let results = message.body as? [String: Any],
               let responseURLString = results["responseURL"] as? String,
               let responseURL = URL(string: responseURLString) else {
-            log.debug("WebTokenInterceptor: Invalid message format")
             return
         }
-
-        log.debug("WebTokenInterceptor: Intercepted AJAX request: \(responseURLString)")
 
         guard shouldIntercept(responseURL: responseURL) else {
             return
