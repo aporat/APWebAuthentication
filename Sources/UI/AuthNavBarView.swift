@@ -29,7 +29,7 @@ public final class AuthNavBarView: UIView {
         static let lockIconSize: CGFloat = 20
         static let lockIconSpacing: CGFloat = 5
         static let titleCenterOffset: CGFloat = 10
-        static let titleFontSize: CGFloat = 17
+        static let titleTextStyle: UIFont.TextStyle = .headline
     }
 
     // MARK: - Public Properties
@@ -52,7 +52,8 @@ public final class AuthNavBarView: UIView {
 
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
-        label.font = .boldSystemFont(ofSize: Constants.titleFontSize)
+        label.font = .preferredFont(forTextStyle: Constants.titleTextStyle)
+        label.adjustsFontForContentSizeCategory = true
         label.textAlignment = .center
         label.textColor = .label
         return label
