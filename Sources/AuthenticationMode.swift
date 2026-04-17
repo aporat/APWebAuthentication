@@ -27,11 +27,14 @@ public enum AuthenticationMode: String, Sendable, CaseIterable {
     /// Web-based authentication using cookies and sessions.
     case web
 
-    /// Bloks framework authentication (Facebook's UI framework).
+    /// Bloks framework authentication
     case bloks
 
     /// Browser-based OAuth flow.
     case browser
+
+    /// OAuth 1.0 authorization flow.
+    case oauth1
 
     /// Native mobile app authentication.
     case app
@@ -57,7 +60,7 @@ public enum AuthenticationMode: String, Sendable, CaseIterable {
         switch self {
         case .explicit, .implicit, .browser:
             return true
-        case .private, .web, .bloks, .app:
+        case .private, .web, .bloks, .app, .oauth1:
             return false
         }
     }
@@ -67,7 +70,7 @@ public enum AuthenticationMode: String, Sendable, CaseIterable {
         switch self {
         case .web, .browser:
             return true
-        case .private, .explicit, .implicit, .bloks, .app:
+        case .private, .explicit, .implicit, .bloks, .app, .oauth1:
             return false
         }
     }
@@ -77,7 +80,7 @@ public enum AuthenticationMode: String, Sendable, CaseIterable {
         switch self {
         case .private, .app, .bloks:
             return true
-        case .explicit, .implicit, .web, .browser:
+        case .explicit, .implicit, .web, .browser, .oauth1:
             return false
         }
     }
@@ -87,7 +90,7 @@ public enum AuthenticationMode: String, Sendable, CaseIterable {
         switch self {
         case .explicit, .private, .app:
             return true
-        case .implicit, .web, .bloks, .browser:
+        case .implicit, .web, .bloks, .browser, .oauth1:
             return false
         }
     }
@@ -109,6 +112,8 @@ public enum AuthenticationMode: String, Sendable, CaseIterable {
             return "Browser OAuth"
         case .app:
             return "Native App"
+        case .oauth1:
+            return "OAuth 1.0"
         }
     }
 }
