@@ -293,8 +293,8 @@ public final class WebAuthNavigationManager {
             .foregroundColor: UIColor(named: "TintColor")!
         ]
         
-        dismissBarButtonItem.setTitleTextAttributes([.foregroundColor: UIColor(named: "TintColor")!], for: .normal)
-        dismissBarButtonItem.setTitleTextAttributes([.foregroundColor: UIColor(named: "TintColor")!], for: .highlighted)
+        dismissBarButtonItem.setTitleTextAttributes([.foregroundColor: UIColor.label], for: .normal)
+        dismissBarButtonItem.setTitleTextAttributes([.foregroundColor: UIColor.label], for: .highlighted)
         
         viewController.navigationController?.navigationBar.standardAppearance = navBarAppearance
         viewController.navigationController?.navigationBar.scrollEdgeAppearance = navBarAppearance
