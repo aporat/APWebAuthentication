@@ -1,4 +1,5 @@
 import Foundation
+import SwifterSwift
 @preconcurrency import SwiftyJSON
 
 // MARK: - JSON Extensions
@@ -102,47 +103,24 @@ public extension JSON {
         return nil
     }
 
-    /// Safely converts the JSON value to a Date from Unix timestamp.
-    ///
-    /// Instagram's API provides timestamps as either Double or String values
-    /// representing seconds since Unix epoch (January 1, 1970).
+    /// Safely converts the JSON value to a Date from a Unix timestamp or ISO 8601 string.
     ///
     /// **Conversion Priority:**
-    /// 1. Direct Double value
-    /// 2. String value parsed as Double
-    /// 3. Validates timestamp is positive
-    ///
-    /// **Example:**
-    /// ```swift
-    /// // Double timestamp
-    /// let json1 = JSON(["created_at": 1609459200.0])
-    /// print(json1["created_at"].date)
-    /// // 2021-01-01 00:00:00 +0000
-    ///
-    /// // String timestamp
-    /// let json2 = JSON(["created_at": "1609459200"])
-    /// print(json2["created_at"].date)
-    /// // 2021-01-01 00:00:00 +0000
-    ///
-    /// // Invalid timestamp
-    /// let json3 = JSON(["created_at": -1])
-    /// print(json3["created_at"].date) // nil
-    ///
-    /// // Missing timestamp
-    /// let json4 = JSON(["created_at": NSNull()])
-    /// print(json4["created_at"].date) // nil
-    /// ```
+    /// 1. Direct Double value as Unix timestamp
+    /// 2. String value parsed as Double (Unix timestamp)
+    /// 3. ISO 8601 string (e.g. `"2026-05-08T13:42:59Z"`)
     ///
     /// - Returns: Date object, or `nil` if conversion fails or timestamp is invalid
     var date: Date? {
-        // Get timestamp as Double (direct or from string)
         let timestamp = self.double ?? self.string.flatMap(Double.init)
-
-        // Validate timestamp is positive
-        guard let finalTimestamp = timestamp, finalTimestamp > 0 else {
-            return nil
+        if let finalTimestamp = timestamp, finalTimestamp > 0 {
+            return Date(timeIntervalSince1970: finalTimestamp)
         }
 
-        return Date(timeIntervalSince1970: finalTimestamp)
+        if let dateString = self.string {
+            return Date(iso8601String: dateString)
+        }
+
+        return nil
     }
 }
