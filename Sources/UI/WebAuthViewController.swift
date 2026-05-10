@@ -181,6 +181,7 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
         setupWebView()
         setupNavigation()
         setupTraitObservation()
+        didStartLoading()
         clearWebsiteDataAndLoad()
         scheduleSecureLockDisplay()
     }
