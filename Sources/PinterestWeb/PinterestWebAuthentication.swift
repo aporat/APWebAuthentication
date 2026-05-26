@@ -31,6 +31,8 @@ public final class PinterestWebAuthentication: SessionAuthentication {
 
     // MARK: - Auth Settings
 
+    override public var keychainCategory: String { "pinterest-web" }
+
     override public func save() async {
         let settings = AuthSettings(
             browserMode: browserMode,
@@ -40,41 +42,18 @@ public final class PinterestWebAuthentication: SessionAuthentication {
             csrfToken: csrfToken,
             username: username
         )
-
-        guard let authSettingsURL = authSettingsURL else { return }
-
-        do {
-            let data = try PropertyListEncoder().encode(settings)
-
-            try await Task.detached {
-                try data.write(to: authSettingsURL)
-            }.value
-        } catch {
-            print("⚠️ Failed to store Pinterest settings: \(error)")
-        }
-
+        await saveSettings(settings)
         await storeCookiesSettings()
     }
 
     override public func load() async {
-        guard let authSettingsURL = authSettingsURL else { return }
-
-        do {
-            let data = try await Task.detached {
-                try Data(contentsOf: authSettingsURL)
-            }.value
-
-            let settings = try PropertyListDecoder().decode(AuthSettings.self, from: data)
-
+        if let settings = await loadSettings(AuthSettings.self) {
             browserMode = settings.browserMode ?? browserMode
             customUserAgent = settings.customUserAgent ?? customUserAgent
             appId = settings.appId ?? appId
             sessionId = settings.sessionId ?? sessionId
             csrfToken = settings.csrfToken ?? csrfToken
             username = settings.username ?? username
-
-        } catch {
-            print("⚠️ Failed to load Pinterest settings: \(error)")
         }
 
         await loadCookiesSettings()

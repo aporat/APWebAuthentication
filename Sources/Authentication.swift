@@ -156,8 +156,10 @@ open class Authentication {
     /// Encodes `settings` as a property list and stores it in the Keychain
     /// under `(keychainCategory, accountIdentifier)`.
     ///
-    /// No-op if `accountIdentifier` is `nil`.
-    func saveSettings<T: Codable & Sendable>(_ settings: T) async {
+    /// No-op if `accountIdentifier` is `nil`. Intended to be called from
+    /// subclasses' `save()` implementations — including subclasses defined
+    /// in other modules.
+    public func saveSettings<T: Codable & Sendable>(_ settings: T) async {
         guard let account = accountIdentifier else { return }
         let category = keychainCategory
 
@@ -172,8 +174,9 @@ open class Authentication {
     }
 
     /// Reads a previously-saved `T` from the Keychain. Returns `nil` if no
-    /// value has been stored yet.
-    func loadSettings<T: Codable & Sendable>(_ type: T.Type) async -> T? {
+    /// value has been stored yet. Intended to be called from subclasses'
+    /// `load()` implementations.
+    public func loadSettings<T: Codable & Sendable>(_ type: T.Type) async -> T? {
         guard let account = accountIdentifier else { return nil }
         let category = keychainCategory
 

@@ -61,6 +61,8 @@ public final class TikTokWebAuthentication: SessionAuthentication {
 
     // MARK: - Auth Settings
 
+    override public var keychainCategory: String { "tiktok-web" }
+
     override public func save() async {
         let settings = AuthSettings(
             signatureUrl: signatureUrl,
@@ -78,35 +80,12 @@ public final class TikTokWebAuthentication: SessionAuthentication {
             browserVersion: browserVersion,
             timezoneName: timezoneName
         )
-
-        guard let authSettingsURL = authSettingsURL else { return }
-
-        do {
-            let data = try PropertyListEncoder().encode(settings)
-
-            try await Task.detached {
-                try data.write(to: authSettingsURL)
-            }.value
-        } catch {
-            print("⚠️ Failed to store TikTok settings: \(error)")
-        }
-
+        await saveSettings(settings)
         await storeCookiesSettings()
     }
 
     override public func load() async {
-        guard let authSettingsURL = authSettingsURL else {
-            await loadCookiesSettings()
-            return
-        }
-
-        do {
-            let data = try await Task.detached {
-                try Data(contentsOf: authSettingsURL)
-            }.value
-
-            let settings = try PropertyListDecoder().decode(AuthSettings.self, from: data)
-
+        if let settings = await loadSettings(AuthSettings.self) {
             signatureUrl = settings.signatureUrl ?? signatureUrl
             browserMode = settings.browserMode ?? browserMode
             customUserAgent = settings.customUserAgent ?? customUserAgent
@@ -121,9 +100,6 @@ public final class TikTokWebAuthentication: SessionAuthentication {
             browserName = settings.browserName ?? browserName
             browserVersion = settings.browserVersion ?? browserVersion
             timezoneName = settings.timezoneName ?? timezoneName
-
-        } catch {
-            print("⚠️ Failed to load TikTok settings: \(error)")
         }
 
         await loadCookiesSettings()

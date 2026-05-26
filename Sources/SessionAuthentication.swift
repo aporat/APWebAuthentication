@@ -87,18 +87,10 @@ open class SessionAuthentication: Authentication {
 
     // MARK: - Cookie Storage
 
-    /// The URL where cookies are stored on disk.
-    ///
-    /// Format: `account_{accountIdentifier}.cookies`
-    private var cookiesURL: URL? {
-        guard let currentAccountIdentifier = accountIdentifier,
-              let documentsURL = FileManager.documentsDirectoryURL else {
-            return nil
-        }
-
-        let fileName = "account_" + currentAccountIdentifier + ".cookies"
-        return documentsURL.appendingPathComponent(fileName)
-    }
+    /// Keychain category used for the cookie blob. Sits alongside the
+    /// subclass's main `keychainCategory` so settings and cookies are
+    /// independent items under the same account.
+    private var cookiesKeychainCategory: String { "\(keychainCategory).cookies" }
 
     /// The HTTP cookie storage for this session.
     open lazy var cookieStorage: HTTPCookieStorage = {
@@ -109,7 +101,7 @@ open class SessionAuthentication: Authentication {
 
     // MARK: - Persistence
 
-    /// Deletes session credentials from disk and memory.
+    /// Deletes session credentials and cookies from the Keychain and memory.
     override open func delete() async {
         await super.delete()
         sessionId = nil
@@ -119,57 +111,65 @@ open class SessionAuthentication: Authentication {
 
     // MARK: - Cookie Management
 
-    /// Stores all current cookies to disk.
+    /// Persists all current cookies to the Keychain.
+    ///
+    /// Cookies are encoded as a single property-list blob keyed by the
+    /// account identifier and `cookiesKeychainCategory`. The blob is small
+    /// enough for Keychain (a typical session jar is a few KB), so storing
+    /// it whole keeps the migration simple and avoids fragmenting into
+    /// one item per cookie.
     open func storeCookiesSettings() async {
-        guard let cookiesURL = cookiesURL, let cookies = cookieStorage.cookies else { return }
+        guard let account = accountIdentifier,
+              let cookies = cookieStorage.cookies else { return }
+        let category = cookiesKeychainCategory
 
         let codableCookies = cookies.compactMap { CodableHTTPCookie(from: $0) }
-        let encoder = PropertyListEncoder()
 
         do {
-            let data = try encoder.encode(codableCookies)
-
+            let data = try PropertyListEncoder().encode(codableCookies)
             try await Task.detached {
-                try data.write(to: cookiesURL)
+                try KeychainStore.save(data, account: account, category: category)
             }.value
         } catch {
+            print("⚠️ Failed to store session cookies in keychain: \(error)")
         }
     }
 
-    /// Loads cookies from disk and adds them to cookie storage.
+    /// Loads cookies from the Keychain and adds them to cookie storage.
     ///
-    /// - Returns: The loaded cookies, or nil if loading fails
+    /// - Returns: The loaded cookies, or `nil` if none were stored.
     @discardableResult
     open func loadCookiesSettings() async -> [HTTPCookie]? {
-        guard let cookiesURL = cookiesURL else { return nil }
+        guard let account = accountIdentifier else { return nil }
+        let category = cookiesKeychainCategory
 
         do {
-            let data = try await Task.detached {
-                try Data(contentsOf: cookiesURL)
+            let data: Data? = try await Task.detached {
+                try KeychainStore.load(account: account, category: category)
             }.value
 
-            let decoder = PropertyListDecoder()
-            let codableCookies = try decoder.decode([CodableHTTPCookie].self, from: data)
+            guard let data else { return nil }
+            let codableCookies = try PropertyListDecoder().decode([CodableHTTPCookie].self, from: data)
             let cookies = codableCookies.compactMap { $0.httpCookie }
 
-            // Set cookies
             cookies.forEach { cookie in
                 cookieStorage.setCookie(cookie)
             }
 
             return cookies
         } catch {
+            print("⚠️ Failed to load session cookies from keychain: \(error)")
+            return nil
         }
-
-        return nil
     }
 
-    /// Deletes the cookies file from disk.
+    /// Removes the persisted cookies from the Keychain.
     public func clearCookiesSettings() async {
-        guard let cookiesURL = cookiesURL else { return }
+        guard let account = accountIdentifier else { return }
+        let category = cookiesKeychainCategory
 
-        try? await Task.detached {
-            try FileManager.default.removeItem(at: cookiesURL)
+        await Task.detached {
+            try? KeychainStore.delete(account: account, category: category)
         }.value
     }
 
