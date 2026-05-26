@@ -22,6 +22,7 @@ coverage/
 test-results.xml
 
 # Swift Package Manager
+.build/
 .swiftpm/
 Packages/
 Package.resolved

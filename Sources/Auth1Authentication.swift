@@ -75,39 +75,21 @@ public final class Auth1Authentication: Authentication {
 
     // MARK: - Persistence
 
-    /// Saves OAuth 1.0a credentials to disk.
+    override public var keychainCategory: String { "oauth1" }
+
+    /// Saves OAuth 1.0a credentials to the Keychain.
     override public func save() async {
         let settings = AuthSettings(token: token, secret: secret, consumerKey: consumerKey, consumerSecret: consumerSecret)
-        guard let authSettingsURL = authSettingsURL else { return }
-
-        do {
-            let data = try PropertyListEncoder().encode(settings)
-
-            try await Task.detached {
-                try data.write(to: authSettingsURL)
-            }.value
-        } catch {
-            print("⚠️ Failed to store OAuth 1.0a settings: \(error)")
-        }
+        await saveSettings(settings)
     }
 
-    /// Loads OAuth 1.0a credentials from disk.
+    /// Loads OAuth 1.0a credentials from the Keychain.
     override public func load() async {
-        guard let authSettingsURL = authSettingsURL else { return }
-
-        do {
-            let data = try await Task.detached {
-                try Data(contentsOf: authSettingsURL)
-            }.value
-
-            let settings = try PropertyListDecoder().decode(AuthSettings.self, from: data)
-            self.token = settings.token
-            self.secret = settings.secret
-            self.consumerKey = settings.consumerKey
-            self.consumerSecret = settings.consumerSecret
-        } catch {
-            print("⚠️ Failed to load OAuth 1.0a settings: \(error)")
-        }
+        guard let settings = await loadSettings(AuthSettings.self) else { return }
+        self.token = settings.token
+        self.secret = settings.secret
+        self.consumerKey = settings.consumerKey
+        self.consumerSecret = settings.consumerSecret
     }
 
     /// Deletes OAuth 1.0a credentials from disk and memory.

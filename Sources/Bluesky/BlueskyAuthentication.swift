@@ -165,7 +165,9 @@ public final class BlueskyAuthentication: Auth2Authentication {
 
     // MARK: - Persistence
 
-    /// Saves Bluesky credentials to disk.
+    override public var keychainCategory: String { "bluesky" }
+
+    /// Saves Bluesky credentials (including the DPoP private key) to the Keychain.
     override public func save() async {
         let settings = BlueskyAuthSettings(
             accessToken: accessToken,
@@ -175,38 +177,18 @@ public final class BlueskyAuthentication: Auth2Authentication {
             handle: handle,
             dpopPrivateKeyData: dpopPrivateKeyData
         )
-
-        guard let authSettingsURL else { return }
-
-        do {
-            let data = try PropertyListEncoder().encode(settings)
-            try await Task.detached {
-                try data.write(to: authSettingsURL)
-            }.value
-        } catch {
-            print("⚠️ Failed to store Bluesky auth settings: \(error)")
-        }
+        await saveSettings(settings)
     }
 
-    /// Loads Bluesky credentials from disk.
+    /// Loads Bluesky credentials from the Keychain.
     override public func load() async {
-        guard let authSettingsURL else { return }
-
-        do {
-            let data = try await Task.detached {
-                try Data(contentsOf: authSettingsURL)
-            }.value
-
-            let settings = try PropertyListDecoder().decode(BlueskyAuthSettings.self, from: data)
-            accessToken = settings.accessToken
-            refreshToken = settings.refreshToken
-            clientId = settings.clientId
-            did = settings.did
-            handle = settings.handle
-            dpopPrivateKeyData = settings.dpopPrivateKeyData
-        } catch {
-            print("⚠️ Failed to load Bluesky auth settings: \(error)")
-        }
+        guard let settings = await loadSettings(BlueskyAuthSettings.self) else { return }
+        accessToken = settings.accessToken
+        refreshToken = settings.refreshToken
+        clientId = settings.clientId
+        did = settings.did
+        handle = settings.handle
+        dpopPrivateKeyData = settings.dpopPrivateKeyData
     }
 
     /// Deletes Bluesky credentials from disk and clears in-memory state.

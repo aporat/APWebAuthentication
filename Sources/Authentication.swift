@@ -22,7 +22,10 @@ open class Authentication {
     /// Unique identifier for the authenticated account.
     public var accountIdentifier: String?
 
-    /// The URL where authentication settings are stored on disk.
+    /// Legacy on-disk location for settings.
+    ///
+    /// Credentials are persisted to the Keychain; this URL is no longer read
+    /// or written by the library and is retained only for API compatibility.
     ///
     /// Format: `{accountIdentifier}.settings`
     public var authSettingsURL: URL? {
@@ -34,6 +37,12 @@ open class Authentication {
         let fileName = currentAccountIdentifier + ".settings"
         return documentsURL.appendingPathComponent(fileName)
     }
+
+    /// Keychain namespace used to disambiguate credentials between different
+    /// authentication types that may share an `accountIdentifier`.
+    ///
+    /// Subclasses override to provide a stable category (e.g. `"oauth1"`).
+    open var keychainCategory: String { "default" }
 
     // MARK: - User Agent Configuration
 
@@ -130,17 +139,55 @@ open class Authentication {
     /// Subclasses should override to save specific credentials.
     open func save() async {}
 
-    /// Deletes credentials and settings from disk.
+    /// Deletes credentials and settings from the Keychain.
     ///
     /// Subclasses should call super and clear their properties.
     public func delete() async {
-        guard let url = authSettingsURL else {
-            return
-        }
+        guard let account = accountIdentifier else { return }
+        let category = keychainCategory
 
-        try? await Task.detached {
-            try FileManager.default.removeItem(at: url)
+        await Task.detached {
+            try? KeychainStore.delete(account: account, category: category)
         }.value
+    }
+
+    // MARK: - Keychain Helpers
+
+    /// Encodes `settings` as a property list and stores it in the Keychain
+    /// under `(keychainCategory, accountIdentifier)`.
+    ///
+    /// No-op if `accountIdentifier` is `nil`.
+    func saveSettings<T: Codable & Sendable>(_ settings: T) async {
+        guard let account = accountIdentifier else { return }
+        let category = keychainCategory
+
+        do {
+            let data = try PropertyListEncoder().encode(settings)
+            try await Task.detached {
+                try KeychainStore.save(data, account: account, category: category)
+            }.value
+        } catch {
+            print("⚠️ Failed to store credentials in keychain: \(error)")
+        }
+    }
+
+    /// Reads a previously-saved `T` from the Keychain. Returns `nil` if no
+    /// value has been stored yet.
+    func loadSettings<T: Codable & Sendable>(_ type: T.Type) async -> T? {
+        guard let account = accountIdentifier else { return nil }
+        let category = keychainCategory
+
+        do {
+            let data: Data? = try await Task.detached {
+                try KeychainStore.load(account: account, category: category)
+            }.value
+
+            guard let data else { return nil }
+            return try PropertyListDecoder().decode(T.self, from: data)
+        } catch {
+            print("⚠️ Failed to load credentials from keychain: \(error)")
+            return nil
+        }
     }
 
     // MARK: - Configuration

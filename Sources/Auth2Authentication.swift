@@ -74,7 +74,9 @@ public class Auth2Authentication: Authentication {
 
     // MARK: - Persistence
 
-    /// Saves OAuth 2.0 credentials to disk.
+    override public var keychainCategory: String { "oauth2" }
+
+    /// Saves OAuth 2.0 credentials to the Keychain.
     override public func save() async {
         let settings = AuthSettings(
             accessToken: self.accessToken,
@@ -82,37 +84,16 @@ public class Auth2Authentication: Authentication {
             clientId: self.clientId,
             clientSecret: self.clientSecret
         )
-
-        guard let authSettingsURL = authSettingsURL else { return }
-
-        do {
-            let data = try PropertyListEncoder().encode(settings)
-
-            try await Task.detached {
-                try data.write(to: authSettingsURL)
-            }.value
-        } catch {
-            print("⚠️ Failed to store OAuth 2.0 settings: \(error)")
-        }
+        await saveSettings(settings)
     }
 
-    /// Loads OAuth 2.0 credentials from disk.
+    /// Loads OAuth 2.0 credentials from the Keychain.
     override public func load() async {
-        guard let authSettingsURL = authSettingsURL else { return }
-
-        do {
-            let data = try await Task.detached {
-                try Data(contentsOf: authSettingsURL)
-            }.value
-
-            let settings = try PropertyListDecoder().decode(AuthSettings.self, from: data)
-            self.accessToken = settings.accessToken
-            self.refreshToken = settings.refreshToken
-            self.clientId = settings.clientId
-            self.clientSecret = settings.clientSecret
-        } catch {
-            print("⚠️ Failed to load OAuth 2.0 settings: \(error)")
-        }
+        guard let settings = await loadSettings(AuthSettings.self) else { return }
+        self.accessToken = settings.accessToken
+        self.refreshToken = settings.refreshToken
+        self.clientId = settings.clientId
+        self.clientSecret = settings.clientSecret
     }
 
     /// Deletes OAuth 2.0 credentials from disk and memory.
