@@ -285,13 +285,10 @@ public final class WebAuthNavigationManager {
         
         let navBarAppearance = UINavigationBarAppearance()
         navBarAppearance.configureWithOpaqueBackground()
-        navBarAppearance.backgroundColor = UIColor(named: "BarTintColor")
-        navBarAppearance.largeTitleTextAttributes = [
-            .foregroundColor: UIColor(named: "TintColor")!
-        ]
-        navBarAppearance.titleTextAttributes = [
-            .foregroundColor: UIColor(named: "TintColor")!
-        ]
+        navBarAppearance.backgroundColor = APWebAuthSession.resolvedBarTintColor
+        let titleColor = APWebAuthSession.resolvedTintColor ?? .label
+        navBarAppearance.largeTitleTextAttributes = [.foregroundColor: titleColor]
+        navBarAppearance.titleTextAttributes = [.foregroundColor: titleColor]
         
         dismissBarButtonItem.setTitleTextAttributes([.foregroundColor: UIColor.label], for: .normal)
         dismissBarButtonItem.setTitleTextAttributes([.foregroundColor: UIColor.label], for: .highlighted)

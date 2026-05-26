@@ -7,15 +7,20 @@ import Foundation
 ///
 /// This class is responsible for:
 /// - Detecting when a navigation matches the configured redirect URL
+/// - Validating the OAuth `state` parameter (CSRF protection) when one was
+///   supplied for the flow
 /// - Parsing query parameters and fragments from redirect URLs
 /// - Parsing JSON responses from web pages
 /// - Extracting error messages from various response formats
 ///
 /// **Example Usage:**
 /// ```swift
-/// let handler = WebAuthRedirectHandler(redirectURL: URL(string: "myapp://callback")!)
+/// let state = WebAuthRedirectHandler.generateState()
+/// let handler = WebAuthRedirectHandler(
+///     redirectURL: URL(string: "myapp://callback")!,
+///     expectedState: state
+/// )
 ///
-/// // Check if URL is a redirect
 /// if let result = handler.checkRedirect(url: someURL) {
 ///     switch result {
 ///     case .success(let params):
@@ -33,54 +38,128 @@ public final class WebAuthRedirectHandler {
     /// The redirect URL to monitor for authentication completion
     public let redirectURL: URL?
 
+    /// The `state` value that must be echoed back by the authorization server.
+    ///
+    /// When non-nil, every callback (including ones that carry an `error=`
+    /// parameter) must include a matching `state`. A missing or mismatched
+    /// state is rejected as a CSRF attempt. Leave `nil` to skip validation —
+    /// only do this for flows that genuinely do not use a state parameter.
+    public var expectedState: String?
+
     // MARK: - Initialization
 
     /// Creates a new redirect handler.
     ///
-    /// - Parameter redirectURL: The callback URL that signals authentication completion
-    public init(redirectURL: URL?) {
+    /// - Parameters:
+    ///   - redirectURL: The callback URL that signals authentication completion
+    ///   - expectedState: Optional `state` value to validate on the callback
+    public init(redirectURL: URL?, expectedState: String? = nil) {
         self.redirectURL = redirectURL
+        self.expectedState = expectedState
+    }
+
+    // MARK: - State Generation
+
+    /// Generates a cryptographically random `state` value suitable for OAuth
+    /// CSRF protection.
+    ///
+    /// - Returns: 32 bytes of random data, URL-safe base64 encoded.
+    public static func generateState() -> String {
+        var bytes = [UInt8](repeating: 0, count: 32)
+        _ = SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes)
+        return Data(bytes).base64EncodedString()
+            .replacingOccurrences(of: "+", with: "-")
+            .replacingOccurrences(of: "/", with: "_")
+            .replacingOccurrences(of: "=", with: "")
     }
 
     // MARK: - Redirect Detection
 
     /// Checks if a URL matches the redirect URL and extracts the response.
     ///
-    /// This method compares the given URL against the configured redirect URL.
-    /// If they match, it parses the URL to extract authentication data from
-    /// query parameters and fragments.
+    /// The URL is compared against `redirectURL` by **components** (scheme,
+    /// host, port, path) — not by string prefix — so callbacks like
+    /// `myapp://callback.attacker.com` cannot impersonate `myapp://callback`.
+    ///
+    /// If `expectedState` is set, the callback's `state` parameter must match
+    /// exactly; otherwise this returns `.failure(.failed)` even when the
+    /// authorization server claims success.
     ///
     /// - Parameter url: The URL to check
-    /// - Returns: A result containing parsed parameters on success, or an error on failure.
-    ///            Returns `nil` if the URL doesn't match the redirect URL.
-    ///
-    /// **Example:**
-    /// ```swift
-    /// // Redirect URL: myapp://callback
-    /// // Navigation URL: myapp://callback?code=abc123&state=xyz
-    ///
-    /// if let result = handler.checkRedirect(url: navigationURL) {
-    ///     switch result {
-    ///     case .success(let params):
-    ///         let code = params["code"] // "abc123"
-    ///         let state = params["state"] // "xyz"
-    ///     case .failure(let error):
-    ///         print(error.errorDescription)
-    ///     }
-    /// }
-    /// ```
+    /// - Returns: A result containing parsed parameters on success, or an
+    ///            error on failure. Returns `nil` if the URL doesn't match
+    ///            the redirect URL.
     public func checkRedirect(url: URL?) -> Result<[String: any Sendable]?, APWebAuthenticationError>? {
-        guard let url = url,
-              let currentRedirectURL = redirectURL?.absoluteString,
-              !currentRedirectURL.isEmpty else {
+        guard let url, let redirectURL else { return nil }
+        guard Self.urlMatchesRedirect(url, redirect: redirectURL) else {
             return nil
         }
 
-        guard url.absoluteString.hasPrefix(currentRedirectURL) else {
-            return nil
+        // CSRF protection: when a state was generated for this flow, every
+        // callback must echo it back — even ones that carry an `error=`
+        // parameter, since an attacker can forge those too.
+        if let expectedState, !expectedState.isEmpty {
+            let receivedState = Self.parameterValue(named: "state", in: url)
+            guard let receivedState, receivedState == expectedState else {
+                return .failure(.failed(reason: "OAuth state mismatch — possible CSRF."))
+            }
         }
 
-        return url.getResponse()
+        // Delegate to the single source-of-truth response parser.
+        switch url.getResponse() {
+        case .success(let params):
+            if params.isEmpty {
+                return .success(nil)
+            }
+            var sendableParams: [String: any Sendable] = [:]
+            for (key, value) in params {
+                sendableParams[key] = value
+            }
+            return .success(sendableParams)
+        case .failure(let error):
+            return .failure(error)
+        }
+    }
+
+    // MARK: - URL Matching
+
+    /// Matches a candidate URL against the registered redirect URL by
+    /// comparing scheme (case-insensitive), host (case-insensitive), port
+    /// and path. Query and fragment are intentionally ignored.
+    static func urlMatchesRedirect(_ url: URL, redirect: URL) -> Bool {
+        guard let candidate = URLComponents(url: url, resolvingAgainstBaseURL: false),
+              let target = URLComponents(url: redirect, resolvingAgainstBaseURL: false) else {
+            return false
+        }
+
+        guard candidate.scheme?.lowercased() == target.scheme?.lowercased(),
+              candidate.host?.lowercased() == target.host?.lowercased(),
+              candidate.port == target.port else {
+            return false
+        }
+
+        // Treat empty path and "/" as equivalent — URLComponents reports
+        // `"https://example.com"` with an empty path.
+        let candidatePath = candidate.path.isEmpty ? "/" : candidate.path
+        let targetPath = target.path.isEmpty ? "/" : target.path
+        return candidatePath == targetPath
+    }
+
+    /// Returns the value of the named parameter from the URL's query string
+    /// or fragment. Used for state extraction before full response parsing.
+    private static func parameterValue(named name: String, in url: URL) -> String? {
+        if let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+           let value = components.queryItems?.first(where: { $0.name == name })?.value {
+            return value
+        }
+
+        guard let fragment = url.fragment else { return nil }
+        for pair in fragment.components(separatedBy: "&") {
+            let parts = pair.components(separatedBy: "=")
+            guard parts.count == 2, parts[0] == name else { continue }
+            return parts[1].removingPercentEncoding ?? parts[1]
+        }
+        return nil
     }
 
     // MARK: - JSON Parsing
@@ -146,78 +225,3 @@ public final class WebAuthRedirectHandler {
     }
 }
 
-// MARK: - URL Response Parsing
-
-private extension URL {
-
-    /// Extracts authentication response data from URL query parameters and fragments.
-    ///
-    /// This method parses both the query string and URL fragment to extract
-    /// authentication data. It checks for errors and returns appropriate results.
-    ///
-    /// **Supported formats:**
-    /// - OAuth 2.0: `?code=...&state=...` or `#access_token=...&token_type=...`
-    /// - Error responses: `?error=...&error_description=...`
-    /// - Custom parameters in query or fragment
-    ///
-    /// - Returns: A result containing parsed parameters or an error
-    func getResponse() -> Result<[String: any Sendable]?, APWebAuthenticationError> {
-        var params = [String: any Sendable]()
-
-        // Parse query parameters
-        if let components = URLComponents(url: self, resolvingAgainstBaseURL: false),
-           let queryItems = components.queryItems {
-            for item in queryItems {
-                params[item.name] = item.value
-            }
-        }
-
-        // Parse fragment parameters (for OAuth implicit flow)
-        if let fragment = self.fragment {
-            let fragmentParams = parseFragment(fragment)
-            params.merge(fragmentParams) { _, new in new }
-        }
-
-        // Check for errors
-        if let error = params["error"] as? String {
-            // Decode error description: replace + with spaces and decode percent encoding
-            let description = params["error_description"] as? String
-            let decodedDescription = description?
-                .replacingOccurrences(of: "+", with: " ")
-                .removingPercentEncoding
-            
-            return .failure(.failed(reason: decodedDescription ?? description ?? error))
-        }
-
-        // If we have parameters, return success
-        if !params.isEmpty {
-            return .success(params)
-        }
-
-        // No parameters found
-        return .success(nil)
-    }
-
-    /// Parses a URL fragment into key-value pairs.
-    ///
-    /// URL fragments in OAuth responses often contain authentication data:
-    /// `#access_token=abc123&token_type=Bearer&expires_in=3600`
-    ///
-    /// - Parameter fragment: The fragment string (without the # symbol)
-    /// - Returns: A dictionary of parsed key-value pairs
-    private func parseFragment(_ fragment: String) -> [String: any Sendable] {
-        var params = [String: any Sendable]()
-
-        let pairs = fragment.components(separatedBy: "&")
-        for pair in pairs {
-            let components = pair.components(separatedBy: "=")
-            if components.count == 2 {
-                let key = components[0]
-                let value = components[1].replacingOccurrences(of: "+", with: " ").removingPercentEncoding ?? components[1]
-                params[key] = value
-            }
-        }
-
-        return params
-    }
-}

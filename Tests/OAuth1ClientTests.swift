@@ -14,7 +14,7 @@ final class OAuth1ClientTests: XCTestCase {
         auth.consumerKey = "key123"
         auth.consumerSecret = "secret456"
         client = OAuth1Client(
-            accountType: AccountStore.twitter,
+            accountType: AccountStore.x,
             baseURLString: "https://api.example.com",
             auth: auth
         )

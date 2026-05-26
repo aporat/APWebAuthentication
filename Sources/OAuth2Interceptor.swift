@@ -298,25 +298,27 @@ public class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
             return
         }
 
-        lock.lock()
-        requestsToRetry.append(completion)
-
-        guard !isRefreshing else {
-            lock.unlock()
-            return
+        // Enqueue the completion and decide atomically whether we're the
+        // request that should kick off the refresh. Holding the lock across
+        // both steps prevents a second request from observing `isRefreshing`
+        // before we've claimed it.
+        let shouldStartRefresh: Bool = lock.withLock {
+            requestsToRetry.append(completion)
+            guard !isRefreshing else { return false }
+            isRefreshing = true
+            return true
         }
 
-        isRefreshing = true
-        lock.unlock()
+        guard shouldStartRefresh else { return }
 
         Task { @MainActor in
             let succeeded = await self.refreshAccessToken(url: refreshTokenURL)
 
-            let completions = self.lock.withLock {
-                let completions = self.requestsToRetry
+            let completions: [(RetryResult) -> Void] = self.lock.withLock {
+                let drained = self.requestsToRetry
                 self.requestsToRetry.removeAll()
                 self.isRefreshing = false
-                return completions
+                return drained
             }
 
             completions.forEach { $0(succeeded ? .retry : .doNotRetry) }
@@ -352,32 +354,38 @@ public class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
             "refresh_token": refreshToken
         ]
 
-        do {
-            let response = await AF.request(
-                url,
-                method: .post,
-                parameters: parameters,
-                encoder: URLEncodedFormParameterEncoder.default
-            )
-            .validate()
-            .serializingDecodable(TokenResponse.self)
-            .response
+        let response = await AF.request(
+            url,
+            method: .post,
+            parameters: parameters,
+            encoder: URLEncodedFormParameterEncoder.default
+        )
+        .validate()
+        .serializingDecodable(TokenResponse.self)
+        .response
 
-            guard let tokenResponse = response.value else {
-                auth.accessToken = nil
-                auth.refreshToken = nil
-                await auth.save()
-                return false
-            }
-
+        if let tokenResponse = response.value {
             auth.accessToken = tokenResponse.accessToken
             if let newRefreshToken = tokenResponse.refreshToken {
                 auth.refreshToken = newRefreshToken
             }
             await auth.save()
-
             return true
         }
+
+        // Only clear credentials when the authorization server has definitively
+        // rejected the refresh token (400 / 401 — typically `invalid_grant`).
+        // Transient failures (network errors, 5xx, timeouts) must leave the
+        // tokens intact so we can retry later, otherwise a flaky network logs
+        // the user out permanently.
+        if let statusCode = response.response?.statusCode,
+           statusCode == 400 || statusCode == 401 {
+            auth.accessToken = nil
+            auth.refreshToken = nil
+            await auth.save()
+        }
+
+        return false
     }
 }
 

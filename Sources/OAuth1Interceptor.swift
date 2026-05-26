@@ -135,21 +135,17 @@ public final class OAuth1Interceptor: RequestInterceptor, Sendable {
             let userAgent = await auth.userAgent
 
             var adaptedRequest = urlRequest
-            var formParameters: [String: String] = [:]
+            var formParameters: [(String, String)] = []
 
-            // Extract form parameters from POST body
+            // Extract form parameters from POST body. Use an ordered list so
+            // repeated keys (e.g. `scope=a&scope=b`) all participate in the
+            // OAuth signature — RFC 5849 §3.4.1.3.2 requires it.
             if adaptedRequest.method == .post, let httpBody = adaptedRequest.httpBody {
                 guard let bodyString = String(data: httpBody, encoding: .utf8) else {
                     completion(.failure(OAuth1Error.requestBodyNotUTF8Encodable))
                     return
                 }
-
-                // Parse form-encoded parameters
-                if let components = URLComponents(string: "?\(bodyString)") {
-                    formParameters = components.queryItems?.reduce(into: [String: String]()) { result, item in
-                        result[item.name] = item.value ?? ""
-                    } ?? [:]
-                }
+                formParameters = URL.parseFormURLEncoded(bodyString)
             }
 
             // Generate OAuth signature and authorization header
@@ -214,25 +210,36 @@ private extension OAuth1Interceptor {
     func authorizationHeader(
         for url: URL,
         method: String,
-        formParameters: [String: String],
+        formParameters: [(String, String)],
         consumerKey: String?,
         consumerSecret: String?,
         authToken: String?,
         authSecret: String?
     ) throws -> String {
 
-        // Build OAuth parameters (consumer key, nonce, timestamp, etc.)
+        // Build OAuth parameters (consumer key, nonce, timestamp, etc.).
+        // These have unique keys, so a dictionary is fine.
         var oauthParameters = buildOAuthParameters(consumerKey: consumerKey, token: authToken)
 
-        // Combine all parameters for signing
-        let allParameters = oauthParameters
-            .merging(formParameters) { _, new in new }
-            .merging(url.parameters) { _, new in new }
+        // Combine all parameters for signing. Preserve duplicates and order
+        // from the request — RFC 5849 §3.4.1.3.2 requires every occurrence
+        // of a repeated key to contribute to the base string.
+        var allParameters: [(String, String)] = []
+        for (key, value) in oauthParameters {
+            allParameters.append((key, value))
+        }
+        allParameters.append(contentsOf: formParameters)
+        allParameters.append(contentsOf: url.parameterItems)
 
-        // Create sorted parameter string
-        let parameterString = allParameters
-            .map { ($0.key.urlEscaped, $0.value.urlEscaped) }
-            .sorted { $0.0 < $1.0 }
+        // Per RFC 5849 §3.4.1.3.2: percent-encode each name and value, then
+        // sort by encoded name, breaking ties by encoded value.
+        let encodedPairs: [(String, String)] = allParameters.map { pair in
+            (pair.0.urlEscaped, pair.1.urlEscaped)
+        }
+        let sortedPairs = encodedPairs.sorted { lhs, rhs in
+            lhs.0 == rhs.0 ? lhs.1 < rhs.1 : lhs.0 < rhs.0
+        }
+        let parameterString = sortedPairs
             .map { "\($0.0)=\($0.1)" }
             .joined(separator: "&")
 

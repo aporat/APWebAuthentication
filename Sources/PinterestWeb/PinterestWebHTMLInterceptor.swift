@@ -4,7 +4,7 @@ import Foundation
 public final class PinterestWebHTMLInterceptor: RequestInterceptor, Sendable {
 
     @MainActor
-    var auth: PinterestWebAuthentication
+    let auth: PinterestWebAuthentication
 
     @MainActor
     public init(auth: PinterestWebAuthentication) {

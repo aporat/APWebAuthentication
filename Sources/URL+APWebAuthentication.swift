@@ -46,7 +46,18 @@ public extension URL {
         components.user = nil
         components.password = nil
 
-        // URLComponents automatically omits default ports
+        // RFC 5849 §3.4.1.2: scheme and host MUST be lowercase; default ports
+        // (80/http, 443/https) MUST be omitted. URLComponents only suppresses
+        // the port when it was never set explicitly, so strip it ourselves
+        // when the original URL embedded `:80` / `:443` literally.
+        let scheme = components.scheme?.lowercased()
+        components.scheme = scheme
+        components.host = components.host?.lowercased()
+        if let port = components.port,
+           (scheme == "http" && port == 80) || (scheme == "https" && port == 443) {
+            components.port = nil
+        }
+
         return components.string
     }
 
@@ -91,26 +102,66 @@ public extension URL {
     /// print(url2.parameters) // ["access_token": "abc", "expires_in": "3600"]
     /// ```
     var parameters: [String: String] {
-        guard let components = URLComponents(url: self, resolvingAgainstBaseURL: false) else {
-            return [:]
+        // Collapse to a dictionary for the common-case API. Use
+        // ``parameterItems`` when duplicates must be preserved (OAuth signing).
+        var result: [String: String] = [:]
+        for (name, value) in parameterItems {
+            result[name] = value
+        }
+        return result
+    }
+
+    /// Ordered list of every query and fragment parameter, preserving order
+    /// and duplicate keys.
+    ///
+    /// OAuth 1.0a signing (RFC 5849 §3.4.1.3.2) requires every value of a
+    /// repeated parameter to participate in the signature base string; use
+    /// this property instead of ``parameters`` whenever a parameter may legally
+    /// appear more than once (e.g. `scope=a&scope=b`).
+    var parameterItems: [(String, String)] {
+        var items: [(String, String)] = []
+
+        if let components = URLComponents(url: self, resolvingAgainstBaseURL: false),
+           let queryItems = components.queryItems {
+            for item in queryItems {
+                items.append((item.name, item.value ?? ""))
+            }
         }
 
-        // Parse the main query string
-        let queryParams = components.queryItems?.reduce(into: [String: String]()) { result, item in
-            result[item.name] = item.value
-        } ?? [:]
-
-        // Parse the fragment (used in OAuth redirects)
-        var fragmentParams: [String: String] = [:]
-        if let fragment = components.fragment,
-           let fragmentComponents = URLComponents(string: "?\(fragment)") {
-            fragmentParams = fragmentComponents.queryItems?.reduce(into: [String: String]()) { result, item in
-                result[item.name] = item.value
-            } ?? [:]
+        if let fragment = self.fragment {
+            items.append(contentsOf: Self.parseFormURLEncoded(fragment))
         }
 
-        // Merge, with fragment values overwriting query values for duplicate keys
-        return queryParams.merging(fragmentParams) { _, new in new }
+        return items
+    }
+
+    /// Parses an `application/x-www-form-urlencoded` string into ordered
+    /// key/value pairs. Performs `+` → space substitution and percent
+    /// decoding on each side of the `=` independently so that embedded
+    /// reserved characters survive the round trip — `URLComponents(string:)`
+    /// is not safe to reuse here because fragments and bodies may contain
+    /// characters it interprets as delimiters.
+    static func parseFormURLEncoded(_ body: String) -> [(String, String)] {
+        var items: [(String, String)] = []
+        for pair in body.components(separatedBy: "&") where !pair.isEmpty {
+            let rawName: String
+            let rawValue: String
+            if let separator = pair.firstIndex(of: "=") {
+                rawName = String(pair[..<separator])
+                rawValue = String(pair[pair.index(after: separator)...])
+            } else {
+                rawName = pair
+                rawValue = ""
+            }
+            let name = rawName
+                .replacingOccurrences(of: "+", with: " ")
+                .removingPercentEncoding ?? rawName
+            let value = rawValue
+                .replacingOccurrences(of: "+", with: " ")
+                .removingPercentEncoding ?? rawValue
+            items.append((name, value))
+        }
+        return items
     }
 
     // MARK: - Authentication Response Parsing

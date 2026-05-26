@@ -134,6 +134,48 @@ public protocol APWebAuthenticationPresentationContextProviding: NSObjectProtoco
 @MainActor
 public final class APWebAuthSession {
 
+    // MARK: - Appearance Configuration
+
+    /// Caller-supplied tint color override, used wherever the library would
+    /// otherwise read the `TintColor` asset.
+    private static var configuredTintColor: UIColor?
+
+    /// Caller-supplied bar-tint color override, used wherever the library
+    /// would otherwise read the `BarTintColor` asset.
+    private static var configuredBarTintColor: UIColor?
+
+    /// Sets the tint color used by the library's authentication UI
+    /// (progress bar, navigation title text in `.normal` appearance).
+    ///
+    /// When unset, the library falls back to `UIColor(named: "TintColor")`
+    /// from the host app's asset catalog, then to the system label color.
+    ///
+    /// - Parameter color: The color to apply, or `nil` to clear the override.
+    public static func setTintColor(_ color: UIColor?) {
+        configuredTintColor = color
+    }
+
+    /// Sets the navigation-bar background color used in the library's
+    /// `.normal` appearance.
+    ///
+    /// When unset, the library falls back to `UIColor(named: "BarTintColor")`
+    /// from the host app's asset catalog, then to the system default.
+    ///
+    /// - Parameter color: The color to apply, or `nil` to clear the override.
+    public static func setBarTintColor(_ color: UIColor?) {
+        configuredBarTintColor = color
+    }
+
+    /// Resolved tint color: explicit override → `TintColor` asset → `nil`.
+    static var resolvedTintColor: UIColor? {
+        configuredTintColor ?? UIColor(named: "TintColor")
+    }
+
+    /// Resolved bar-tint color: explicit override → `BarTintColor` asset → `nil`.
+    static var resolvedBarTintColor: UIColor? {
+        configuredBarTintColor ?? UIColor(named: "BarTintColor")
+    }
+
     // MARK: - Public Properties
 
     /// The status bar style for the authentication interface.
@@ -383,7 +425,7 @@ public final class APWebAuthSession {
             format: NSLocalizedString("Sign in to %@", comment: ""),
             accountType.description
         )
-        loginViewController.progressView.tintColor = UIColor(named: "TintColor")
+        loginViewController.progressView.tintColor = APWebAuthSession.resolvedTintColor
         loginViewController.statusBarStyle = statusBarStyle
 
         let navController = UINavigationController(rootViewController: loginViewController)

@@ -85,6 +85,13 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
     /// The redirect URL that signals authentication completion
     public var redirectURL: URL?
 
+    /// Optional OAuth `state` to validate on the callback (CSRF protection).
+    ///
+    /// Set this to the same value passed in the authorization URL. The
+    /// callback is rejected if its `state` parameter is missing or mismatched.
+    /// Use ``WebAuthRedirectHandler/generateState()`` to produce a value.
+    public var expectedState: String?
+
     /// Custom user agent string for the web view
     public var customUserAgent: String? {
         get { webView.customUserAgent }
@@ -504,7 +511,13 @@ private extension WebAuthViewController {
     /// - Parameter url: The URL to check
     /// - Returns: `true` if the URL matched the redirect URL, `false` otherwise
     func handleRedirect(url: URL?) -> Bool {
-        guard let url, redirectHandler.checkRedirect(url: url) != nil else {
+        guard let url else { return false }
+
+        // Sync the expected state on every check — callers may set it after
+        // the handler has been lazily constructed.
+        redirectHandler.expectedState = expectedState
+
+        guard let result = redirectHandler.checkRedirect(url: url) else {
             return false
         }
 
@@ -512,10 +525,16 @@ private extension WebAuthViewController {
         let handler = completionHandler
         completionHandler = nil
 
-        // Fetch cookies from the web view before completing
-        Task {
-            let cookies = await webView.configuration.websiteDataStore.httpCookieStore.allCookies()
-            handler?(.success((url, cookies)))
+        switch result {
+        case .success:
+            // Fetch cookies from the web view before completing
+            Task {
+                let cookies = await webView.configuration.websiteDataStore.httpCookieStore.allCookies()
+                handler?(.success((url, cookies)))
+                dismiss(animated: true)
+            }
+        case .failure(let error):
+            handler?(.failure(error))
             dismiss(animated: true)
         }
 

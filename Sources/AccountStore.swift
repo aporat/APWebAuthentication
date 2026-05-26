@@ -133,12 +133,6 @@ public final class AccountStore {
         description: "TikTok"
     )
 
-    public static let bluesky = AccountType(
-        code: .bluesky,
-        webAddress: "bsky.app",
-        description: "Bluesky"
-    )
-
     // MARK: - Account Type Collections
 
     /// Complete list of all supported account types.
@@ -154,8 +148,7 @@ public final class AccountStore {
         foursquare,
         github,
         fiveHundredpx,
-        tiktok,
-        bluesky
+        tiktok
     ]
 
     /// List of account types that are currently enabled.

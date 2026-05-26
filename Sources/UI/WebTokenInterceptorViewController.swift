@@ -259,6 +259,18 @@ open class WebTokenInterceptorViewController: UIViewController {
         setupConstraints()
     }
 
+    /// Removes the WKScriptMessageHandler when the controller leaves the
+    /// hierarchy. `userContentController.add(self, name:)` retains `self`, so
+    /// without this cleanup the controller leaks if it's dismissed by any
+    /// path other than `finishWithSuccess`/`finishWithError` (e.g. an
+    /// interactive swipe, the parent being dismissed).
+    override open func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        if isBeingDismissed || isMovingFromParent || view.window == nil {
+            cleanupWebView()
+        }
+    }
+
     private func setupUI() {
         view.addSubview(webView)
 
