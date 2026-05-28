@@ -24,7 +24,8 @@ let package = Package(
         .package(url: "https://github.com/SwifterSwift/SwifterSwift.git", from: "8.0.0"),
         .package(url: "https://github.com/SwiftyJSON/SwiftyJSON.git", from: "5.0.0"),
         .package(url: "https://github.com/devicekit/DeviceKit.git", from: "5.8.0"),
-        .package(url: "https://github.com/aporat/APUserAgentGenerator.git", branch: "main")
+        .package(url: "https://github.com/aporat/APUserAgentGenerator.git", branch: "main"),
+        .package(url: "https://github.com/kishikawakatsumi/KeychainAccess.git", from: "4.2.0")
     ],
     targets: [
         .target(
@@ -40,7 +41,8 @@ let package = Package(
                 "SwifterSwift",
                 "SwiftyJSON",
                 "DeviceKit",
-                "APUserAgentGenerator"
+                "APUserAgentGenerator",
+                "KeychainAccess"
             ],
             path: "Sources"
         ),
