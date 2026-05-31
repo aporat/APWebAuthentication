@@ -65,6 +65,12 @@ open class AuthClient {
     /// that adds platform-specific authentication.
     public let requestInterceptor: RequestInterceptor
 
+    /// Retrier that handles transient network failures (timeouts, dropped
+    /// connections, 5xx) with exponential backoff. Composed alongside
+    /// `requestInterceptor` so platform-specific auth retry behavior (e.g.
+    /// OAuth refresh on 401) still works.
+    public let transientNetworkRetrier = TransientNetworkRetrier()
+
     /// The account type/platform this client targets.
     ///
     /// This property identifies which social platform (Twitter, Reddit, GitHub, etc.)
@@ -107,10 +113,14 @@ open class AuthClient {
     /// - Parameter configuration: The URL session configuration to use
     /// - Returns: A configured Alamofire session
     open func makeSessionManager(configuration: URLSessionConfiguration) -> Session {
+        let composed = Interceptor(
+            retriers: [transientNetworkRetrier],
+            interceptors: [requestInterceptor]
+        )
         let session = Session(
             configuration: configuration,
             delegate: SessionDelegate(),
-            interceptor: requestInterceptor
+            interceptor: composed
         )
 
         return session
@@ -138,6 +148,9 @@ open class AuthClient {
     open func makeSessionConfiguration() -> URLSessionConfiguration {
         let configuration = URLSessionConfiguration.ephemeral
         configuration.httpShouldSetCookies = false
+        configuration.waitsForConnectivity = true
+        configuration.timeoutIntervalForRequest = 30
+        configuration.timeoutIntervalForResource = 60
         return configuration
     }
 
@@ -552,6 +565,7 @@ open class AuthClient {
     /// ```
     public func cancelAllRequests() {
         isReloadingCancelled = true
+        transientNetworkRetrier.isReloadingCancelled = true
         sessionManager.session.getAllTasks { tasks in
             tasks.forEach { $0.cancel() }
         }
