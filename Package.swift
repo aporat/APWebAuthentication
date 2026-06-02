@@ -19,7 +19,7 @@ let package = Package(
         .package(url: "https://github.com/rhodgkins/SwiftHTTPStatusCodes.git", from: "3.3.0"),
         .package(url: "https://github.com/JonasGessner/JGProgressHUD.git", from: "2.0.0"),
         .package(url: "https://github.com/SFSafeSymbols/SFSafeSymbols.git", from: "7.0.0"),
-        .package(url: "https://github.com/SnapKit/SnapKit.git", from: "5.0.0"),
+        .package(url: "https://github.com/SnapKit/SnapKit.git", from: "6.0.0"),
         .package(url: "https://github.com/SwiftyBeaver/SwiftyBeaver.git", from: "2.1.1"),
         .package(url: "https://github.com/SwifterSwift/SwifterSwift.git", from: "8.0.0"),
         .package(url: "https://github.com/SwiftyJSON/SwiftyJSON.git", from: "5.0.0"),
