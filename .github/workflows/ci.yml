@@ -8,15 +8,8 @@ on:
 
 jobs:
   test:
-    name: Tests on ${{ matrix.device }} ${{ matrix.os }}
+    name: Tests on iOS Simulator
     runs-on: macos-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - platform: iOS Simulator
-            device: iPhone 17
-            os: "26.2"
 
     steps:
       - name: Checkout Repository
@@ -30,12 +23,29 @@ jobs:
       - name: Set Project Scheme
         run: echo "scheme=$(basename ${{ github.repository }})" >> $GITHUB_ENV
 
+      - name: Select iOS Simulator Destination
+        run: |
+          destination=$(python3 <<'EOF'
+          import json, subprocess
+          runtimes = json.loads(subprocess.check_output(["xcrun", "simctl", "list", "runtimes", "-j"]))["runtimes"]
+          ios = [r for r in runtimes if r.get("isAvailable") and r["identifier"].startswith("com.apple.CoreSimulator.SimRuntime.iOS")]
+          ios.sort(key=lambda r: [int(p) for p in r["version"].split(".")])
+          rt = ios[-1]
+          devices = json.loads(subprocess.check_output(["xcrun", "simctl", "list", "devices", "-j"]))["devices"].get(rt["identifier"], [])
+          iphones = [d for d in devices if d.get("isAvailable") and "iPhone" in d["name"]]
+          name = iphones[-1]["name"] if iphones else "iPhone 16"
+          print(f"platform=iOS Simulator,name={name},OS={rt['version']}")
+          EOF
+          )
+          echo "Selected destination: $destination"
+          echo "destination=$destination" >> "$GITHUB_ENV"
+
       - name: Run Tests with Code Coverage
         run: |
           set -o pipefail && \
           xcodebuild \
             -scheme "${{ env.scheme }}" \
-            -destination "platform=${{ matrix.platform }},name=${{ matrix.device }},OS=${{ matrix.os }}" \
+            -destination "${{ env.destination }}" \
             -enableCodeCoverage YES \
             -derivedDataPath ./DerivedData \
             -resultBundlePath ./TestResults.xcresult \
