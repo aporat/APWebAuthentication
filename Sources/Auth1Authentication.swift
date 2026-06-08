@@ -61,18 +61,6 @@ public final class Auth1Authentication: Authentication {
         return false
     }
 
-    // MARK: - Configuration
-
-    /// Sets the browser mode for user agent generation.
-    func setBrowserMode(_ mode: UserAgentMode) {
-        self.browserMode = mode
-    }
-
-    /// Sets a custom user agent string.
-    func setCustomUserAgent(_ agent: String) {
-        self.customUserAgent = agent
-    }
-
     // MARK: - Persistence
 
     override public var keychainCategory: String { "oauth1" }

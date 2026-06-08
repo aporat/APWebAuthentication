@@ -48,7 +48,7 @@ final class APWebAuthenticationErrorTests: XCTestCase {
         XCTAssertEqual(APWebAuthenticationError.canceled.errorCode, "canceled")
         XCTAssertEqual(APWebAuthenticationError.timeout.errorCode, "timeout")
         XCTAssertEqual(APWebAuthenticationError.badRequest.errorCode, "bad_request")
-        XCTAssertEqual(APWebAuthenticationError.unknown.errorCode, "bad_request")
+        XCTAssertEqual(APWebAuthenticationError.unknown.errorCode, "unknown")
     }
 
     // MARK: - Test Response JSON Extraction

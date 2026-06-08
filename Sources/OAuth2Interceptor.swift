@@ -121,10 +121,9 @@ public class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
 
     /// The authentication manager containing the access token.
     ///
-    /// Provides access to the user's OAuth 2.0 access token.
-    ///
-    /// - Note: Marked `nonisolated(unsafe)` because it's immutable after initialization
-    ///         and MainActor-isolated properties are accessed safely within Task contexts.
+    /// Provides access to the user's OAuth 2.0 access token. `Auth2Authentication`
+    /// is `@MainActor`-isolated, so reads are performed from a MainActor-bound
+    /// `Task` in `adapt` / `retry`.
     let auth: Auth2Authentication
 
     /// The URL for the OAuth 2.0 token refresh endpoint.
@@ -229,16 +228,18 @@ public class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
         for _: Session,
         completion: @escaping @Sendable (Result<URLRequest, any Error>) -> Void
     ) {
-        Task {
+        // Hop to MainActor once instead of awaiting each `auth` property
+        // independently — `Auth2Authentication` is MainActor-isolated.
+        Task { @MainActor in
             var urlRequest = urlRequest
 
             // Add user agent if available
-            if let currentUserAgent = await auth.userAgent, !currentUserAgent.isEmpty {
+            if let currentUserAgent = auth.userAgent, !currentUserAgent.isEmpty {
                 urlRequest.headers.add(.userAgent(currentUserAgent))
             }
 
             // Get access token
-            let currentAccessToken = await auth.accessToken
+            let currentAccessToken = auth.accessToken
 
             // Add token to Authorization header (recommended)
             if let currentAccessToken, !currentAccessToken.isEmpty, tokenLocation == .authorizationHeader {

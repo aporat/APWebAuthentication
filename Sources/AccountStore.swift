@@ -27,8 +27,8 @@ import UIKit
 /// }
 /// ```
 @MainActor
-public final class AccountStore {
-    
+public enum AccountStore {
+
     // MARK: - Configuration
     
     /// Set of currently enabled account type codes.
@@ -176,7 +176,4 @@ public final class AccountStore {
         enabledCodes.contains(code)
     }
 
-    // MARK: - Initialization
-
-    private init() {}
 }

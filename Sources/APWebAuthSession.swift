@@ -355,6 +355,9 @@ public final class APWebAuthSession {
                         try self.presentNormalStyle()
                     }
                 } catch {
+                    // Detach the handler before resuming so a later invocation
+                    // can't double-resume the continuation.
+                    loginVC.completionHandler = nil
                     let authError = (error as? APWebAuthenticationError) ?? .failed(reason: error.localizedDescription)
                     continuation.resume(throwing: authError)
                 }

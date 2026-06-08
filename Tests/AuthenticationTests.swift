@@ -13,16 +13,6 @@ final class AuthenticationTests: XCTestCase {
         auth = TestAuth()
     }
 
-    func testAuthSettingsURL_whenAccountIdentifierIsNil_returnsNil() {
-        auth.accountIdentifier = nil
-        XCTAssertNil(auth.authSettingsURL)
-    }
-
-    func testAuthSettingsURL_whenAccountIdentifierSet_returnsURL() {
-        auth.accountIdentifier = "test_account"
-        XCTAssertTrue(auth.authSettingsURL?.path.contains("test_account.settings") ?? false)
-    }
-
     func testUserAgent_customUserAgentOverrides() {
         auth.customUserAgent = "CustomAgent"
         XCTAssertEqual(auth.userAgent, "CustomAgent")

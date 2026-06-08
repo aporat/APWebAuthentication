@@ -71,8 +71,9 @@ public enum OAuth1Error: Error, Sendable {
 /// - Tumblr
 /// - Some legacy APIs
 ///
-/// - Note: The interceptor is marked `@unchecked Sendable` because it accesses
-///         `@MainActor`-isolated authentication properties.
+/// - Note: The interceptor is `Sendable` — its only stored property (`auth`)
+///         is a `@MainActor`-isolated class reference, and all access to it
+///         happens from a MainActor-bound `Task` inside `adapt`.
 public final class OAuth1Interceptor: RequestInterceptor, Sendable {
 
     // MARK: - Properties
@@ -120,7 +121,9 @@ public final class OAuth1Interceptor: RequestInterceptor, Sendable {
         for session: Session,
         completion: @escaping @Sendable (Result<URLRequest, any Error>) -> Void
     ) {
-        Task {
+        // Hop to MainActor once instead of awaiting each `auth` property
+        // independently — `Auth1Authentication` is MainActor-isolated.
+        Task { @MainActor in
             // Validate URL presence
             guard let url = urlRequest.url else {
                 completion(.failure(OAuth1Error.missingURLInRequest))
@@ -128,11 +131,11 @@ public final class OAuth1Interceptor: RequestInterceptor, Sendable {
             }
 
             // Get credentials from auth
-            let consumerKey = await auth.consumerKey
-            let consumerSecret = await auth.consumerSecret
-            let authToken = await auth.token
-            let authSecret = await auth.secret
-            let userAgent = await auth.userAgent
+            let consumerKey = auth.consumerKey
+            let consumerSecret = auth.consumerSecret
+            let authToken = auth.token
+            let authSecret = auth.secret
+            let userAgent = auth.userAgent
 
             var adaptedRequest = urlRequest
             var formParameters: [(String, String)] = []

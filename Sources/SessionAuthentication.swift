@@ -11,7 +11,6 @@ private struct CodableHTTPCookie: Codable, Sendable {
     let path: String
     let expiresDate: Date?
     let isSecure: Bool
-    let isHTTPOnly: Bool
 
     /// Creates a codable cookie from an `HTTPCookie`.
     init?(from cookie: HTTPCookie) {
@@ -21,7 +20,6 @@ private struct CodableHTTPCookie: Codable, Sendable {
         self.path = cookie.path
         self.expiresDate = cookie.expiresDate
         self.isSecure = cookie.isSecure
-        self.isHTTPOnly = cookie.isHTTPOnly
     }
 
     /// Converts the codable cookie back to an `HTTPCookie`.
@@ -33,7 +31,6 @@ private struct CodableHTTPCookie: Codable, Sendable {
         properties[.path] = path
         properties[.expires] = expiresDate
         properties[.secure] = isSecure
-        properties[.init(rawValue: "HttpOnly")] = isHTTPOnly
 
         return HTTPCookie(properties: properties)
     }

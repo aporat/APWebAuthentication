@@ -7,11 +7,11 @@ import Foundation
 /// **Example Usage:**
 /// ```swift
 /// let auth = InstagramAuthentication()
-/// auth.setBrowserMode(.desktop)
+/// auth.browserMode = .desktop
 ///
 /// // Or from string
 /// if let mode = UserAgentMode("ios-chrome") {
-///     auth.setBrowserMode(mode)
+///     auth.browserMode = mode
 /// }
 /// ```
 public enum UserAgentMode: String, Codable, Sendable, CaseIterable {

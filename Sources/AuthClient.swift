@@ -597,11 +597,18 @@ open class AuthClient {
             return absoluteURL
         }
 
-        // Construct URL relative to base
-        guard let baseURL = URL(string: baseURLString)?.appendingPathComponent(path) else {
+        // Join base and path with exactly one separator. `appendingPathComponent`
+        // doubles the slash when `baseURLString` ends with `/` and `path` starts
+        // with `/`, so strip the leading `/` from the path before joining.
+        let trimmedBase = baseURLString.hasSuffix("/")
+            ? String(baseURLString.dropLast())
+            : baseURLString
+        let trimmedPath = path.hasPrefix("/") ? String(path.dropFirst()) : path
+
+        guard let joined = URL(string: "\(trimmedBase)/\(trimmedPath)") else {
             throw APWebAuthenticationError.unknown
         }
 
-        return baseURL
+        return joined
     }
 }

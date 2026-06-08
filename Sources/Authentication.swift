@@ -22,22 +22,6 @@ open class Authentication {
     /// Unique identifier for the authenticated account.
     public var accountIdentifier: String?
 
-    /// Legacy on-disk location for settings.
-    ///
-    /// Credentials are persisted to the Keychain; this URL is no longer read
-    /// or written by the library and is retained only for API compatibility.
-    ///
-    /// Format: `{accountIdentifier}.settings`
-    public var authSettingsURL: URL? {
-        guard let currentAccountIdentifier = accountIdentifier,
-              let documentsURL = FileManager.documentsDirectoryURL else {
-            return nil
-        }
-
-        let fileName = currentAccountIdentifier + ".settings"
-        return documentsURL.appendingPathComponent(fileName)
-    }
-
     /// Keychain namespace used to disambiguate credentials between different
     /// authentication types that may share an `accountIdentifier`.
     ///
@@ -61,34 +45,39 @@ open class Authentication {
             return currentUserAgent
         }
 
-        // Priority 2: Generate based on browser mode
-        if browserMode == nil || browserMode == .default || browserMode == .ios || browserMode == .iphone {
+        // Priority 2: Generate based on browser mode. A nil mode is treated
+        // the same as `.default` — the platform-default mobile Safari agent.
+        switch browserMode ?? .default {
+        case .default, .ios, .iphone:
             return APWebBrowserAgentBuilder.builder().generate()
-        } else if browserMode == .iosChrome {
+
+        case .iosChrome:
             return APWebBrowserAgentBuilder.builder()
                 .withDevice(IOSDevice())
                 .withBrowser(ChromeBrowser())
                 .generate()
-        } else if browserMode == .webView {
+
+        case .webView:
             return nil
-        } else if browserMode == .android {
+
+        case .android:
             return APWebBrowserAgentBuilder.builder()
                 .withDevice(AndroidDevice(deviceModel: "Pixel 7"))
                 .withBrowser(ChromeBrowser(version: "123.0.6312.86"))
                 .generate()
-        } else if browserMode == .desktop {
+
+        case .desktop:
             return APWebBrowserAgentBuilder.builder()
                 .withDevice(MacDevice())
                 .withBrowser(ChromeBrowser())
                 .generate()
-        } else if browserMode == .desktopFirefox {
+
+        case .desktopFirefox:
             return APWebBrowserAgentBuilder.builder()
                 .withDevice(MacDevice())
                 .withBrowser(FirefoxBrowser())
                 .generate()
         }
-
-        return nil
     }
 
     // MARK: - Locale Configuration

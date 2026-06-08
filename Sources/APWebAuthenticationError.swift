@@ -164,8 +164,10 @@ extension APWebAuthenticationError: LocalizedError {
             return "not_found"
         case .timeout:
             return "timeout"
-        case .badRequest, .unknown:
+        case .badRequest:
             return "bad_request"
+        case .unknown:
+            return "unknown"
         }
     }
 }
