@@ -149,8 +149,8 @@ open class AuthClient {
         let configuration = URLSessionConfiguration.ephemeral
         configuration.httpShouldSetCookies = false
         configuration.waitsForConnectivity = true
-        configuration.timeoutIntervalForRequest = 30
-        configuration.timeoutIntervalForResource = 60
+        configuration.timeoutIntervalForRequest = 15
+        configuration.timeoutIntervalForResource = 20
         return configuration
     }
 
