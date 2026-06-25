@@ -5,6 +5,11 @@ import AuthenticationServices
 
 // MARK: - ASWebAuthenticationSession Async Support
 
+@MainActor
+private final class ASWebAuthSessionHolder {
+    var session: ASWebAuthenticationSession?
+}
+
 public extension ASWebAuthenticationSession {
 
     @MainActor
@@ -14,9 +19,13 @@ public extension ASWebAuthenticationSession {
         contextProvider: ASWebAuthenticationPresentationContextProviding,
         ephemeral: Bool = false
     ) async throws(APWebAuthenticationError) -> URL {
+        let holder = ASWebAuthSessionHolder()
         do {
             return try await withCheckedThrowingContinuation { continuation in
                 let session = ASWebAuthenticationSession(url: url, callback: callback) { callbackURL, error in
+                    MainActor.assumeIsolated {
+                        holder.session = nil
+                    }
                     if let error = error {
                         continuation.resume(throwing: error)
                         return
@@ -32,8 +41,10 @@ public extension ASWebAuthenticationSession {
 
                 session.presentationContextProvider = contextProvider
                 session.prefersEphemeralWebBrowserSession = ephemeral
+                holder.session = session
 
                 if !session.start() {
+                    holder.session = nil
                     continuation.resume(throwing: ASWebAuthenticationSessionError(.canceledLogin))
                 }
             }
@@ -44,4 +55,3 @@ public extension ASWebAuthenticationSession {
         }
     }
 }
-
