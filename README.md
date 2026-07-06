@@ -223,7 +223,7 @@ Useful classifiers on the error: `isRetryable`, `isLoginError`, `requiresUserAct
 
 ```bash
 xcodebuild -scheme APWebAuthentication \
-    -destination 'platform=iOS Simulator,name=iPhone 17' test
+    -destination 'platform=iOS Simulator,name=iPhone 17 Pro' test
 ```
 
 Some Keychain-touching tests skip when run from a SwiftPM test host without an `application-identifier` entitlement — that's the only environment where this happens; real apps embedding the library exercise the full code path normally.

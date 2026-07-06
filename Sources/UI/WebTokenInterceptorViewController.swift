@@ -263,10 +263,15 @@ open class WebTokenInterceptorViewController: UIViewController {
     /// hierarchy. `userContentController.add(self, name:)` retains `self`, so
     /// without this cleanup the controller leaks if it's dismissed by any
     /// path other than `finishWithSuccess`/`finishWithError` (e.g. an
-    /// interactive swipe, the parent being dismissed).
+    /// interactive swipe, the parent being dismissed). Those same paths also
+    /// bypass the finish methods, so resolve a pending `start()` continuation
+    /// here — otherwise the awaiting caller hangs forever.
     override open func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        if isBeingDismissed || isMovingFromParent || view.window == nil {
+        if isBeingDismissed || isMovingFromParent {
+            resolvePendingStart(throwing: .canceled)
+            cleanupWebView()
+        } else if view.window == nil {
             cleanupWebView()
         }
     }
@@ -310,10 +315,11 @@ open class WebTokenInterceptorViewController: UIViewController {
         }
     }
 
-    /// Stop loading and cleanup
+    /// Stop loading and cleanup. Resolves a pending `start()` as canceled.
     public func stopLoading() {
         timeoutTask?.cancel()
         webView.stopLoading()
+        resolvePendingStart(throwing: .canceled)
         cleanupWebView()
     }
 
@@ -430,12 +436,20 @@ open class WebTokenInterceptorViewController: UIViewController {
     private func finishWithError(_ error: APWebAuthenticationError) {
         guard !state.isFinished else { return }
 
+        resolvePendingStart(throwing: error)
+        dismiss(animated: true)
+    }
+
+    /// Resolves a pending `start()` continuation without dismissing. Used by
+    /// paths where the controller is already leaving the hierarchy (interactive
+    /// swipe, parent dismissal) or the caller controls the presentation.
+    private func resolvePendingStart(throwing error: APWebAuthenticationError) {
+        guard !state.isFinished else { return }
+
         state = .failed(error)
         timeoutTask?.cancel()
         continuation?.resume(throwing: error)
         continuation = nil
-
-        dismiss(animated: true)
     }
 
     // MARK: - Cleanup

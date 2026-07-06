@@ -196,6 +196,11 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
     override open func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
 
+        // Observe interactive (swipe-down) dismissal of the presented sheet.
+        // The presentation controller belongs to the presented container —
+        // the navigation controller when one wraps this controller.
+        (navigationController ?? self).presentationController?.delegate = self
+
         if appearanceStyle == .safari {
             setupProgressObserver()
         }
@@ -502,6 +507,22 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
     }
 }
 
+// MARK: - UIAdaptivePresentationControllerDelegate
+
+extension WebAuthViewController: UIAdaptivePresentationControllerDelegate {
+
+    /// Completes the pending authentication as canceled when the user
+    /// dismisses the sheet interactively (swipe-down). Without this, the
+    /// continuation awaiting in `APWebAuthSession.start()` is never resumed
+    /// and the caller hangs forever.
+    public func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
+        // Capture and clear to prevent duplicate calls, matching handleRedirect.
+        let handler = completionHandler
+        completionHandler = nil
+        handler?(.failure(.canceled))
+    }
+}
+
 // MARK: - Private Methods - Redirect Handling
 
 private extension WebAuthViewController {
@@ -549,7 +570,12 @@ private extension WebAuthViewController {
         }
 
         if let error = redirectHandler.parseJSONError(from: htmlString) {
-            completionHandler?(.failure(error))
+            // Capture and clear to prevent duplicate calls, matching
+            // handleRedirect — this runs async after didFinish, so a redirect
+            // may already have consumed the handler.
+            guard let handler = completionHandler else { return }
+            completionHandler = nil
+            handler(.failure(error))
             dismiss(animated: true)
         }
     }

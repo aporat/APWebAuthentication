@@ -22,29 +22,36 @@ public final class TikTokWebAuthViewController: WebAuthViewController {
 
     // MARK: - WKNavigationDelegate
 
-    /*
-    override public func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, preferences: WKWebpagePreferences, decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void) {
+    /// TikTok completes login by setting session cookies rather than by
+    /// delivering tokens on the callback URL, so instead of the base class's
+    /// cancel-and-complete redirect handling, allow the navigation, reload the
+    /// auth URL, and verify the cookies in `didFinish`.
+    override public func webView(
+        _ webView: WKWebView,
+        decidePolicyFor navigationAction: WKNavigationAction,
+        preferences: WKWebpagePreferences
+    ) async -> (WKNavigationActionPolicy, WKWebpagePreferences) {
         if redirectURL == nil {
             checkForAuthTokens()
         }
 
-        if let urlString = navigationAction.request.url?.absoluteString, let currentRedirectURL = redirectURL?.absoluteString, !urlString.isEmpty {
-            if urlString.contains(currentRedirectURL) {
-                showHUD()
-                loggedIn = true
+        if let urlString = navigationAction.request.url?.absoluteString,
+           let currentRedirectURL = redirectURL?.absoluteString,
+           !urlString.isEmpty,
+           urlString.contains(currentRedirectURL) {
+            showHUD()
+            loggedIn = true
 
-                // make sure we dont get stuck loading
-                // This is fine, as `asyncAfter` runs on the main queue.
-                DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(3)) {
-                    self.hideHUD()
-                    self.loadRequest()
-                }
+            // make sure we dont get stuck loading
+            DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(3)) { [weak self] in
+                self?.hideHUD()
+                self?.loadRequest()
             }
         }
 
-        decisionHandler(.allow, preferences)
+        return (.allow, preferences)
     }
-*/
+
     override public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         if loggedIn {
             checkForAuthTokens()
