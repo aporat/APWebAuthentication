@@ -224,7 +224,8 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
         view.addSubview(webView)
         
         webView.snp.makeConstraints { make in
-            make.edges.equalTo(view.safeAreaLayoutGuide)
+            make.top.leading.trailing.equalTo(view.safeAreaLayoutGuide)
+            make.bottom.equalTo(view)
         }
     }
 
