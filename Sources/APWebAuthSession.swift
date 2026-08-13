@@ -389,7 +389,7 @@ public final class APWebAuthSession {
     /// ```
     private func showLoginPermission() async -> Bool {
         await withCheckedContinuation { continuation in
-            let title = String(format: NSLocalizedString("“%@” Wants to Use “%@” to Sign In", comment: ""), UIApplication.shared.shortAppName, self.accountType.webAddress)
+            let title = String(format: NSLocalizedString("“%@” Wants to Use “%@” to Sign In", comment: ""), UIApplication.shared.displayName ?? "", self.accountType.webAddress)
             let message = NSLocalizedString("This allows the app and website to share information about you.", comment: "")
             let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
 
