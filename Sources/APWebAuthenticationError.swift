@@ -48,6 +48,9 @@ public enum APWebAuthenticationError: Error, Sendable, Equatable {
 
     case checkPointRequired(reason: String?, responseJSON: JSON?)
     case twoFactorRequired(responseJSON: JSON?)
+    /// An "account protection" profile-code challenge (an email/SMS one-time code
+    /// confirmation), distinct from two-factor authentication.
+    case accountProtectionRequired(responseJSON: JSON?)
 
     // MARK: - Response JSON Access
 
@@ -62,6 +65,7 @@ public enum APWebAuthenticationError: Error, Sendable, Equatable {
              let .sessionExpired(_, json),
              let .rateLimit(_, json),
              let .twoFactorRequired(json),
+             let .accountProtectionRequired(json),
              let .checkPointRequired(_, json):
             return json
 
@@ -92,6 +96,8 @@ extension APWebAuthenticationError: LocalizedError {
             return "Security Check"
         case .twoFactorRequired:
             return "Two-Factor Authentication"
+        case .accountProtectionRequired:
+            return "Confirm It's You"
         case .failed, .notFound, .timeout, .badRequest, .canceled, .unknown:
             return "Error"
         }
@@ -124,6 +130,8 @@ extension APWebAuthenticationError: LocalizedError {
 
         case .twoFactorRequired:
             return "Two-factor authentication is required."
+        case .accountProtectionRequired:
+            return "Enter the code that was sent to your email or phone to confirm it's you."
         case .notFound:
             return "The requested resource could not be found."
         case .timeout:
@@ -158,6 +166,8 @@ extension APWebAuthenticationError: LocalizedError {
             return "rate_limit"
         case .twoFactorRequired:
             return "two_factor_required"
+        case .accountProtectionRequired:
+            return "account_protection_required"
         case .canceled:
             return "canceled"
         case .notFound:
@@ -203,6 +213,7 @@ extension APWebAuthenticationError {
         switch self {
         case .checkPointRequired,
              .twoFactorRequired,
+             .accountProtectionRequired,
              .feedbackRequired,
              .externalActionRequired:
             return true
