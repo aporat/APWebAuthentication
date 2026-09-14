@@ -1,5 +1,5 @@
 import Alamofire
-import CryptoSwift
+import CryptoKit
 import Foundation
 
 // MARK: - OAuth 1.0a Error
@@ -19,7 +19,8 @@ public enum OAuth1Error: Error, Sendable {
 
     /// Failed to generate the HMAC-SHA1 signature.
     ///
-    /// This occurs when cryptographic operations fail.
+    /// Retained for API compatibility. CryptoKit's HMAC cannot fail, so the
+    /// interceptor no longer throws this case.
     case signatureGenerationFailed
 }
 
@@ -276,13 +277,11 @@ private extension OAuth1Interceptor {
         // Create signing key
         let signingKey = "\((consumerSecret ?? "").urlEscaped)&\((authSecret ?? "").urlEscaped)"
 
-        // Generate HMAC-SHA1 signature
-        guard let signature = try? HMAC(key: signingKey, variant: .sha1)
-                .authenticate(Array(signatureBase.utf8))
-                .toBase64()
-        else {
-            throw OAuth1Error.signatureGenerationFailed
-        }
+        // Generate HMAC-SHA1 signature. SHA-1 is what RFC 5849 mandates for
+        // HMAC-SHA1; CryptoKit exposes it under `Insecure` for that reason.
+        let key = SymmetricKey(data: Data(signingKey.utf8))
+        let mac = HMAC<Insecure.SHA1>.authenticationCode(for: Data(signatureBase.utf8), using: key)
+        let signature = Data(mac).base64EncodedString()
 
         oauthParameters["oauth_signature"] = signature
 

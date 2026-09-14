@@ -368,6 +368,34 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
         loginHUD.dismiss()
     }
 
+    // MARK: - Public Methods - Completion
+
+    /// Finishes the authentication flow exactly once: dismisses this
+    /// controller (if it is presented) and then delivers `result` to
+    /// `completionHandler`.
+    ///
+    /// The handler runs *after* the dismissal animation completes, so a
+    /// caller awaiting `APWebAuthSession.start()` can present its next
+    /// screen immediately without colliding with the outgoing sheet. This
+    /// is the only place that should dismiss the controller on completion —
+    /// subclasses that detect success themselves should call it rather than
+    /// dismissing directly. Subsequent calls are ignored.
+    ///
+    /// - Parameter result: The outcome to report.
+    public func complete(with result: Result<(URL, [HTTPCookie]), APWebAuthenticationError>) {
+        guard let handler = completionHandler else { return }
+        completionHandler = nil
+
+        guard presentingViewController != nil else {
+            handler(result)
+            return
+        }
+
+        dismiss(animated: true) {
+            handler(result)
+        }
+    }
+
     // MARK: - Public Methods - Text Transform
 
     /// Override this method to provide custom text transform functionality.
@@ -543,21 +571,19 @@ private extension WebAuthViewController {
             return false
         }
 
-        // Capture and clear handler to prevent duplicate calls
-        let handler = completionHandler
-        completionHandler = nil
+        // A redirect can be observed by several delegate callbacks for the
+        // same navigation; only the first one that still has a handler wins.
+        guard completionHandler != nil else { return true }
 
         switch result {
         case .success:
             // Fetch cookies from the web view before completing
             Task {
                 let cookies = await webView.configuration.websiteDataStore.httpCookieStore.allCookies()
-                handler?(.success((url, cookies)))
-                dismiss(animated: true)
+                complete(with: .success((url, cookies)))
             }
         case .failure(let error):
-            handler?(.failure(error))
-            dismiss(animated: true)
+            complete(with: .failure(error))
         }
 
         return true
@@ -571,13 +597,9 @@ private extension WebAuthViewController {
         }
 
         if let error = redirectHandler.parseJSONError(from: htmlString) {
-            // Capture and clear to prevent duplicate calls, matching
-            // handleRedirect — this runs async after didFinish, so a redirect
-            // may already have consumed the handler.
-            guard let handler = completionHandler else { return }
-            completionHandler = nil
-            handler(.failure(error))
-            dismiss(animated: true)
+            // Runs async after didFinish, so a redirect may already have
+            // consumed the handler; `complete(with:)` is a no-op then.
+            complete(with: .failure(error))
         }
     }
 }
@@ -587,10 +609,7 @@ private extension WebAuthViewController {
 private extension WebAuthViewController {
 
     func handleDismiss() {
-        dismiss(animated: true) { [weak self] in
-            self?.completionHandler?(.failure(.canceled))
-            self?.completionHandler = nil
-        }
+        complete(with: .failure(.canceled))
     }
 
     func handleRefresh() {

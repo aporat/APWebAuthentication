@@ -76,21 +76,11 @@ public final class PinterestWebAuthController: WebAuthViewController {
 
             if success {
                 let cookies = await getCookies()
-
-                let handler = completionHandler
-                completionHandler = nil
-
                 let url = URL(string: "pinterest://auth-complete") ?? URL(string: "about:blank")!
-                dismiss(animated: true) {
-                    handler?(.success((url, cookies)))
-                }
+                complete(with: .success((url, cookies)))
             } else {
                 let error = APWebAuthenticationError.sessionExpired(reason: "Login detected, but session cookies could not be retrieved. Please try again.")
-
-                self.dismiss(animated: true) {
-                    self.completionHandler?(.failure(error))
-                    self.completionHandler = nil
-                }
+                complete(with: .failure(error))
             }
 
             self.isVerifying = false

@@ -31,7 +31,7 @@ xcodebuild -scheme APWebAuthentication \
 ## Key Dependencies
 
 - Alamofire (networking)
-- CryptoSwift (crypto operations)
+- CryptoKit (OAuth 1.0a HMAC-SHA1 signing)
 - SwiftyJSON (JSON parsing)
 - SnapKit (Auto Layout)
 - APUserAgentGenerator (user-agent string generation)

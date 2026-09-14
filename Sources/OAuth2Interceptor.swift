@@ -186,6 +186,12 @@ public class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
     /// second time, which is what prevents an endless refresh loop. Kept as
     /// a small FIFO because Alamofire offers no hook to learn when a retried
     /// request finally completes.
+    ///
+    /// Entries are only ever *checked*, never removed on sight: Alamofire
+    /// consults the retrier twice per failed attempt (once when validation
+    /// fails, again when the response serializer rethrows that error), so
+    /// clearing the entry on the first sighting would let the second
+    /// consultation start a fresh refresh and loop forever.
     private var refreshedRequestIDs: [UUID] = []
     private static let refreshedRequestIDsLimit = 64
 
@@ -359,8 +365,7 @@ public class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
         // `nil`  → this request already had its one refresh; fail it.
         // `true` → we start the refresh; `false` → one is already in flight.
         let shouldStartRefresh: Bool? = lock.withLock {
-            if let index = refreshedRequestIDs.firstIndex(of: request.id) {
-                refreshedRequestIDs.remove(at: index)
+            guard !refreshedRequestIDs.contains(request.id) else {
                 return nil
             }
             refreshedRequestIDs.append(request.id)

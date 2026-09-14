@@ -15,7 +15,6 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/Alamofire/Alamofire.git", from: "5.11.0"),
-        .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", from: "1.9.0"),
         .package(url: "https://github.com/rhodgkins/SwiftHTTPStatusCodes.git", from: "3.3.0"),
         .package(url: "https://github.com/JonasGessner/JGProgressHUD.git", from: "2.0.0"),
         .package(url: "https://github.com/SnapKit/SnapKit.git", from: "6.0.0"),
@@ -29,7 +28,6 @@ let package = Package(
             name: "APWebAuthentication",
             dependencies: [
                 "Alamofire",
-                "CryptoSwift",
                 .product(name: "HTTPStatusCodes", package: "SwiftHTTPStatusCodes"),
                 "JGProgressHUD",
                 "SnapKit",

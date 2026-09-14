@@ -299,7 +299,7 @@ public final class APWebAuthSession {
     /// 2. Presents the web authentication view controller
     /// 3. Monitors for redirect to callback URL
     /// 4. Parses and returns authentication data
-    /// 5. Dismisses the view controller
+    /// 5. The view controller dismisses itself, then this method returns
     ///
     /// **Example:**
     /// ```swift
@@ -328,8 +328,11 @@ public final class APWebAuthSession {
                     return
                 }
 
-                // Set up completion handler for web view controller
+                // Set up completion handler for web view controller. The
+                // controller owns its own dismissal and invokes this handler
+                // once the sheet is gone, so all that's left is to release it.
                 loginVC.completionHandler = { [weak self] (result: Result<(URL, [HTTPCookie]), APWebAuthenticationError>) in
+                    self?.loginViewController = nil
 
                     switch result {
                     case .success(let value):
@@ -337,13 +340,6 @@ public final class APWebAuthSession {
 
                     case .failure(let error):
                         continuation.resume(throwing: error)
-                    }
-
-                    // Clean up after authentication completes
-                    guard let self else { return }
-
-                    self.loginViewController?.dismiss(animated: true) {
-                        self.loginViewController = nil
                     }
                 }
 
