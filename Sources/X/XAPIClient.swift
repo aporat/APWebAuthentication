@@ -9,7 +9,15 @@ public final class XAPIClient: OAuth2Client {
     // MARK: - Initialization
 
     public convenience init(auth: Auth2Authentication) {
-        let interceptor = OAuth2Interceptor(auth: auth, tokenLocation: .authorizationHeader, refreshTokenURL: "https://api.x.com/2/oauth2/token")
+        // X authenticates confidential clients with HTTP Basic at the token
+        // endpoint; public (PKCE) clients send only `client_id`. Leaving
+        // `auth.clientSecret` nil selects the public-client behaviour.
+        let interceptor = OAuth2Interceptor(
+            auth: auth,
+            tokenLocation: .authorizationHeader,
+            refreshTokenURL: "https://api.x.com/2/oauth2/token",
+            clientAuthentication: .basicAuthorizationHeader
+        )
 
         self.init(
             accountType: AccountStore.x,

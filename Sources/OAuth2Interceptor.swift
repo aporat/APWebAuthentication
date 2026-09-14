@@ -21,6 +21,31 @@ public enum TokenLocation: Int, Sendable {
     case params
 }
 
+// MARK: - Client Authentication
+
+/// How the client proves its identity to the token endpoint during a
+/// refresh-token grant (RFC 6749 §2.3.1).
+///
+/// In every mode, a `nil` `clientSecret` on the auth object means the app is
+/// a **public client** (e.g. a PKCE flow): only `client_id` is sent and no
+/// secret is required. Providers differ on where a *confidential* client's
+/// secret goes:
+///
+/// | Provider | Mode |
+/// |---|---|
+/// | Tumblr | `.requestBody` — `client_secret` as a form field |
+/// | X (Twitter) | `.basicAuthorizationHeader` — `Authorization: Basic base64(id:secret)` |
+public enum OAuth2ClientAuthentication: Sendable {
+
+    /// Send `client_id` and `client_secret` as form fields in the body.
+    case requestBody
+
+    /// Send `client_id:client_secret` as an HTTP Basic `Authorization`
+    /// header. `client_id` is still included in the body, which the RFC
+    /// permits and X requires.
+    case basicAuthorizationHeader
+}
+
 // MARK: - OAuth 2.0 Interceptor
 
 /// Request interceptor that adds OAuth 2.0 bearer token authentication to HTTP requests.
@@ -136,8 +161,17 @@ public class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
     /// interceptor.refreshTokenURL = "https://api.tumblr.com/v2/oauth2/token"
     /// ```
     ///
-    /// - Note: Requires `auth.refreshToken`, `auth.clientId`, and `auth.clientSecret` to be set.
+    /// - Note: Requires `auth.refreshToken` and `auth.clientId`. `auth.clientSecret`
+    ///         is optional — see ``OAuth2ClientAuthentication``.
     let refreshTokenURL: String?
+
+    /// How the client authenticates to the token endpoint during refresh.
+    let clientAuthentication: OAuth2ClientAuthentication
+
+    /// Session used for the refresh request itself. Kept separate from the
+    /// API session so a refresh is never intercepted by this interceptor
+    /// (which would recurse on a 401 from the token endpoint).
+    let refreshSession: Session
 
     // MARK: - Refresh Token State
 
@@ -183,18 +217,24 @@ public class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
     ///   - tokenParamName: Parameter name for token (default: `"access_token"`)
     ///   - tokenHeaderParamName: Authorization scheme name (default: `"Bearer"`)
     ///   - refreshTokenURL: The token endpoint URL for refresh grants (default: `nil`, disabling auto-refresh)
+    ///   - clientAuthentication: Where a confidential client's secret goes during refresh (default: `.requestBody`)
+    ///   - refreshSession: Session used for the refresh request (default: `AF`)
     public init(
         auth: Auth2Authentication,
         tokenLocation: TokenLocation = .params,
         tokenParamName: String = "access_token",
         tokenHeaderParamName: String = "Bearer",
-        refreshTokenURL: String? = nil
+        refreshTokenURL: String? = nil,
+        clientAuthentication: OAuth2ClientAuthentication = .requestBody,
+        refreshSession: Session = AF
     ) {
         self.auth = auth
         self.tokenLocation = tokenLocation
         self.tokenParamName = tokenParamName
         self.tokenHeaderParamName = tokenHeaderParamName
         self.refreshTokenURL = refreshTokenURL
+        self.clientAuthentication = clientAuthentication
+        self.refreshSession = refreshSession
     }
 
     // MARK: - RequestAdapter
@@ -333,36 +373,44 @@ public class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
 
     /// Calls the OAuth 2.0 token endpoint with the refresh token grant.
     ///
-    /// Sends a POST request with:
-    /// - `grant_type=refresh_token`
-    /// - `client_id`
-    /// - `client_secret`
-    /// - `refresh_token`
+    /// Sends a form-encoded POST with `grant_type=refresh_token`,
+    /// `refresh_token` and `client_id`. A confidential client's secret is
+    /// added according to ``clientAuthentication``; a public client (no
+    /// secret configured) sends nothing else.
     ///
     /// On success, updates `auth.accessToken` and `auth.refreshToken` and persists them.
     ///
     /// - Parameter url: The token endpoint URL
     /// - Returns: `true` if the token was refreshed successfully, `false` otherwise
     @MainActor
-    private func refreshAccessToken(url: String) async -> Bool {
+    func refreshAccessToken(url: String) async -> Bool {
         guard let refreshToken = auth.refreshToken,
-              let clientId = auth.clientId,
-              let clientSecret = auth.clientSecret else {
+              let clientId = auth.clientId else {
             return false
         }
 
-        let parameters: [String: String] = [
+        var parameters: [String: String] = [
             "grant_type": "refresh_token",
             "client_id": clientId,
-            "client_secret": clientSecret,
             "refresh_token": refreshToken
         ]
+        var headers: HTTPHeaders = [.contentType("application/x-www-form-urlencoded")]
 
-        let response = await AF.request(
+        if let clientSecret = auth.clientSecret, !clientSecret.isEmpty {
+            switch clientAuthentication {
+            case .requestBody:
+                parameters["client_secret"] = clientSecret
+            case .basicAuthorizationHeader:
+                headers.add(.authorization(username: clientId, password: clientSecret))
+            }
+        }
+
+        let response = await refreshSession.request(
             url,
             method: .post,
             parameters: parameters,
-            encoder: URLEncodedFormParameterEncoder.default
+            encoder: URLEncodedFormParameterEncoder.default,
+            headers: headers
         )
         .validate()
         .serializingDecodable(TokenResponse.self)
