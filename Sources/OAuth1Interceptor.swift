@@ -94,6 +94,19 @@ public final class OAuth1Interceptor: RequestInterceptor, Sendable {
         self.auth = auth
     }
 
+    // MARK: - Body Classification
+
+    /// Whether a `Content-Type` header value denotes a form-encoded body.
+    /// Tolerates parameters such as `; charset=utf-8` and mixed case.
+    static func isFormURLEncoded(_ contentType: String?) -> Bool {
+        guard let contentType else { return false }
+        let mediaType = contentType
+            .split(separator: ";", maxSplits: 1)
+            .first
+            .map { $0.trimmingCharacters(in: .whitespaces).lowercased() }
+        return mediaType == "application/x-www-form-urlencoded"
+    }
+
     // MARK: - RequestAdapter
 
     /// Adapts requests by adding OAuth 1.0a authentication.
@@ -140,10 +153,15 @@ public final class OAuth1Interceptor: RequestInterceptor, Sendable {
             var adaptedRequest = urlRequest
             var formParameters: [(String, String)] = []
 
-            // Extract form parameters from POST body. Use an ordered list so
+            // Extract form parameters from the body. Use an ordered list so
             // repeated keys (e.g. `scope=a&scope=b`) all participate in the
             // OAuth signature — RFC 5849 §3.4.1.3.2 requires it.
-            if adaptedRequest.method == .post, let httpBody = adaptedRequest.httpBody {
+            //
+            // RFC 5849 §3.4.1.3.1: only an `application/x-www-form-urlencoded`
+            // body contributes parameters, regardless of HTTP method. JSON or
+            // multipart bodies must be left out of the signature entirely.
+            if let httpBody = adaptedRequest.httpBody,
+               Self.isFormURLEncoded(adaptedRequest.headers["Content-Type"]) {
                 guard let bodyString = String(data: httpBody, encoding: .utf8) else {
                     completion(.failure(OAuth1Error.requestBodyNotUTF8Encodable))
                     return

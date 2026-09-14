@@ -48,7 +48,7 @@ public final class GitHubInterceptor: OAuth2Interceptor, @unchecked Sendable {
     /// **Headers Added:**
     /// - `Accept: application/vnd.github+json` - GitHub's media type
     /// - `X-GitHub-Api-Version: 2022-11-28` - API version
-    /// - `Content-Length: 0` - Required for PUT requests
+    /// - `Content-Length: 0` - Required for bodiless PUT requests
     ///
     /// Then calls parent to add OAuth token and standard headers.
     ///
@@ -67,8 +67,10 @@ public final class GitHubInterceptor: OAuth2Interceptor, @unchecked Sendable {
         urlRequest.headers.add(.accept("application/vnd.github+json"))
         urlRequest.headers.add(name: "X-GitHub-Api-Version", value: "2022-11-28")
 
-        // GitHub requires Content-Length header for PUT requests
-        if urlRequest.method == .put {
+        // GitHub rejects bodiless PUT requests (e.g. starring a repo) that
+        // omit Content-Length. Only add it when there really is no body —
+        // forcing `0` on a PUT that carries JSON would truncate the payload.
+        if urlRequest.method == .put, urlRequest.httpBody == nil, urlRequest.httpBodyStream == nil {
             urlRequest.headers.add(HTTPHeader(name: "Content-Length", value: "0"))
         }
 

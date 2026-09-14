@@ -187,12 +187,11 @@ open class AuthClient {
     ) async throws(APWebAuthenticationError) -> JSON {
         let url = try url(for: path)
 
-        let dataTask = sessionManager
-            .request(url, method: method, parameters: parameters, encoding: encoding, headers: headers)
-            .validate()
-            .serializingDecodable(JSON.self)
-
-        let response = await dataTask.response
+        let response = await jsonResponse(
+            for: sessionManager
+                .request(url, method: method, parameters: parameters, encoding: encoding, headers: headers)
+                .validate()
+        )
 
         switch response.result {
         case .success(let value):
@@ -232,12 +231,11 @@ open class AuthClient {
     ) async throws(APWebAuthenticationError) -> (json: JSON, response: HTTPURLResponse) {
         let url = try url(for: path)
 
-        let dataTask = sessionManager
-            .request(url, method: method, parameters: parameters, encoding: encoding, headers: headers)
-            .validate()
-            .serializingDecodable(JSON.self)
-
-        let response = await dataTask.response
+        let response = await jsonResponse(
+            for: sessionManager
+                .request(url, method: method, parameters: parameters, encoding: encoding, headers: headers)
+                .validate()
+        )
 
         guard let httpResponse = response.response else {
             throw generateError(from: response)
@@ -282,30 +280,42 @@ open class AuthClient {
     ) async throws(APWebAuthenticationError) -> HTTPStatusCode {
         let url = try url(for: path)
 
-        let dataTask = sessionManager
-            .request(url, method: method, parameters: parameters, encoding: encoding, headers: headers)
-            .validate(statusCode: 200..<600)
-            .serializingDecodable(JSON.self)
-
-        let response = await dataTask.response
+        let response = await jsonResponse(
+            for: sessionManager
+                .request(url, method: method, parameters: parameters, encoding: encoding, headers: headers)
+                .validate(statusCode: 200..<600)
+        )
 
         guard let httpResponse = response.response else {
-            if let afError = response.error {
-                let dummyDataResponse = DataResponse<JSON, AFError>(
-                    request: response.request,
-                    response: nil,
-                    data: response.data,
-                    metrics: response.metrics,
-                    serializationDuration: response.serializationDuration,
-                    result: .failure(afError)
-                )
-                throw generateError(from: dummyDataResponse)
+            if response.error != nil {
+                throw generateError(from: response)
             } else {
                 throw APWebAuthenticationError.unknown
             }
         }
 
         return httpResponse.statusCodeValue ?? .badRequest
+    }
+
+    // MARK: - Response Serialization
+
+    /// Runs `request` and serializes the body as JSON.
+    ///
+    /// Bodiless responses on the standard empty-response status codes
+    /// (204 / 205, or any code for HEAD) serialize as `JSON.null` rather
+    /// than failing — `serializingDecodable(JSON.self)` would reject them
+    /// because SwiftyJSON's type does not conform to `EmptyResponse`. An
+    /// empty body on any other status is still a serialization error.
+    private func jsonResponse(for request: DataRequest) async -> DataResponse<JSON, AFError> {
+        let response = await request.serializingData().response
+
+        return response
+            .tryMap { data in
+                data.isEmpty ? JSON.null : try JSON(data: data)
+            }
+            .mapError { error in
+                error.asAFError ?? .responseSerializationFailed(reason: .customSerializationFailed(error: error))
+            }
     }
 
     // MARK: - Error Generation

@@ -70,18 +70,24 @@ public struct InterceptedRequest: Sendable {
         }
         self.requestHeaders = parsedRequestHeaders
 
-        // Parse response headers
-        var parsedResponseHeaders: [String: String] = [:]
-        if let headers = responseHeaders {
-            let lines = headers.components(separatedBy: "\n")
-            for line in lines {
-                let parts = line.components(separatedBy: ": ")
-                if parts.count == 2 {
-                    parsedResponseHeaders[parts[0].trimmingCharacters(in: .whitespaces)] = parts[1].trimmingCharacters(in: .whitespaces)
-                }
-            }
+        // Parse response headers. `getAllResponseHeaders()` returns CRLF-
+        // separated `name: value` lines; values may themselves contain
+        // `: ` (dates, Link headers), so split on the first colon only.
+        self.responseHeaders = Self.parseResponseHeaders(responseHeaders)
+    }
+
+    static func parseResponseHeaders(_ raw: String?) -> [String: String] {
+        guard let raw else { return [:] }
+
+        var parsed: [String: String] = [:]
+        for line in raw.components(separatedBy: .newlines) where !line.isEmpty {
+            guard let separator = line.firstIndex(of: ":") else { continue }
+            let name = line[..<separator].trimmingCharacters(in: .whitespacesAndNewlines)
+            let value = line[line.index(after: separator)...].trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !name.isEmpty else { continue }
+            parsed[name] = value
         }
-        self.responseHeaders = parsedResponseHeaders
+        return parsed
     }
 }
 
@@ -478,9 +484,24 @@ extension WebTokenInterceptorViewController: WKNavigationDelegate {
     }
 
     open func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        handleNavigationFailure(error)
+    }
+
+    /// DNS, TLS and connection failures on the initial request surface here
+    /// rather than in `didFail`. Without this the pending `start()` would
+    /// hang until the timeout — or forever in interactive mode.
+    open func webView(
+        _ webView: WKWebView,
+        didFailProvisionalNavigation navigation: WKNavigation!,
+        withError error: Error
+    ) {
+        handleNavigationFailure(error)
+    }
+
+    private func handleNavigationFailure(_ error: Error) {
         let nsError = error as NSError
 
-        // Ignore cancelled errors
+        // Ignore cancelled errors (e.g. a navigation superseded by another)
         guard nsError.domain != NSURLErrorDomain || nsError.code != NSURLErrorCancelled else {
             return
         }

@@ -253,8 +253,11 @@ public class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
             if let currentAccessToken, !currentAccessToken.isEmpty, tokenLocation == .params {
                 let params: Parameters = [tokenParamName: currentAccessToken]
 
+                // Always append to the query string. `URLEncoding.default`
+                // would move the token into the body for POST/PUT/PATCH and
+                // overwrite whatever body the caller already encoded.
                 do {
-                    let encodedRequest = try URLEncoding.default.encode(urlRequest, with: params)
+                    let encodedRequest = try URLEncoding.queryString.encode(urlRequest, with: params)
                     completion(.success(encodedRequest))
                 } catch {
                     completion(.failure(error))

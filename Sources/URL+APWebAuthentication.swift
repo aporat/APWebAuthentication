@@ -121,11 +121,14 @@ public extension URL {
     var parameterItems: [(String, String)] {
         var items: [(String, String)] = []
 
+        // Both the query and the fragment are `application/x-www-form-urlencoded`
+        // (RFC 5849 §3.4.1.3.1 and every OAuth callback in practice), so decode
+        // them the same way: `+` → space first, then percent-decoding. Going
+        // through `URLComponents.queryItems` would skip the `+` rule and force
+        // callers to re-decode, which mangles literal `%` and `+` characters.
         if let components = URLComponents(url: self, resolvingAgainstBaseURL: false),
-           let queryItems = components.queryItems {
-            for item in queryItems {
-                items.append((item.name, item.value ?? ""))
-            }
+           let query = components.percentEncodedQuery {
+            items.append(contentsOf: Self.parseFormURLEncoded(query))
         }
 
         if let fragment = self.fragment {
@@ -194,10 +197,12 @@ public extension URL {
     func getResponse() -> Result<[String: String], APWebAuthenticationError> {
         let params = self.parameters
 
-        // Check for error parameters
+        // Check for error parameters. `parameters` is already fully decoded
+        // (form rules included), so use the value as-is — decoding again
+        // would mangle any literal `%` or `+` the server put in the message.
         let errorReason = params["error_description"] ?? params["error_message"] ?? params["error"]
 
-        if let reason = errorReason?.replacingOccurrences(of: "+", with: " ").removingPercentEncoding {
+        if let reason = errorReason {
             // Check for specific error types
             if params["error_type"] == "login_failed" {
                 return .failure(.sessionExpired(reason: reason))

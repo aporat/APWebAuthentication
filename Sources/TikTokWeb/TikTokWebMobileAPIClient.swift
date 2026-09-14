@@ -25,7 +25,11 @@ public class TikTokWebMobileAPIClient: AuthClient {
 
     override public func makeSessionConfiguration() -> URLSessionConfiguration {
         let configuration = super.makeSessionConfiguration()
+        // The base configuration disables cookie handling for token-based
+        // clients. This client authenticates with session cookies, so the
+        // jar must be both attached and actually consulted on each request.
         configuration.httpCookieStorage = auth.cookieStorage
+        configuration.httpShouldSetCookies = true
         return configuration
     }
 

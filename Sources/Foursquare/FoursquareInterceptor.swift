@@ -95,7 +95,9 @@ public final class FoursquareInterceptor: OAuth2Interceptor, @unchecked Sendable
         let params: Parameters = ["v": "20240109"]
 
         do {
-            urlRequest = try URLEncoding.default.encode(urlRequest, with: params)
+            // Query string only — `URLEncoding.default` would replace the
+            // body of a POST with just `v=...`.
+            urlRequest = try URLEncoding.queryString.encode(urlRequest, with: params)
             // Let parent add OAuth token and other headers
             super.adapt(urlRequest, for: session, completion: completion)
         } catch {
