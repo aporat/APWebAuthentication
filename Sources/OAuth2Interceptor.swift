@@ -181,6 +181,14 @@ public class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
     /// Queued retry completions waiting for the token refresh to finish.
     private var requestsToRetry: [(RetryResult) -> Void] = []
 
+    /// IDs of requests that have already been granted one refresh. A request
+    /// that 401s again after its refresh is failed rather than refreshed a
+    /// second time, which is what prevents an endless refresh loop. Kept as
+    /// a small FIFO because Alamofire offers no hook to learn when a retried
+    /// request finally completes.
+    private var refreshedRequestIDs: [UUID] = []
+    private static let refreshedRequestIDsLimit = 64
+
     /// Lock for thread-safe access to refresh state.
     private let lock = NSLock()
 
@@ -320,7 +328,10 @@ public class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
     /// 4. Updates the auth credentials and retries all queued requests on success
     /// 5. Fails all queued requests if the refresh fails
     ///
-    /// Only one refresh attempt is made per request (`retryCount == 0`) to prevent infinite loops.
+    /// Only one refresh attempt is made per request to prevent infinite loops.
+    /// The check is per request rather than on `retryCount`, so a 401 that
+    /// arrives after `TransientNetworkRetrier` has already retried the request
+    /// (e.g. 503 → retry → 401) still triggers a refresh.
     ///
     /// - Parameters:
     ///   - request: The failed Alamofire request
@@ -333,26 +344,40 @@ public class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
         dueTo error: Error,
         completion: @escaping @Sendable (RetryResult) -> Void
     ) {
-        // Only retry once per request to prevent loops
-        guard request.retryCount == 0,
-              let refreshTokenURL,
+        guard let refreshTokenURL,
               let response = request.task?.response as? HTTPURLResponse,
               response.statusCode == 401 else {
             completion(.doNotRetry)
             return
         }
 
-        // Enqueue the completion and decide atomically whether we're the
-        // request that should kick off the refresh. Holding the lock across
-        // both steps prevents a second request from observing `isRefreshing`
-        // before we've claimed it.
-        let shouldStartRefresh: Bool = lock.withLock {
+        // Atomically: refuse a second refresh for the same request, enqueue
+        // the completion, and decide whether we're the request that kicks
+        // off the refresh. Holding the lock across all three steps prevents
+        // another request from observing `isRefreshing` before we've claimed it.
+        //
+        // `nil`  → this request already had its one refresh; fail it.
+        // `true` → we start the refresh; `false` → one is already in flight.
+        let shouldStartRefresh: Bool? = lock.withLock {
+            if let index = refreshedRequestIDs.firstIndex(of: request.id) {
+                refreshedRequestIDs.remove(at: index)
+                return nil
+            }
+            refreshedRequestIDs.append(request.id)
+            if refreshedRequestIDs.count > Self.refreshedRequestIDsLimit {
+                refreshedRequestIDs.removeFirst()
+            }
+
             requestsToRetry.append(completion)
             guard !isRefreshing else { return false }
             isRefreshing = true
             return true
         }
 
+        guard let shouldStartRefresh else {
+            completion(.doNotRetry)
+            return
+        }
         guard shouldStartRefresh else { return }
 
         Task { @MainActor in
