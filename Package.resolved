@@ -1,13 +1,13 @@
 {
-  "originHash" : "e47e0cefdc08f38f0c4ad38cbb2320e15dd7219ceaef6274d08d5da01caed53d",
+  "originHash" : "d86938a813d94d1525084d61487ccfb6890dc0fcb1e70c678646aff322c63f21",
   "pins" : [
     {
       "identity" : "alamofire",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Alamofire/Alamofire.git",
       "state" : {
-        "revision" : "7595cbcf59809f9977c5f6378500de2ad73b7ddb",
-        "version" : "5.12.0"
+        "revision" : "bda9ed57d72988a3a2ada33d824583541f86eac6",
+        "version" : "5.12.2"
       }
     },
     {
@@ -16,7 +16,7 @@
       "location" : "https://github.com/aporat/APUserAgentGenerator.git",
       "state" : {
         "branch" : "main",
-        "revision" : "da2e1d99dfeea49888a57ac91600022253c09ee0"
+        "revision" : "c50541b6c3d11b65191cf18f782a4ba30bf322f4"
       }
     },
     {
@@ -56,15 +56,6 @@
       }
     },
     {
-      "identity" : "sfsafesymbols",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/SFSafeSymbols/SFSafeSymbols.git",
-      "state" : {
-        "revision" : "e01b3d4f861412f8dcee8d93c417d2c2b0cdfd77",
-        "version" : "7.0.0"
-      }
-    },
-    {
       "identity" : "snapkit",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/SnapKit/SnapKit.git",
@@ -89,15 +80,6 @@
       "state" : {
         "revision" : "a2c4f5f645dec3a5614ff82e391f44e22d778f87",
         "version" : "3.3.2"
-      }
-    },
-    {
-      "identity" : "swiftybeaver",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/SwiftyBeaver/SwiftyBeaver",
-      "state" : {
-        "revision" : "8cba041db09596183331d123f337d0eb2e6e8e91",
-        "version" : "2.1.1"
       }
     },
     {
