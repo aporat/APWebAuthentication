@@ -370,29 +370,30 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
 
     // MARK: - Public Methods - Completion
 
-    /// Finishes the authentication flow exactly once: dismisses this
-    /// controller (if it is presented) and then delivers `result` to
-    /// `completionHandler`.
+    /// Finishes the authentication flow: dismisses this controller (if it is
+    /// presented) and then delivers `result` to `completionHandler`.
     ///
     /// The handler runs *after* the dismissal animation completes, so a
     /// caller awaiting `APWebAuthSession.start()` can present its next
     /// screen immediately without colliding with the outgoing sheet. This
     /// is the only place that should dismiss the controller on completion —
     /// subclasses that detect success themselves should call it rather than
-    /// dismissing directly. Subsequent calls are ignored.
+    /// dismissing directly. The result is delivered at most once; the
+    /// controller is still dismissed when no handler is pending, so a plain
+    /// web page (terms, FAQ) presented without one can be closed.
     ///
     /// - Parameter result: The outcome to report.
     public func complete(with result: Result<(URL, [HTTPCookie]), APWebAuthenticationError>) {
-        guard let handler = completionHandler else { return }
+        let handler = completionHandler
         completionHandler = nil
 
         guard presentingViewController != nil else {
-            handler(result)
+            handler?(result)
             return
         }
 
         dismiss(animated: true) {
-            handler(result)
+            handler?(result)
         }
     }
 
