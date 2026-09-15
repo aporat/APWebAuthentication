@@ -12,6 +12,8 @@ private final class ASWebAuthSessionHolder {
 
 public extension ASWebAuthenticationSession {
 
+    /// `ASWebAuthenticationSession.Callback` requires iOS 17.4.
+    @available(iOS 17.4, *)
     @MainActor
     static func start(
         url: URL,
