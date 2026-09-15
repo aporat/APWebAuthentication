@@ -1,5 +1,4 @@
 import Foundation
-import SwifterSwift
 import UIKit
 import AuthenticationServices
 
@@ -12,7 +11,11 @@ private final class ASWebAuthSessionHolder {
 
 public extension ASWebAuthenticationSession {
 
-    /// `ASWebAuthenticationSession.Callback` requires iOS 17.4.
+    /// Starts a session that completes when the browser redirects to a URL
+    /// matching `callback`.
+    ///
+    /// `ASWebAuthenticationSession.Callback` requires iOS 17.4. On earlier
+    /// iOS 17 releases use `start(url:callbackURLScheme:contextProvider:ephemeral:)`.
     @available(iOS 17.4, *)
     @MainActor
     static func start(
@@ -21,10 +24,41 @@ public extension ASWebAuthenticationSession {
         contextProvider: ASWebAuthenticationPresentationContextProviding,
         ephemeral: Bool = false
     ) async throws(APWebAuthenticationError) -> URL {
+        try await run(
+            contextProvider: contextProvider,
+            ephemeral: ephemeral
+        ) { completion in
+            ASWebAuthenticationSession(url: url, callback: callback, completionHandler: completion)
+        }
+    }
+
+    /// Starts a session that completes when the browser redirects to a URL
+    /// with the given custom scheme. Works on every supported iOS version.
+    @MainActor
+    static func start(
+        url: URL,
+        callbackURLScheme: String,
+        contextProvider: ASWebAuthenticationPresentationContextProviding,
+        ephemeral: Bool = false
+    ) async throws(APWebAuthenticationError) -> URL {
+        try await run(
+            contextProvider: contextProvider,
+            ephemeral: ephemeral
+        ) { completion in
+            ASWebAuthenticationSession(url: url, callbackURLScheme: callbackURLScheme, completionHandler: completion)
+        }
+    }
+
+    @MainActor
+    private static func run(
+        contextProvider: ASWebAuthenticationPresentationContextProviding,
+        ephemeral: Bool,
+        makeSession: (@escaping ASWebAuthenticationSession.CompletionHandler) -> ASWebAuthenticationSession
+    ) async throws(APWebAuthenticationError) -> URL {
         let holder = ASWebAuthSessionHolder()
         do {
             return try await withCheckedThrowingContinuation { continuation in
-                let session = ASWebAuthenticationSession(url: url, callback: callback) { callbackURL, error in
+                let session = makeSession { callbackURL, error in
                     MainActor.assumeIsolated {
                         holder.session = nil
                     }
