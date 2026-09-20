@@ -195,7 +195,38 @@ public extension URL {
     ///
     /// - Returns: Result containing either parameters or an authentication error
     func getResponse() -> Result<[String: String], APWebAuthenticationError> {
+        getResponse(expectedState: nil)
+    }
+
+    /// Parses an OAuth callback URL, first verifying its `state` parameter.
+    ///
+    /// Pass the value that was sent on the authorization request. The callback
+    /// must echo it back exactly, or the result is a failure — this is the
+    /// CSRF defence from RFC 6749 §10.12, and it is the caller's only
+    /// protection against an attacker feeding their own authorization code
+    /// into the app's redirect.
+    ///
+    /// The check applies to error callbacks too: an attacker can forge
+    /// `error=access_denied` just as easily as a code, so an unverified
+    /// callback is rejected before its contents are read.
+    ///
+    /// Passing `nil` skips the check, for flows that genuinely have no state
+    /// (OAuth 1.0a, where the request token plays the same role).
+    ///
+    /// - Parameter expectedState: The `state` sent on the authorization
+    ///   request, or `nil` to skip verification.
+    /// - Returns: The decoded callback parameters, or the error the provider
+    ///   reported.
+    func getResponse(
+        expectedState: String?
+    ) -> Result<[String: String], APWebAuthenticationError> {
         let params = self.parameters
+
+        if let expectedState, !expectedState.isEmpty {
+            guard let receivedState = params["state"], receivedState == expectedState else {
+                return .failure(.failed(reason: "OAuth state mismatch — possible CSRF."))
+            }
+        }
 
         // Check for error parameters. `parameters` is already fully decoded
         // (form rules included), so use the value as-is — decoding again

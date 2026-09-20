@@ -28,7 +28,11 @@ public final class PinterestWebAPIClient: AuthClient {
     // MARK: - Session Configuration
 
     override public func makeSessionConfiguration() -> URLSessionConfiguration {
-        let configuration = URLSessionConfiguration.ephemeral
+        // Build on `super` so this client keeps the base timeouts and
+        // connectivity behaviour; starting from a bare `.ephemeral` config
+        // silently reverted to URLSession's 60s defaults.
+        let configuration = super.makeSessionConfiguration()
+        configuration.httpShouldSetCookies = true
         configuration.httpCookieStorage = auth.cookieStorage
         return configuration
     }

@@ -212,7 +212,20 @@ public final class APWebAuthSession {
     /// webVC.customUserAgent = "MyApp/1.0"
     /// session.loginViewController = webVC
     /// ```
-    public var loginViewController: WebAuthViewController?
+    public var loginViewController: WebAuthViewController? {
+        didSet { loginViewController?.expectedState = expectedState }
+    }
+
+    /// The OAuth `state` this flow expects the callback to echo back.
+    ///
+    /// Set it to the same value used in the authorization URL — typically
+    /// ``WebAuthRedirectHandler/generateState()`` — and the redirect is
+    /// rejected unless it matches (RFC 6749 §10.12). Leaving it `nil` skips
+    /// the check, which is correct only for flows with no `state`, such as
+    /// OAuth 1.0a.
+    public var expectedState: String? {
+        didSet { loginViewController?.expectedState = expectedState }
+    }
 
     /// The object that provides the view controller for presenting authentication.
     ///

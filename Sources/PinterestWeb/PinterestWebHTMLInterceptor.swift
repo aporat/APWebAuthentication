@@ -14,18 +14,22 @@ public final class PinterestWebHTMLInterceptor: RequestInterceptor, Sendable {
     // MARK: - RequestAdapter
 
     public func adapt(_ urlRequest: URLRequest, for session: Session, completion: @escaping @Sendable (Result<URLRequest, any Error>) -> Void) {
+            // Hop to MainActor once instead of awaiting each `auth` property
+        // independently — every separate `await` is another suspension the
+        // auth state can change across, which would let one request go out
+        // carrying a mix of old and new credentials.
 
-        Task {
+        Task { @MainActor in
             var urlRequest = urlRequest
 
-            if let currentUserAgent = await auth.userAgent, !currentUserAgent.isEmpty {
+            if let currentUserAgent = auth.userAgent, !currentUserAgent.isEmpty {
                 urlRequest.headers.add(.userAgent(currentUserAgent))
             }
 
             urlRequest.headers.add(HTTPHeader(name: "Referer", value: "https://www.pinterest.com"))
             urlRequest.headers.add(HTTPHeader(name: "Origin", value: "https://www.pinterest.com"))
 
-            let locale = await auth.localeWebIdentifier
+            let locale = auth.localeWebIdentifier
             urlRequest.headers.add(.acceptLanguage(locale))
 
             // Standard HTML/Browser accept headers

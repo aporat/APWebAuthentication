@@ -14,13 +14,17 @@ public final class TikTokWebMobileInterceptor: RequestInterceptor, Sendable {
     // MARK: - RequestAdapter
 
     public func adapt(_ urlRequest: URLRequest, for session: Session, completion: @escaping @Sendable (Result<URLRequest, any Error>) -> Void) {
-        Task {
+        // Hop to MainActor once instead of awaiting each `auth` property
+        // independently — every separate `await` is another suspension the
+        // auth state can change across, which would let one request go out
+        // carrying a mix of old and new credentials.
+        Task { @MainActor in
             var urlRequest = urlRequest
 
             urlRequest.headers.add(HTTPHeader(name: "authority", value: "m.tiktok.com"))
             urlRequest.headers.add(.accept("application/json, text/plain, */*"))
 
-            if let currentUserAgent = await auth.userAgent, !currentUserAgent.isEmpty {
+            if let currentUserAgent = auth.userAgent, !currentUserAgent.isEmpty {
                 urlRequest.headers.add(.userAgent(currentUserAgent))
             }
 
@@ -29,7 +33,7 @@ public final class TikTokWebMobileInterceptor: RequestInterceptor, Sendable {
             urlRequest.headers.add(HTTPHeader(name: "sec-fetch-mode", value: "cors"))
             urlRequest.headers.add(HTTPHeader(name: "sec-fetch-dest", value: "empty"))
 
-            let locale = await auth.localeWebIdentifier
+            let locale = auth.localeWebIdentifier
             urlRequest.headers.add(.acceptLanguage(locale))
 
             completion(.success(urlRequest))

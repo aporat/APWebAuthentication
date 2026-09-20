@@ -55,13 +55,18 @@ public extension ASWebAuthenticationSession {
         ephemeral: Bool,
         makeSession: (@escaping ASWebAuthenticationSession.CompletionHandler) -> ASWebAuthenticationSession
     ) async throws(APWebAuthenticationError) -> URL {
+        // Holds the session alive for the duration of the presentation. The
+        // `defer` releases it once `run` returns — i.e. after the continuation
+        // has resumed — which keeps every touch of `holder` on the main actor.
+        // Clearing it from inside the completion handler instead would mean
+        // asserting main-actor isolation on a callback Apple never promises to
+        // deliver on the main thread, and `assumeIsolated` traps when it isn't.
         let holder = ASWebAuthSessionHolder()
+        defer { holder.session = nil }
+
         do {
             return try await withCheckedThrowingContinuation { continuation in
                 let session = makeSession { callbackURL, error in
-                    MainActor.assumeIsolated {
-                        holder.session = nil
-                    }
                     if let error = error {
                         continuation.resume(throwing: error)
                         return

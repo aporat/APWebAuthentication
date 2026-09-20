@@ -64,7 +64,11 @@ public final class WebAuthRedirectHandler {
     /// CSRF protection.
     ///
     /// - Returns: 32 bytes of random data, URL-safe base64 encoded.
-    public static func generateState() -> String {
+    /// `nonisolated` because it derives its result entirely from
+    /// `SecRandomCopyBytes` and touches no actor state — the main-actor
+    /// isolation it otherwise inherits from the enclosing class would force
+    /// every caller building an authorization URL to hop for no reason.
+    public nonisolated static func generateState() -> String {
         var bytes = [UInt8](repeating: 0, count: 32)
         _ = SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes)
         return Data(bytes).base64EncodedString()
@@ -95,18 +99,9 @@ public final class WebAuthRedirectHandler {
             return nil
         }
 
-        // CSRF protection: when a state was generated for this flow, every
-        // callback must echo it back — even ones that carry an `error=`
-        // parameter, since an attacker can forge those too.
-        if let expectedState, !expectedState.isEmpty {
-            let receivedState = Self.parameterValue(named: "state", in: url)
-            guard let receivedState, receivedState == expectedState else {
-                return .failure(.failed(reason: "OAuth state mismatch — possible CSRF."))
-            }
-        }
-
-        // Delegate to the single source-of-truth response parser.
-        switch url.getResponse() {
+        // Delegate to the single source-of-truth response parser, which also
+        // performs the CSRF `state` check when one was generated for this flow.
+        switch url.getResponse(expectedState: expectedState) {
         case .success(let params):
             if params.isEmpty {
                 return .success(nil)
@@ -126,7 +121,10 @@ public final class WebAuthRedirectHandler {
     /// Matches a candidate URL against the registered redirect URL by
     /// comparing scheme (case-insensitive), host (case-insensitive), port
     /// and path. Query and fragment are intentionally ignored.
-    static func urlMatchesRedirect(_ url: URL, redirect: URL) -> Bool {
+    /// `public` so hosts that receive the callback outside the web view — an
+    /// `openURL` delivery to the scene delegate, for instance — can apply the
+    /// same match instead of hand-rolling a looser one.
+    public static func urlMatchesRedirect(_ url: URL, redirect: URL) -> Bool {
         guard let candidate = URLComponents(url: url, resolvingAgainstBaseURL: false),
               let target = URLComponents(url: redirect, resolvingAgainstBaseURL: false) else {
             return false
@@ -147,21 +145,6 @@ public final class WebAuthRedirectHandler {
 
     /// Returns the value of the named parameter from the URL's query string
     /// or fragment. Used for state extraction before full response parsing.
-    private static func parameterValue(named name: String, in url: URL) -> String? {
-        if let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
-           let value = components.queryItems?.first(where: { $0.name == name })?.value {
-            return value
-        }
-
-        guard let fragment = url.fragment else { return nil }
-        for pair in fragment.components(separatedBy: "&") {
-            let parts = pair.components(separatedBy: "=")
-            guard parts.count == 2, parts[0] == name else { continue }
-            return parts[1].removingPercentEncoding ?? parts[1]
-        }
-        return nil
-    }
-
     // MARK: - JSON Parsing
 
     /// Parses a JSON response and extracts any error messages.

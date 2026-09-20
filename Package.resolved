@@ -1,5 +1,5 @@
 {
-  "originHash" : "0cf556c3136a2734e4db5c6f6fb34f31b6020de279cfc30cb88999ca15654c46",
+  "originHash" : "84b446d80cb0a97887a762cb05cd431ab37f56fc39fff16b55c956cb1fd50098",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -16,7 +16,7 @@
       "location" : "https://github.com/aporat/APUserAgentGenerator.git",
       "state" : {
         "branch" : "main",
-        "revision" : "c50541b6c3d11b65191cf18f782a4ba30bf322f4"
+        "revision" : "9c107e2679e1e61083534aa762826e0cca994121"
       }
     },
     {

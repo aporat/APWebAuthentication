@@ -384,9 +384,29 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
     ///
     /// - Parameter result: The outcome to report.
     public func complete(with result: Result<(URL, [HTTPCookie]), APWebAuthenticationError>) {
+        deliver(claimCompletionHandler(), result)
+    }
+
+    /// Takes ownership of the pending completion handler, leaving `nil` behind.
+    ///
+    /// Claiming is deliberately synchronous: a single redirect is observed by
+    /// several `WKNavigationDelegate` callbacks, so whoever intends to finish
+    /// the flow must stake its claim *before* awaiting anything, or two
+    /// callbacks each run a dismissal.
+    func claimCompletionHandler() -> CompletionHandler? {
         let handler = completionHandler
         completionHandler = nil
+        return handler
+    }
 
+    /// Dismisses the sheet (when presented) and then hands the result over.
+    ///
+    /// The dismissal happens even when `handler` is `nil` — a flow that was
+    /// already resolved still has a sheet on screen that has to come down.
+    func deliver(
+        _ handler: CompletionHandler?,
+        _ result: Result<(URL, [HTTPCookie]), APWebAuthenticationError>
+    ) {
         guard presentingViewController != nil else {
             handler?(result)
             return
@@ -546,10 +566,9 @@ extension WebAuthViewController: UIAdaptivePresentationControllerDelegate {
     /// continuation awaiting in `APWebAuthSession.start()` is never resumed
     /// and the caller hangs forever.
     public func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
-        // Capture and clear to prevent duplicate calls, matching handleRedirect.
-        let handler = completionHandler
-        completionHandler = nil
-        handler?(.failure(.canceled))
+        // The sheet is already gone, so report straight to the handler rather
+        // than going through `deliver` and asking for a second dismissal.
+        claimCompletionHandler()?(.failure(.canceled))
     }
 }
 
@@ -574,23 +593,52 @@ private extension WebAuthViewController {
 
         // A redirect can be observed by several delegate callbacks for the
         // same navigation; only the first one that still has a handler wins.
-        guard completionHandler != nil else { return true }
+        // Claim it now rather than inside the Task below — the cookie fetch
+        // suspends, and a sibling callback running in the meantime would
+        // otherwise start a second dismissal.
+        guard let handler = claimCompletionHandler() else { return true }
 
         switch result {
         case .success:
             // Fetch cookies from the web view before completing
             Task {
-                let cookies = await webView.configuration.websiteDataStore.httpCookieStore.allCookies()
-                complete(with: .success((url, cookies)))
+                let cookies = await cookiesForCompletion()
+                deliver(handler, .success((url, cookies)))
             }
         case .failure(let error):
-            complete(with: .failure(error))
+            deliver(handler, .failure(error))
         }
 
         return true
     }
 
     /// Parses JSON response from the web page and handles errors.
+    /// Reads the web view's cookies, giving up after a short wait.
+    ///
+    /// The handler is claimed before this runs, so the caller is committed to
+    /// delivering a result; if `allCookies()` never came back — a dead web
+    /// content process, say — the awaiting continuation would hang with no
+    /// escape, because the sheet's own cancel path no longer has a handler to
+    /// report through. Completing with no cookies beats never completing: the
+    /// callback URL carries the tokens for every OAuth flow, and only the
+    /// session-cookie providers care, which is exactly the case where the web
+    /// view is alive and this returns immediately.
+    func cookiesForCompletion() async -> [HTTPCookie] {
+        let cookieStore = webView.configuration.websiteDataStore.httpCookieStore
+
+        return await withTaskGroup(of: [HTTPCookie]?.self) { group in
+            group.addTask { await cookieStore.allCookies() }
+            group.addTask {
+                try? await Task.sleep(for: .seconds(5))
+                return nil
+            }
+
+            let first = await group.next() ?? nil
+            group.cancelAll()
+            return first ?? []
+        }
+    }
+
     func parseAndHandleJSONResponse() async {
         guard let htmlString = await javaScriptBridge.evaluateString("document.body.innerText"),
               !htmlString.isEmpty else {

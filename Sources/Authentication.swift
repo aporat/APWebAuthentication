@@ -1,5 +1,6 @@
 import APUserAgentGenerator
 import Foundation
+import OSLog
 @preconcurrency import SwiftyJSON
 
 /// Base class for authentication management across different OAuth versions.
@@ -158,7 +159,7 @@ open class Authentication {
                 try KeychainStore.save(data, account: account, category: category)
             }.value
         } catch {
-            print("⚠️ Failed to store credentials in keychain: \(error)")
+            Log.keychain.error("Failed to store credentials in keychain: \(error.localizedDescription, privacy: .public)")
         }
     }
 
@@ -177,7 +178,7 @@ open class Authentication {
             guard let data else { return nil }
             return try PropertyListDecoder().decode(T.self, from: data)
         } catch {
-            print("⚠️ Failed to load credentials from keychain: \(error)")
+            Log.keychain.error("Failed to load credentials from keychain: \(error.localizedDescription, privacy: .public)")
             return nil
         }
     }

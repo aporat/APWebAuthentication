@@ -17,8 +17,8 @@ import HTTPStatusCodes
 /// - URL construction
 ///
 /// **Subclassing:**
-/// Subclasses must override `accountType` to specify the platform they target.
-/// They can also override error handling methods to customize behavior:
+/// Pass the platform's `AccountType` to `init`, and override the error
+/// classification hooks where the platform deviates from the HTTP defaults:
 /// - `isServerError()` - Custom server error detection
 /// - `isRateLimitError()` - Custom rate limit detection
 /// - `isSessionExpiredError()` - Custom session expiration detection
@@ -27,14 +27,17 @@ import HTTPStatusCodes
 ///
 /// **Example:**
 /// ```swift
-/// class MyAPIClient: AuthClient {
-///     override var accountType: AccountType {
-///         AccountStore.myPlatform
+/// final class MyAPIClient: AuthClient {
+///     init(auth: Auth2Authentication) {
+///         super.init(
+///             accountType: AccountStore.myPlatform,
+///             baseURLString: "https://api.example.com/",
+///             requestInterceptor: OAuth2Interceptor(auth: auth)
+///         )
 ///     }
 ///
-///     func fetchUser() async throws {
-///         let json = try await request("/user")
-///         // Process response...
+///     func fetchUser() async throws -> JSON {
+///         try await request("/user")
 ///     }
 /// }
 /// ```
@@ -73,16 +76,26 @@ open class AuthClient {
 
     /// The account type/platform this client targets.
     ///
-    /// This property identifies which social platform (Twitter, Reddit, GitHub, etc.)
-    /// this client is configured to communicate with.
-    ///
-    /// Subclasses should set this property in their initializer to identify their platform.
-    private var accountType: AccountType
+    /// This identifies which social platform (X, Reddit, GitHub, …) the client
+    /// targets. It is supplied at initialization and only used to name the
+    /// platform in generated error messages.
+    private let accountType: AccountType
 
     /// Whether request reloading has been cancelled by the user.
     ///
-    /// Set this to `true` to indicate that automatic retry attempts should stop.
-    public var isReloadingCancelled: Bool = false
+    /// Setting this to `true` stops automatic retry attempts; setting it back
+    /// to `false` re-arms them for the next reload.
+    ///
+    /// - Important: This is a facade over ``transientNetworkRetrier``'s own
+    ///   flag rather than independent storage. Keeping a single source of
+    ///   truth is what makes a cancel recoverable — when the two were stored
+    ///   separately, `cancelAllRequests()` latched the retrier's copy to
+    ///   `true` and nothing ever cleared it, silently disabling transient
+    ///   retries for the rest of the client's life.
+    public var isReloadingCancelled: Bool {
+        get { transientNetworkRetrier.isReloadingCancelled }
+        set { transientNetworkRetrier.isReloadingCancelled = newValue }
+    }
 
     /// Whether to always show the login screen again after authentication errors.
     ///
@@ -575,7 +588,6 @@ open class AuthClient {
     /// ```
     public func cancelAllRequests() {
         isReloadingCancelled = true
-        transientNetworkRetrier.isReloadingCancelled = true
         sessionManager.session.getAllTasks { tasks in
             tasks.forEach { $0.cancel() }
         }

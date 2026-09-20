@@ -24,21 +24,25 @@ public final class PinterestWebInterceptor: RequestInterceptor, Sendable {
         for session: Session,
         completion: @escaping @Sendable (Result<URLRequest, any Error>) -> Void
     ) {
-        Task {
+        // Hop to MainActor once instead of awaiting each `auth` property
+        // independently — every separate `await` is another suspension the
+        // auth state can change across, which would let one request go out
+        // carrying a mix of old and new credentials.
+        Task { @MainActor in
             var urlRequest = urlRequest
 
             // Add user agent
-            if let currentUserAgent = await auth.userAgent, !currentUserAgent.isEmpty {
+            if let currentUserAgent = auth.userAgent, !currentUserAgent.isEmpty {
                 urlRequest.headers.add(.userAgent(currentUserAgent))
             }
 
             // Add CSRF token
-            if let currentCSRF = await auth.csrfToken {
+            if let currentCSRF = auth.csrfToken {
                 urlRequest.headers.add(HTTPHeader(name: "X-CSRFToken", value: currentCSRF))
             }
 
             // Add Pinterest-specific headers
-            let appId = await auth.appId
+            let appId = auth.appId
             urlRequest.headers.add(HTTPHeader(name: "x-pinterest-appstate", value: "active"))
             urlRequest.headers.add(HTTPHeader(name: "x-app-version", value: appId))
             urlRequest.headers.add(HTTPHeader(name: "X-Requested-With", value: "XMLHttpRequest"))
@@ -48,7 +52,7 @@ public final class PinterestWebInterceptor: RequestInterceptor, Sendable {
             urlRequest.headers.add(HTTPHeader(name: "Origin", value: "https://www.pinterest.com"))
 
             // Add locale and content headers
-            let locale = await auth.localeWebIdentifier
+            let locale = auth.localeWebIdentifier
             urlRequest.headers.add(.acceptLanguage(locale))
             urlRequest.headers.add(.accept("application/json, text/javascript, */*; q=0.01"))
             urlRequest.headers.add(.acceptEncoding("gzip, deflate, sdch, br"))
@@ -63,7 +67,7 @@ public final class PinterestWebInterceptor: RequestInterceptor, Sendable {
             // Add PWS handler and source URL
             urlRequest.headers.add(HTTPHeader(name: "x-pinterest-pws-handler", value: "www/[username]/_profile.js"))
 
-            if let username = await auth.username {
+            if let username = auth.username {
                 urlRequest.headers.add(HTTPHeader(name: "x-pinterest-source-url", value: "/\(username)/_profile/"))
             }
 

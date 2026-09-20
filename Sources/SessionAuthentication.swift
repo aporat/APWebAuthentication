@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 import SwifterSwift
 
 // MARK: - Codable HTTPCookie
@@ -59,10 +60,21 @@ open class SessionAuthentication: Authentication {
     /// Whether to preserve device settings across sessions.
     public var keepDeviceSettings = true
 
-    /// Unique identifier for this session's cookie storage.
+    /// Identifies the cookie jar this session uses.
     ///
-    /// Format: `"session-{20 random characters}"`
-    public var sessionIdentifier = "session-" + String.random(ofLength: 20)
+    /// Format: `"session-{20 random characters}"`.
+    ///
+    /// Changing it swaps in the storage for the new identifier. Callers
+    /// restoring a saved account assign this before loading, and the old
+    /// `lazy var cookieStorage` captured whichever identifier happened to be
+    /// current at first access — so a restore that touched the storage first
+    /// silently kept reading the wrong (freshly generated) jar.
+    public var sessionIdentifier = "session-" + String.random(ofLength: 20) {
+        didSet {
+            guard oldValue != sessionIdentifier else { return }
+            backingCookieStorage = nil
+        }
+    }
 
     // MARK: - Session Credentials
 
@@ -90,11 +102,18 @@ open class SessionAuthentication: Authentication {
     private var cookiesKeychainCategory: String { "\(keychainCategory).cookies" }
 
     /// The HTTP cookie storage for this session.
-    open lazy var cookieStorage: HTTPCookieStorage = {
+    private var backingCookieStorage: HTTPCookieStorage?
+
+    open var cookieStorage: HTTPCookieStorage {
+        if let backingCookieStorage {
+            return backingCookieStorage
+        }
+
         let storage = HTTPCookieStorage.sharedCookieStorage(forGroupContainerIdentifier: sessionIdentifier)
         storage.cookieAcceptPolicy = .always
+        backingCookieStorage = storage
         return storage
-    }()
+    }
 
     // MARK: - Persistence
 
@@ -128,7 +147,7 @@ open class SessionAuthentication: Authentication {
                 try KeychainStore.save(data, account: account, category: category)
             }.value
         } catch {
-            print("⚠️ Failed to store session cookies in keychain: \(error)")
+            Log.keychain.error("Failed to store session cookies in keychain: \(error.localizedDescription, privacy: .public)")
         }
     }
 
@@ -155,7 +174,7 @@ open class SessionAuthentication: Authentication {
 
             return cookies
         } catch {
-            print("⚠️ Failed to load session cookies from keychain: \(error)")
+            Log.keychain.error("Failed to load session cookies from keychain: \(error.localizedDescription, privacy: .public)")
             return nil
         }
     }

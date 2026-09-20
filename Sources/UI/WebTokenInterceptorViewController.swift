@@ -155,6 +155,32 @@ private final class JavaScriptInjectionManager {
     }
 }
 
+// MARK: - Weak Script Message Handler
+
+/// Forwards script messages to a weakly-held target.
+///
+/// `WKUserContentController` retains its message handlers. Registering the
+/// view controller directly makes the cycle
+/// `controller -> configuration -> userContentController -> controller`,
+/// so `deinit` never runs and the whole web view leaks. Registering this
+/// proxy instead leaves the controller free to deallocate.
+@MainActor
+private final class WeakScriptMessageHandler: NSObject, WKScriptMessageHandler {
+
+    private weak var target: (any WKScriptMessageHandler)?
+
+    init(target: any WKScriptMessageHandler) {
+        self.target = target
+    }
+
+    func userContentController(
+        _ userContentController: WKUserContentController,
+        didReceive message: WKScriptMessage
+    ) {
+        target?.userContentController(userContentController, didReceive: message)
+    }
+}
+
 // MARK: - View Controller State
 
 private enum ViewControllerState {
@@ -219,7 +245,10 @@ open class WebTokenInterceptorViewController: UIViewController {
         // Add JavaScript injection
         let userScript = JavaScriptInjectionManager.createUserScript()
         config.userContentController.addUserScript(userScript)
-        config.userContentController.add(self, name: JavaScriptInjectionManager.handlerName)
+        config.userContentController.add(
+            WeakScriptMessageHandler(target: self),
+            name: JavaScriptInjectionManager.handlerName
+        )
 
         return config
     }()
@@ -342,9 +371,14 @@ open class WebTokenInterceptorViewController: UIViewController {
     // MARK: - Timeout Handling
 
     private func startTimeoutIfNeeded() {
-        guard !configuration.isInteractive else {
+        guard !configuration.isInteractive, !state.isFinished else {
             return
         }
+
+        // `didFinish` fires once per navigation, and a login flow goes through
+        // several. Without cancelling first, each one leaves another live timer
+        // behind and the earliest of them decides the deadline.
+        timeoutTask?.cancel()
 
         timeoutTask = Task { [weak self] in
             guard let self else { return }
@@ -452,7 +486,7 @@ open class WebTokenInterceptorViewController: UIViewController {
     private func resolvePendingStart(throwing error: APWebAuthenticationError) {
         guard !state.isFinished else { return }
 
-        state = .failed(error)
+        state = error.isCancelledError ? .cancelled : .failed(error)
         timeoutTask?.cancel()
         continuation?.resume(throwing: error)
         continuation = nil
@@ -510,6 +544,10 @@ extension WebTokenInterceptorViewController: WKNavigationDelegate {
     }
 
     open func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        // A navigation can still land after the flow resolved (the dismissal
+        // animation, a trailing redirect); leave the terminal state alone.
+        guard !state.isFinished else { return }
+
         state = .waitingForIntercept
 
         // Start timeout for non-interactive mode
