@@ -37,7 +37,7 @@ final class WebAuthViewControllerCompletionTests: XCTestCase {
         XCTAssertNil(controller.completionHandler)
     }
 
-    func testComplete_whenPresented_dismissesWithoutHandler() {
+    func testComplete_whenPresented_dismissesWithoutHandler() async {
         let window = UIWindow(frame: UIScreen.main.bounds)
         let host = UIViewController()
         window.rootViewController = host
@@ -48,11 +48,20 @@ final class WebAuthViewControllerCompletionTests: XCTestCase {
 
         controller.complete(with: .failure(.canceled))
 
-        let dismissed = expectation(description: "dismissed")
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            if controller.presentingViewController == nil { dismissed.fulfill() }
+        // Poll rather than sampling once at a fixed deadline. Presenting this
+        // controller builds a WKWebView, and on a loaded CI machine its web
+        // content and GPU processes have taken 20s each to launch — with the
+        // render server that starved, an animated dismissal overruns any
+        // deadline short enough to be worth waiting for. Sampling once meant
+        // the difference between pass and fail was machine load, not
+        // behaviour. Awaiting here yields the main actor so UIKit can drive
+        // the animation between checks.
+        let deadline = Date().addingTimeInterval(30)
+        while controller.presentingViewController != nil, Date() < deadline {
+            try? await Task.sleep(for: .milliseconds(50))
         }
-        wait(for: [dismissed], timeout: 3)
+
+        XCTAssertNil(controller.presentingViewController)
     }
 
     func testComplete_whenNotPresented_deliversSynchronously() {
