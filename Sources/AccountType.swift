@@ -84,7 +84,6 @@ public extension AccountType {
         case x = "com.apple.x"
         case instagram = "com.apple.instagram"
         case fiveHundredpx = "com.apple.500px"
-        case tiktok = "com.apple.tiktok"
         case tumblr = "com.apple.tumblr"
         case twitch = "com.apple.twitch"
         case pinterest = "com.apple.pinterest"
@@ -103,8 +102,6 @@ public extension AccountType {
                 return "Instagram"
             case .fiveHundredpx:
                 return "500px"
-            case .tiktok:
-                return "TikTok"
             case .tumblr:
                 return "Tumblr"
             case .twitch:

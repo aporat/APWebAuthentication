@@ -15,7 +15,7 @@ A Swift package for in-app OAuth 1.0a and OAuth 2.0 authentication on iOS. Prese
 - Automatic refresh-token grant on 401 with single-flight queueing
 - Keychain-backed credential storage (`kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`)
 - Configurable tint colors and per-account browser/user-agent modes
-- Cookie-based ("session") flows for providers that don't speak OAuth (Pinterest Web, TikTok Web)
+- Cookie-based ("session") flows for providers that don't speak OAuth (Pinterest Web)
 
 ## Requirements
 
@@ -186,7 +186,7 @@ extension MyCoordinator: WebTokenInterceptorDelegate {
 
 ## Built-in providers
 
-`AccountStore` ships configured `AccountType` entries for X (Twitter), Reddit, Pinterest, GitHub, Tumblr, Twitch, TikTok, Foursquare, 500px, and Instagram. Each provider has its own API client and user model under the matching subdirectory (`X/`, `Reddit/`, etc.) — see `Sources/`.
+`AccountStore` ships configured `AccountType` entries for X (Twitter), Reddit, Pinterest, GitHub, Tumblr, Twitch, Foursquare, 500px, and Instagram. Each provider has its own API client and user model under the matching subdirectory (`X/`, `Reddit/`, etc.) — see `Sources/`.
 
 Adding a new provider is a matter of declaring an `AccountType`, attaching an `OAuth1Interceptor` or `OAuth2Interceptor`, and writing a thin API client over `Alamofire.Session`.
 

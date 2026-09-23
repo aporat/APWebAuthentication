@@ -127,12 +127,6 @@ public enum AccountStore {
         description: "500px"
     )
 
-    public static let tiktok = AccountType(
-        code: .tiktok,
-        webAddress: "tiktok.com",
-        description: "TikTok"
-    )
-
     // MARK: - Account Type Collections
 
     /// Complete list of all supported account types.
@@ -147,8 +141,7 @@ public enum AccountStore {
         reddit,
         foursquare,
         github,
-        fiveHundredpx,
-        tiktok
+        fiveHundredpx
     ]
 
     /// List of account types that are currently enabled.

@@ -1,6 +1,6 @@
 # APWebAuthentication
 
-A Swift package providing in-app OAuth authentication (OAuth1 + OAuth2) across social platforms (Twitter/X, Reddit, Pinterest, GitHub, Tumblr, TikTok, Twitch, Foursquare).
+A Swift package providing in-app OAuth authentication (OAuth1 + OAuth2) across social platforms (Twitter/X, Reddit, Pinterest, GitHub, Tumblr, Twitch, Foursquare).
 
 ## Build & Test
 
@@ -24,7 +24,7 @@ xcodebuild -scheme APWebAuthentication \
 
 - `Sources/` - All library source code (flat structure with per-provider subdirectories)
 - `Tests/` - Unit tests using XCTest
-- Provider subdirectories: `Foursquare/`, `GitHub/`, `Pinterest/`, `PinterestWeb/`, `Reddit/`, `TikTokWeb/`, `Tumblr/`, `Twitch/`, `X/`
+- Provider subdirectories: `Foursquare/`, `GitHub/`, `Pinterest/`, `PinterestWeb/`, `Reddit/`, `Tumblr/`, `Twitch/`, `X/`
 - `Models/` - Shared model types (`GenericUser`, `MediaItem`, `StoryItem`, `MediaComment`)
 - `UI/` - Web-based authentication view controllers
 
