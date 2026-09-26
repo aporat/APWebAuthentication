@@ -5,6 +5,7 @@ import SwifterSwift
 @preconcurrency import SwiftyJSON
 import UIKit
 @preconcurrency import WebKit
+import APUserAgentGenerator
 
 // MARK: - Type Aliases
 
@@ -57,7 +58,7 @@ extension WebAuthViewController {
 /// present(navController, animated: true)
 /// ```
 @MainActor
-open class WebAuthViewController: UIViewController, WKNavigationDelegate {
+open class WebAuthViewController: UIViewController, WKNavigationDelegate, WKUIDelegate {
 
     // MARK: - Public Properties
 
@@ -97,6 +98,14 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
         get { webView.customUserAgent }
         set { webView.customUserAgent = newValue }
     }
+
+    /// Present the web view as Mobile Safari, with a user agent from
+    /// `APUserAgentGenerator`, instead of WebKit's default in-app one.
+    ///
+    /// Some sign-in pages (x.com, for one) treat the in-app user agent as an
+    /// unsupported browser and their login links silently do nothing.
+    /// Ignored when `customUserAgent` is set explicitly.
+    public var usesBrowserUserAgent = false
 
     /// An optional existing session ID (for app-specific use)
     public var existingSessionId: String?
@@ -185,6 +194,14 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
     override open func viewDidLoad() {
         super.viewDidLoad()
 
+        // WKWebView reports an empty string, not nil, until one is set.
+        if usesBrowserUserAgent, customUserAgent?.isEmpty ?? true {
+            customUserAgent = APWebBrowserAgentBuilder.builder()
+                .withDevice(IOSDevice())
+                .withBrowser(SafariBrowser())
+                .generate()
+        }
+
         setupWebView()
         setupNavigation()
         setupTraitObservation()
@@ -221,6 +238,7 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
 
     private func setupWebView() {
         webView.navigationDelegate = self
+        webView.uiDelegate = self
         view.addSubview(webView)
         
         webView.snp.makeConstraints { make in
@@ -426,6 +444,22 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
         // Override in subclass
     }
 
+    // MARK: - WKUIDelegate
+
+    /// A link that targets a new window has nowhere to go in a single web
+    /// view, and WebKit drops it silently. Load it here instead.
+    open func webView(
+        _ webView: WKWebView,
+        createWebViewWith configuration: WKWebViewConfiguration,
+        for navigationAction: WKNavigationAction,
+        windowFeatures: WKWindowFeatures
+    ) -> WKWebView? {
+        if navigationAction.targetFrame == nil {
+            webView.load(navigationAction.request)
+        }
+        return nil
+    }
+
     // MARK: - WKNavigationDelegate
 
     open func webView(
@@ -475,9 +509,7 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
     }
 
     open func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-        let nsError = error as NSError
-
-        if let failingURL = nsError.userInfo[NSURLErrorFailingURLErrorKey] as? URL {
+        if let failingURL = Self.failingURL(in: error) {
             // Check for custom redirect handling first (subclass override)
             if checkForRedirect(url: failingURL) {
                 return
@@ -497,9 +529,7 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate {
         didFailProvisionalNavigation navigation: WKNavigation!,
         withError error: Error
     ) {
-        let nsError = error as NSError
-
-        if let failingURL = nsError.userInfo[NSURLErrorFailingURLErrorKey] as? URL {
+        if let failingURL = Self.failingURL(in: error) {
             // Check for custom redirect handling first (subclass override)
             if checkForRedirect(url: failingURL) {
                 return
@@ -580,6 +610,24 @@ private extension WebAuthViewController {
     ///
     /// - Parameter url: The URL to check
     /// - Returns: `true` if the URL matched the redirect URL, `false` otherwise
+    /// The URL a failed navigation was heading for.
+    ///
+    /// A redirect to a non-HTTP(S) scheme — the app's own callback scheme —
+    /// is refused by WebKit at the network layer, so it never reaches the
+    /// navigation-policy delegate. The only trace is the error's failing-URL
+    /// entry, which arrives as either a URL or a string.
+    static func failingURL(in error: Error) -> URL? {
+        let info = (error as NSError).userInfo
+
+        if let url = info[NSURLErrorFailingURLErrorKey] as? URL {
+            return url
+        }
+        if let string = info[NSURLErrorFailingURLErrorKey] as? String ?? info[NSURLErrorFailingURLStringErrorKey] as? String {
+            return URL(string: string)
+        }
+        return nil
+    }
+
     func handleRedirect(url: URL?) -> Bool {
         guard let url else { return false }
 
