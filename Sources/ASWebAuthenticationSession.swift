@@ -13,10 +13,6 @@ public extension ASWebAuthenticationSession {
 
     /// Starts a session that completes when the browser redirects to a URL
     /// matching `callback`.
-    ///
-    /// `ASWebAuthenticationSession.Callback` requires iOS 17.4. On earlier
-    /// iOS 17 releases use `start(url:callbackURLScheme:contextProvider:ephemeral:)`.
-    @available(iOS 17.4, *)
     @MainActor
     static func start(
         url: URL,
@@ -33,7 +29,7 @@ public extension ASWebAuthenticationSession {
     }
 
     /// Starts a session that completes when the browser redirects to a URL
-    /// with the given custom scheme. Works on every supported iOS version.
+    /// with the given custom scheme.
     @MainActor
     static func start(
         url: URL,
