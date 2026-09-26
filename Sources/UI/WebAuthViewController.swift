@@ -107,6 +107,17 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate, WKUIDe
     /// Ignored when `customUserAgent` is set explicitly.
     public var usesBrowserUserAgent = false
 
+    /// Some sign-in flows drop the user somewhere else after logging in
+    /// instead of returning to `authURL` (x.com's login lands on the home
+    /// timeline). When this returns true for a main-frame navigation, the
+    /// navigation is cancelled and `authURL` is loaded again; the user is
+    /// signed in by then, so the flow continues from there. Capped at a few
+    /// reloads so a page that keeps bouncing can't loop.
+    public var shouldReturnToAuthURL: ((URL) -> Bool)?
+
+    private var authURLReloads = 0
+    private let maxAuthURLReloads = 3
+
     /// An optional existing session ID (for app-specific use)
     public var existingSessionId: String?
 
@@ -472,6 +483,11 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate, WKUIDe
             return (.cancel, preferences)
         }
 
+        if navigationAction.targetFrame?.isMainFrame ?? false,
+           returnToAuthURLIfNeeded(for: navigationAction.request.url) {
+            return (.cancel, preferences)
+        }
+
         if handleRedirect(url: navigationAction.request.url) {
             return (.cancel, preferences)
         }
@@ -610,6 +626,19 @@ private extension WebAuthViewController {
     ///
     /// - Parameter url: The URL to check
     /// - Returns: `true` if the URL matched the redirect URL, `false` otherwise
+    /// Reloads `authURL` when a sign-in flow has wandered off to a page the
+    /// host wants to bounce back from. See `shouldReturnToAuthURL`.
+    private func returnToAuthURLIfNeeded(for url: URL?) -> Bool {
+        guard let url, let authURL, let shouldReturnToAuthURL,
+              shouldReturnToAuthURL(url), authURLReloads < maxAuthURLReloads else {
+            return false
+        }
+
+        authURLReloads += 1
+        webView.load(URLRequest(url: authURL))
+        return true
+    }
+
     /// The URL a failed navigation was heading for.
     ///
     /// A redirect to a non-HTTP(S) scheme — the app's own callback scheme —
