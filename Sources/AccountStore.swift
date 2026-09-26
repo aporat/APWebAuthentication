@@ -137,10 +137,10 @@ public enum AccountStore {
         x,
         pinterest,
         tumblr,
+        github,
         twitch,
         reddit,
         foursquare,
-        github,
         fiveHundredpx
     ]
 
