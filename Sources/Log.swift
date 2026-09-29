@@ -18,4 +18,6 @@ enum Log {
 
     /// OAuth token acquisition and refresh.
     static let oauth = Logger(subsystem: subsystem, category: "oauth")
+
+    static let atproto = Logger(subsystem: subsystem, category: "atproto")
 }

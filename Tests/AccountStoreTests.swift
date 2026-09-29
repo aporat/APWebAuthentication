@@ -31,3 +31,18 @@ final class AccountStoreTests: XCTestCase {
         XCTAssertEqual(accounts.count, 2)
     }
 }
+
+// MARK: - Bluesky
+
+@MainActor
+final class BlueskyAccountTypeTests: XCTestCase {
+
+    func testBluesky_isRegistered() {
+        XCTAssertEqual(AccountStore.bluesky.code, .bluesky)
+        XCTAssertEqual(AccountStore.bluesky.code.rawValue, "com.apple.bluesky")
+        XCTAssertEqual(AccountStore.bluesky.code.platformName, "Bluesky")
+        XCTAssertEqual(AccountStore.bluesky.webAddress, "bsky.app")
+        XCTAssertTrue(AccountStore.all.contains(AccountStore.bluesky))
+        XCTAssertEqual(AccountStore.accountType(for: .bluesky), AccountStore.bluesky)
+    }
+}

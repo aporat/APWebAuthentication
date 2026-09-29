@@ -121,6 +121,12 @@ public enum AccountStore {
         description: "GitHub"
     )
 
+    public static let bluesky = AccountType(
+        code: .bluesky,
+        webAddress: "bsky.app",
+        description: "Bluesky"
+    )
+
     public static let fiveHundredpx = AccountType(
         code: .fiveHundredpx,
         webAddress: "500px.com",
@@ -140,6 +146,7 @@ public enum AccountStore {
         github,
         twitch,
         reddit,
+        bluesky,
         foursquare,
         fiveHundredpx
     ]
