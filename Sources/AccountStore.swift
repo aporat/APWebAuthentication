@@ -127,6 +127,15 @@ public enum AccountStore {
         description: "Bluesky"
     )
 
+    /// Mastodon has no single home: the account lives on whichever server the
+    /// user signed up with. `webAddress` is the flagship server, used only as
+    /// the default suggestion at login.
+    public static let mastodon = AccountType(
+        code: .mastodon,
+        webAddress: "mastodon.social",
+        description: "Mastodon"
+    )
+
     public static let fiveHundredpx = AccountType(
         code: .fiveHundredpx,
         webAddress: "500px.com",
@@ -147,6 +156,7 @@ public enum AccountStore {
         twitch,
         reddit,
         bluesky,
+        mastodon,
         foursquare,
         fiveHundredpx
     ]

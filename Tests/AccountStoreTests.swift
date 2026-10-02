@@ -46,3 +46,18 @@ final class BlueskyAccountTypeTests: XCTestCase {
         XCTAssertEqual(AccountStore.accountType(for: .bluesky), AccountStore.bluesky)
     }
 }
+
+// MARK: - Mastodon
+
+@MainActor
+final class MastodonAccountTypeTests: XCTestCase {
+
+    func testMastodon_isRegistered() {
+        XCTAssertEqual(AccountStore.mastodon.code, .mastodon)
+        XCTAssertEqual(AccountStore.mastodon.code.rawValue, "com.apple.mastodon")
+        XCTAssertEqual(AccountStore.mastodon.code.platformName, "Mastodon")
+        XCTAssertEqual(AccountStore.mastodon.webAddress, "mastodon.social")
+        XCTAssertTrue(AccountStore.all.contains(AccountStore.mastodon))
+        XCTAssertEqual(AccountStore.accountType(for: .mastodon), AccountStore.mastodon)
+    }
+}

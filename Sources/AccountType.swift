@@ -91,6 +91,7 @@ public extension AccountType {
         case reddit = "com.apple.reddit"
         case github = "com.apple.github"
         case bluesky = "com.apple.bluesky"
+        case mastodon = "com.apple.mastodon"
 
         // MARK: - Computed Properties
 
@@ -117,6 +118,8 @@ public extension AccountType {
                 return "GitHub"
             case .bluesky:
                 return "Bluesky"
+            case .mastodon:
+                return "Mastodon"
             }
         }
 
