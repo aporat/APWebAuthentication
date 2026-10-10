@@ -52,7 +52,24 @@ open class AuthClient {
     ///
     /// Requests with relative paths are resolved against this base URL.
     /// Absolute URLs bypass the base URL.
-    public var baseURLString: String
+    public var baseURLString: String {
+        didSet { updateAuthorizedHosts() }
+    }
+
+    /// Hosts besides the base URL's that may receive this client's
+    /// credentials (e.g. an upload host on a sibling domain).
+    ///
+    /// Authentication headers — bearer tokens, DPoP proofs, CSRF tokens,
+    /// OAuth 1.0a signatures — are only attached to requests whose host is
+    /// the host of ``baseURLString`` or one listed here. Absolute URLs to any
+    /// other host are sent without them.
+    public var additionalAuthorizedHosts: Set<String> = [] {
+        didSet { updateAuthorizedHosts() }
+    }
+
+    /// The hosts credentials may currently be sent to; kept in sync with
+    /// ``baseURLString`` and ``additionalAuthorizedHosts``.
+    public let authorizedHosts = AuthorizedHosts()
 
     /// The Alamofire session manager for executing requests.
     ///
@@ -114,6 +131,22 @@ open class AuthClient {
         self.accountType = accountType
         self.baseURLString = baseURLString
         self.requestInterceptor = requestInterceptor
+        updateAuthorizedHosts()
+    }
+
+    private func updateAuthorizedHosts() {
+        var hosts = additionalAuthorizedHosts
+        if let host = URL(string: baseURLString)?.host, !host.isEmpty {
+            hosts.insert(host)
+        }
+        authorizedHosts.replace(with: hosts)
+    }
+
+    /// ``requestInterceptor`` limited to ``authorizedHosts``. Use this rather
+    /// than `requestInterceptor` when composing a session in an override of
+    /// ``makeSessionManager(configuration:)``.
+    public var hostRestrictedRequestInterceptor: any RequestInterceptor {
+        HostRestrictedInterceptor(wrapped: requestInterceptor, hosts: authorizedHosts)
     }
 
     // MARK: - Session Configuration
@@ -128,7 +161,7 @@ open class AuthClient {
     open func makeSessionManager(configuration: URLSessionConfiguration) -> Session {
         let composed = Interceptor(
             retriers: [transientNetworkRetrier],
-            interceptors: [requestInterceptor]
+            interceptors: [hostRestrictedRequestInterceptor]
         )
         let session = Session(
             configuration: configuration,

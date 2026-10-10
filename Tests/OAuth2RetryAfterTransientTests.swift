@@ -75,6 +75,59 @@ final class OAuth2RetryAfterTransientTests: XCTestCase {
 
     // MARK: - Tests
 
+    func testAbsoluteURLOnOtherHost_getsNoCredentialsAndNoRefresh() async {
+        let journal = Journal()
+        MockURLProtocol.handler = { request in
+            _ = journal.record(request)
+            if request.url!.path == Self.tokenPath {
+                return MockURLProtocol.response(for: request, status: 200, body: Self.tokenResponse)
+            }
+            return MockURLProtocol.response(for: request, status: 401)
+        }
+
+        do {
+            _ = try await client.request("https://cdn.example.net/foreign")
+            XCTFail("Expected the 401 to surface")
+        } catch {}
+
+        XCTAssertEqual(journal.hits("/foreign"), [nil], "No bearer token for a host the client does not own")
+        XCTAssertTrue(journal.hits(Self.tokenPath).isEmpty, "A foreign 401 must not trigger a refresh")
+        XCTAssertEqual(auth.accessToken, "old-token")
+    }
+
+    func testAbsoluteURLOnOwnHost_isAuthenticated() async throws {
+        let journal = Journal()
+        MockURLProtocol.handler = { request in
+            _ = journal.record(request)
+            return MockURLProtocol.response(for: request, status: 200, body: Data(#"{"ok":true}"#.utf8))
+        }
+
+        _ = try await client.request("https://API.example.com/own")
+
+        XCTAssertEqual(journal.hits("/own"), ["Bearer old-token"])
+    }
+
+    func testAdditionalAuthorizedHost_isAuthenticated() async throws {
+        let journal = Journal()
+        MockURLProtocol.handler = { request in
+            _ = journal.record(request)
+            return MockURLProtocol.response(for: request, status: 200, body: Data(#"{"ok":true}"#.utf8))
+        }
+
+        client.additionalAuthorizedHosts = ["upload.example.com"]
+        _ = try await client.request("https://upload.example.com/media")
+
+        XCTAssertEqual(journal.hits("/media"), ["Bearer old-token"])
+    }
+
+    func testAuthorizedHosts_followBaseURL() {
+        XCTAssertEqual(client.authorizedHosts.current, ["api.example.com"])
+        client.baseURLString = "https://Other.example.org/v1/"
+        XCTAssertEqual(client.authorizedHosts.current, ["other.example.org"])
+        XCTAssertFalse(client.authorizedHosts.allows(URL(string: "https://api.example.com/x")))
+        XCTAssertTrue(client.authorizedHosts.allows(URL(string: "https://other.example.org/x")))
+    }
+
     func test401AfterTransientRetry_stillRefreshesAndSucceeds() async throws {
         let journal = Journal()
         MockURLProtocol.handler = { request in
