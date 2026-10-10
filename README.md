@@ -12,6 +12,7 @@ A Swift package for in-app OAuth 1.0a and OAuth 2.0 authentication on iOS. Prese
 - OAuth 1.0a (RFC 5849) and OAuth 2.0 request signing via `Alamofire` interceptors
 - Hosted sign-in UI (`WebAuthViewController`) with normal and Safari-style chrome
 - Strict component-based redirect-URL matching and OAuth `state` CSRF validation
+- OAuth 2.0 authorization code flow with PKCE (RFC 7636) and code exchange, with presets for X, GitHub and Mastodon
 - Automatic refresh-token grant on 401 with single-flight queueing
 - Keychain-backed credential storage (`kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`)
 - Configurable tint colors and per-account browser/user-agent modes
@@ -33,6 +34,66 @@ dependencies: [
 ```
 
 Or in Xcode: **File → Add Package Dependencies…** and paste the URL.
+
+## OAuth 2.0 authorization code with PKCE
+
+`OAuth2AuthorizationCodeFlow` runs the whole authorization code flow: it builds the authorization URL (`response_type=code`, a random `state`, an `S256` PKCE challenge), presents it, checks the callback, exchanges the code with the `code_verifier`, and stores the tokens on an `Auth2Authentication`.
+
+```swift
+import APWebAuthentication
+import AuthenticationServices
+import UIKit
+
+@MainActor
+final class XLogin: NSObject, ASWebAuthenticationPresentationContextProviding {
+    weak var window: UIWindow?
+
+    func signIn() async throws -> XAPIClient {
+        let flow = OAuth2AuthorizationCodeFlow(configuration: .x(
+            clientId: "YOUR_CLIENT_ID",
+            redirectURI: URL(string: "myapp://oauth/x")!,
+            scopes: ["tweet.read", "users.read", "offline.access"]
+        ))
+
+        let auth = Auth2Authentication()
+        auth.accountIdentifier = "x"
+        try await flow.signIn(auth: auth, contextProvider: self)   // saves to the Keychain
+
+        return XAPIClient(auth: auth)   // refreshes with the stored refresh token
+    }
+
+    func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
+        window ?? ASPresentationAnchor()
+    }
+}
+```
+
+`signIn(auth:contextProvider:ephemeral:)` uses `ASWebAuthenticationSession`. A custom-scheme redirect is matched by scheme; an `https` redirect is matched by host and path, so it must be a universal link your app's associated domains cover. `signIn(auth:webSession:)` uses the in-app `APWebAuthSession` web view instead.
+
+The callback is checked in this order: the URL must be the registered redirect, `state` must match (before anything else is trusted, including `error=`), then the provider's error. `error=access_denied` throws `.canceled`; every other failure is an `APWebAuthenticationError`. The verifier, code and tokens are never logged.
+
+**Presets**
+
+| Preset | Endpoints | Client authentication |
+|---|---|---|
+| `.x(clientId:redirectURI:clientSecret:scopes:)` | `x.com/i/oauth2/authorize`, `api.x.com/2/oauth2/token` | none for public clients, Basic for confidential |
+| `.gitHub(clientId:clientSecret:redirectURI:scopes:)` | `github.com/login/oauth/authorize`, `github.com/login/oauth/access_token` | secret in the body (GitHub has no public clients) |
+| `.mastodon(host:clientId:clientSecret:redirectURI:scopes:)` | `https://<host>/oauth/authorize`, `/oauth/token` | secret in the body; PKCE needs Mastodon 4.3+ |
+
+Any other provider: fill in `OAuth2AuthorizationCodeConfiguration` (`authorizeURL`, `tokenURL`, `clientId`, `redirectURI`, optional `clientSecret` and `clientAuthentication`, `scopes`, `scopeSeparator`, `additionalAuthorizationParameters`, `usesPKCE`).
+
+**Custom UI.** Each step is public:
+
+```swift
+let request = flow.makeAuthorizationRequest()      // request.url, request.state, request.pkce
+// … open request.url yourself, receive callbackURL …
+let code = try flow.authorizationCode(from: callbackURL, for: request)
+let token = try await flow.exchangeCode(code, for: request)   // OAuth2TokenResponse
+auth.applyTokenResponse(token.json)
+// or both steps plus storage: try await flow.completeAuthorization(callbackURL:request:auth:)
+```
+
+`PKCE` is public too: `PKCE()` makes a random pair, `PKCE(verifier:)` rebuilds one, `PKCE.challenge(for:)` computes `S256`.
 
 ## Quick start: OAuth 2.0 with state validation
 
@@ -254,6 +315,7 @@ Useful classifiers on the error: `isRetryable`, `isLoginError`, `requiresUserAct
 | `WebAuthViewController` | `WKWebView`-backed sign-in screen. Owns the redirect handler. |
 | `WebAuthRedirectHandler` | Strict scheme/host/port/path matching; CSRF state validation; response parsing. |
 | `Authentication` / `Auth1Authentication` / `Auth2Authentication` | Credential models with Keychain persistence. |
+| `OAuth2AuthorizationCodeFlow` / `PKCE` | Authorization code flow with PKCE: URL building, callback validation, code exchange. |
 | `OAuth1Interceptor` / `OAuth2Interceptor` | Alamofire interceptors that sign requests and refresh tokens. |
 | `SessionAuthentication` | Cookie-based auth (for providers without OAuth). Cookies live in the Keychain too. |
 | `WebTokenInterceptorViewController` | Captures tokens from in-page XHR calls. |
