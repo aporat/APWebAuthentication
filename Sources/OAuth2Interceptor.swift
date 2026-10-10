@@ -53,6 +53,31 @@ public enum OAuth2ClientAuthentication: Sendable {
     /// from installed apps, which have no secret
     /// (https://github.com/reddit-archive/reddit/wiki/OAuth2).
     case basicAuthorizationHeaderAllowingEmptySecret
+
+    /// Adds the client's credentials to a token-endpoint request in this
+    /// mode. `client_id` is always in the body; an empty `clientSecret`
+    /// counts as none (a public client).
+    func apply(
+        clientId: String,
+        clientSecret: String?,
+        to parameters: inout [String: String],
+        headers: inout HTTPHeaders
+    ) {
+        parameters["client_id"] = clientId
+        let clientSecret = clientSecret.flatMap { $0.isEmpty ? nil : $0 }
+        switch self {
+        case .requestBody:
+            if let clientSecret {
+                parameters["client_secret"] = clientSecret
+            }
+        case .basicAuthorizationHeader:
+            if let clientSecret {
+                headers.add(.authorization(username: clientId, password: clientSecret))
+            }
+        case .basicAuthorizationHeaderAllowingEmptySecret:
+            headers.add(.authorization(username: clientId, password: clientSecret ?? ""))
+        }
+    }
 }
 
 // MARK: - OAuth 2.0 Interceptor
@@ -495,19 +520,12 @@ public class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
             .accept("application/json")
         ]
 
-        let clientSecret = auth.clientSecret.flatMap { $0.isEmpty ? nil : $0 }
-        switch clientAuthentication {
-        case .requestBody:
-            if let clientSecret {
-                parameters["client_secret"] = clientSecret
-            }
-        case .basicAuthorizationHeader:
-            if let clientSecret {
-                headers.add(.authorization(username: clientId, password: clientSecret))
-            }
-        case .basicAuthorizationHeaderAllowingEmptySecret:
-            headers.add(.authorization(username: clientId, password: clientSecret ?? ""))
-        }
+        clientAuthentication.apply(
+            clientId: clientId,
+            clientSecret: auth.clientSecret,
+            to: &parameters,
+            headers: &headers
+        )
 
         let response = await refreshSession.request(
             url,

@@ -1,5 +1,4 @@
 import Alamofire
-import CryptoKit
 import Foundation
 @preconcurrency import SwiftyJSON
 
@@ -386,8 +385,7 @@ public final class ATProtoOAuthClient {
         }
 
         let state = state ?? Self.randomToken()
-        let codeVerifier = Self.randomToken()
-        let codeChallenge = Self.codeChallenge(for: codeVerifier)
+        let pkce = PKCE()
 
         var form: [String: String] = [
             "client_id": clientId,
@@ -395,8 +393,8 @@ public final class ATProtoOAuthClient {
             "redirect_uri": redirectURL,
             "scope": auth.scope,
             "state": state,
-            "code_challenge": codeChallenge,
-            "code_challenge_method": "S256"
+            "code_challenge": pkce.challenge,
+            "code_challenge_method": PKCE.method
         ]
         if let loginHint, !loginHint.isEmpty {
             form["login_hint"] = loginHint
@@ -415,7 +413,7 @@ public final class ATProtoOAuthClient {
         return ATProtoAuthorizationRequest(
             authorizationURL: authorizationURL,
             state: state,
-            codeVerifier: codeVerifier,
+            codeVerifier: pkce.verifier,
             metadata: metadata,
             expectedDID: expectedDID
         )
@@ -745,14 +743,13 @@ public final class ATProtoOAuthClient {
         return "\(scheme)://\(host)"
     }
 
-    /// 32 random bytes, base64url: a PKCE verifier or a `state` value.
+    /// 32 random bytes, base64url: a `state` value. Same generator as
+    /// ``PKCE/generateVerifier()``.
     static func randomToken() -> String {
-        var generator = SystemRandomNumberGenerator()
-        let bytes = (0..<32).map { _ in UInt8.random(in: .min ... .max, using: &generator) }
-        return Data(bytes).base64URLEncodedString()
+        PKCE.generateVerifier()
     }
 
     static func codeChallenge(for verifier: String) -> String {
-        Data(SHA256.hash(data: Data(verifier.utf8))).base64URLEncodedString()
+        PKCE.challenge(for: verifier)
     }
 }

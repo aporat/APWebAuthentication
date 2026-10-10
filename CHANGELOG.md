@@ -27,6 +27,17 @@
 
 ### Added
 
+- **OAuth 2.0 authorization code flow with PKCE.** `OAuth2AuthorizationCodeFlow`
+  builds the authorization URL (`response_type=code`, random `state`, `S256`
+  challenge), runs it in `ASWebAuthenticationSession` or `APWebAuthSession`,
+  validates the redirect and `state` before reading `error=`, exchanges the
+  code with `code_verifier` and `redirect_uri` using any
+  `OAuth2ClientAuthentication` mode, and stores the tokens with
+  `Auth2Authentication.applyTokenResponse(_:)`. Each step is also public for
+  custom UI. Presets: `.x(...)`, `.gitHub(...)`, `.mastodon(host:...)`.
+- `PKCE`: verifier generation and `S256` challenge (RFC 7636), now shared with
+  the AT Protocol client (no behaviour change there).
+
 - **Proactive OAuth 2.0 refresh.** `Auth2Authentication.expiresAt` records when
   the access token expires. It is set from `expires_in` on refresh, and on first
   login via the new `applyTokenResponse(_:)`. It is persisted in the Keychain
