@@ -100,7 +100,6 @@ public extension Error {
     /// Returns `true` for common connection problems:
     /// - Timeout
     /// - DNS lookup failed
-    /// - Secure connection failed
     /// - Not connected to internet
     /// - Cannot find host
     /// - Network connection lost
@@ -120,9 +119,11 @@ public extension Error {
         guard let urlError = underlyingURLError else { return false }
 
         switch urlError.code {
+        // TLS failures (`.secureConnectionFailed`, server certificate errors)
+        // are deliberately absent: they can mean an intercepted connection,
+        // so they must surface rather than be treated as a flaky network.
         case .timedOut,
              .dnsLookupFailed,
-             .secureConnectionFailed,
              .notConnectedToInternet,
              .cannotFindHost,
              .networkConnectionLost:

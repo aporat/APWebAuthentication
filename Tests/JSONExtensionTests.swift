@@ -40,6 +40,15 @@ final class JSONExtensionTests: XCTestCase {
         XCTAssertEqual(json.int32Number, 77)
     }
 
+    func testInt32Number_outOfRangeIsNilInsteadOfTrapping() {
+        XCTAssertNil(JSON(Int(Int32.max) + 1).int32Number)
+        XCTAssertNil(JSON(Int(Int32.min) - 1).int32Number)
+        XCTAssertNil(JSON(5_000_000_000).int32Number)
+        XCTAssertNil(JSON("5000000000").int32Number)
+        XCTAssertEqual(JSON(Int(Int32.max)).int32Number, Int32.max)
+        XCTAssertEqual(JSON(String(Int32.min)).int32Number, Int32.min)
+    }
+
     func testInt32Number_invalid() {
         XCTAssertNil(JSON("hello").int32Number)
         XCTAssertNil(JSON(NSNull()).int32Number)

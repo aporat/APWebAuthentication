@@ -88,16 +88,14 @@ public extension JSON {
     /// print(json3["count"].int32Number) // nil
     /// ```
     ///
-    /// - Returns: Int32 value, or `nil` if conversion fails
+    /// - Returns: Int32 value, or `nil` if conversion fails or the value is
+    ///   outside the `Int32` range
     var int32Number: Int32? {
-        // Priority 1: Direct Int32 value
-        if let value = self.int32 {
-            return value
-        }
-
-        // Priority 2: Int value or string parsed as Int
+        // Read as a full-width Int first: SwiftyJSON's `int32` truncates
+        // out-of-range numbers (NSNumber.int32Value), and `Int32(_:)` traps on
+        // them. A value that does not fit in Int32 is a conversion failure.
         if let intValue = self.int ?? self.string.flatMap(Int.init) {
-            return Int32(intValue)
+            return Int32(exactly: intValue)
         }
 
         return nil
