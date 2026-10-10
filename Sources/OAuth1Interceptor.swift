@@ -236,12 +236,19 @@ private extension OAuth1Interceptor {
         consumerKey: String?,
         consumerSecret: String?,
         authToken: String?,
-        authSecret: String?
+        authSecret: String?,
+        nonce: String? = nil,
+        timestamp: String? = nil
     ) throws -> String {
 
         // Build OAuth parameters (consumer key, nonce, timestamp, etc.).
         // These have unique keys, so a dictionary is fine.
-        var oauthParameters = buildOAuthParameters(consumerKey: consumerKey, token: authToken)
+        var oauthParameters = buildOAuthParameters(
+            consumerKey: consumerKey,
+            token: authToken,
+            nonce: nonce,
+            timestamp: timestamp
+        )
 
         // Combine all parameters for signing. Preserve duplicates and order
         // from the request — RFC 5849 §3.4.1.3.2 requires every occurrence
@@ -256,40 +263,12 @@ private extension OAuth1Interceptor {
         // contents would produce a signature the server cannot reproduce.
         allParameters.append(contentsOf: url.queryParameterItems)
 
-        // Per RFC 5849 §3.4.1.3.2: percent-encode each name and value, then
-        // sort by encoded name, breaking ties by encoded value.
-        let encodedPairs: [(String, String)] = allParameters.map { pair in
-            (pair.0.urlEscaped, pair.1.urlEscaped)
-        }
-        let sortedPairs = encodedPairs.sorted { lhs, rhs in
-            lhs.0 == rhs.0 ? lhs.1 < rhs.1 : lhs.0 < rhs.0
-        }
-        let parameterString = sortedPairs
-            .map { "\($0.0)=\($0.1)" }
-            .joined(separator: "&")
-
-        // Create signature base string. Without a base string URI there is
-        // no valid signature; fail rather than sign a two-part base string.
-        guard let baseURL = url.oAuthBaseURL else {
-            throw OAuth1Error.signatureGenerationFailed
-        }
-        let signatureBase = [
-            method.uppercased().urlEscaped,
-            baseURL.urlEscaped,
-            parameterString.urlEscaped
-        ]
-        .joined(separator: "&")
-
-        // Create signing key
-        let signingKey = "\((consumerSecret ?? "").urlEscaped)&\((authSecret ?? "").urlEscaped)"
-
-        // Generate HMAC-SHA1 signature. SHA-1 is what RFC 5849 mandates for
-        // HMAC-SHA1; CryptoKit exposes it under `Insecure` for that reason.
-        let key = SymmetricKey(data: Data(signingKey.utf8))
-        let mac = HMAC<Insecure.SHA1>.authenticationCode(for: Data(signatureBase.utf8), using: key)
-        let signature = Data(mac).base64EncodedString()
-
-        oauthParameters["oauth_signature"] = signature
+        let signatureBase = try Self.signatureBaseString(method: method, url: url, parameters: allParameters)
+        oauthParameters["oauth_signature"] = Self.hmacSHA1Signature(
+            of: signatureBase,
+            consumerSecret: consumerSecret,
+            tokenSecret: authSecret
+        )
 
         // Format OAuth header
         let headerParameters = oauthParameters
@@ -299,6 +278,50 @@ private extension OAuth1Interceptor {
             .joined(separator: ", ")
 
         return "OAuth \(headerParameters)"
+    }
+
+    /// The signature base string (RFC 5849 §3.4.1): method, base string URI
+    /// and normalized parameters, each percent-encoded and joined with `&`.
+    ///
+    /// - Parameter parameters: Every parameter to sign — `oauth_*` (without
+    ///   `oauth_signature`), query and form body — decoded, in any order,
+    ///   duplicates included.
+    static func signatureBaseString(method: String, url: URL, parameters: [(String, String)]) throws -> String {
+        // Per RFC 5849 §3.4.1.3.2: percent-encode each name and value, then
+        // sort by encoded name, breaking ties by encoded value.
+        let encodedPairs: [(String, String)] = parameters.map { pair in
+            (pair.0.urlEscaped, pair.1.urlEscaped)
+        }
+        let sortedPairs = encodedPairs.sorted { lhs, rhs in
+            lhs.0 == rhs.0 ? lhs.1 < rhs.1 : lhs.0 < rhs.0
+        }
+        let parameterString = sortedPairs
+            .map { "\($0.0)=\($0.1)" }
+            .joined(separator: "&")
+
+        // Without a base string URI there is no valid signature; fail rather
+        // than sign a two-part base string.
+        guard let baseURL = url.oAuthBaseURL else {
+            throw OAuth1Error.signatureGenerationFailed
+        }
+        return [
+            method.uppercased().urlEscaped,
+            baseURL.urlEscaped,
+            parameterString.urlEscaped
+        ]
+        .joined(separator: "&")
+    }
+
+    /// HMAC-SHA1 signature (RFC 5849 §3.4.2), base64-encoded. The key is the
+    /// percent-encoded consumer secret and token secret joined by `&`.
+    static func hmacSHA1Signature(of baseString: String, consumerSecret: String?, tokenSecret: String?) -> String {
+        let signingKey = "\((consumerSecret ?? "").urlEscaped)&\((tokenSecret ?? "").urlEscaped)"
+
+        // SHA-1 is what RFC 5849 mandates for HMAC-SHA1; CryptoKit exposes
+        // it under `Insecure` for that reason.
+        let key = SymmetricKey(data: Data(signingKey.utf8))
+        let mac = HMAC<Insecure.SHA1>.authenticationCode(for: Data(baseString.utf8), using: key)
+        return Data(mac).base64EncodedString()
     }
 
     /// Builds the OAuth parameters for the request.
@@ -314,15 +337,23 @@ private extension OAuth1Interceptor {
     /// **Nonce Generation:**
     /// Uses a UUID without hyphens as a unique identifier.
     ///
-    /// - Parameter token: The user's OAuth access token (optional)
+    /// - Parameters:
+    ///   - token: The user's OAuth access token (optional)
+    ///   - nonce: Fixed nonce, for tests; random when `nil`
+    ///   - timestamp: Fixed timestamp, for tests; the current time when `nil`
     /// - Returns: A dictionary of OAuth parameters
-    func buildOAuthParameters(consumerKey: String?, token: String?) -> [String: String] {
+    func buildOAuthParameters(
+        consumerKey: String?,
+        token: String?,
+        nonce: String? = nil,
+        timestamp: String? = nil
+    ) -> [String: String] {
         var parameters: [String: String] = [
             "oauth_consumer_key": consumerKey ?? "",
             "oauth_signature_method": "HMAC-SHA1",
             "oauth_version": "1.0",
-            "oauth_timestamp": String(Int(Date().timeIntervalSince1970)),
-            "oauth_nonce": UUID().uuidString.replacingOccurrences(of: "-", with: "")
+            "oauth_timestamp": timestamp ?? String(Int(Date().timeIntervalSince1970)),
+            "oauth_nonce": nonce ?? UUID().uuidString.replacingOccurrences(of: "-", with: "")
         ]
 
         // Add token if available
