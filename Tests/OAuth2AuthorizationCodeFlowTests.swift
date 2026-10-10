@@ -88,7 +88,7 @@ final class OAuth2AuthorizationCodeFlowTests: XCTestCase {
     }
 
     private func expectFailure(
-        _ operation: () async throws(APWebAuthenticationError) -> Void,
+        _ operation: () async throws -> Void,
         file: StaticString = #filePath,
         line: UInt = #line
     ) async -> APWebAuthenticationError? {
@@ -96,8 +96,11 @@ final class OAuth2AuthorizationCodeFlowTests: XCTestCase {
             try await operation()
             XCTFail("Expected an error", file: file, line: line)
             return nil
-        } catch {
+        } catch let error as APWebAuthenticationError {
             return error
+        } catch {
+            XCTFail("Unexpected error type \(error)", file: file, line: line)
+            return nil
         }
     }
 
