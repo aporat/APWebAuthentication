@@ -121,6 +121,56 @@ final class OAuth2RefreshTests: XCTestCase {
         XCTAssertEqual(formBody(of: capture.request)["client_secret"], "s3cret")
     }
 
+    // MARK: - Reddit style: Basic even without a secret
+
+    func testBasicAllowingEmptySecret_publicClient_sendsBasicWithEmptyPassword() async {
+        auth.clientSecret = nil
+        let capture = installTokenEndpoint()
+
+        let refreshed = await makeInterceptor(.basicAuthorizationHeaderAllowingEmptySecret).refreshAccessToken(url: Self.tokenURL)
+
+        XCTAssertTrue(refreshed)
+        let expectedBasic = "Basic " + Data("client-123:".utf8).base64EncodedString()
+        XCTAssertEqual(capture.request?.value(forHTTPHeaderField: "Authorization"), expectedBasic)
+        XCTAssertNil(formBody(of: capture.request)["client_secret"])
+    }
+
+    func testBasicAllowingEmptySecret_confidentialClient_sendsSecretInBasic() async {
+        auth.clientSecret = "s3cret"
+        let capture = installTokenEndpoint()
+
+        let refreshed = await makeInterceptor(.basicAuthorizationHeaderAllowingEmptySecret).refreshAccessToken(url: Self.tokenURL)
+
+        XCTAssertTrue(refreshed)
+        let expectedBasic = "Basic " + Data("client-123:s3cret".utf8).base64EncodedString()
+        XCTAssertEqual(capture.request?.value(forHTTPHeaderField: "Authorization"), expectedBasic)
+        XCTAssertNil(formBody(of: capture.request)["client_secret"])
+    }
+
+    // MARK: - Provider configuration
+
+    func testProviders_configureRefresh() {
+        let reddit = RedditAPIClient(auth: auth).interceptor
+        XCTAssertEqual(reddit.refreshTokenURL, "https://www.reddit.com/api/v1/access_token")
+        XCTAssertEqual(reddit.clientAuthentication, .basicAuthorizationHeaderAllowingEmptySecret)
+        XCTAssertEqual(reddit.tokenLocation, .authorizationHeader)
+
+        let pinterest = PinterestAPIClient(auth: auth).interceptor
+        XCTAssertEqual(pinterest.refreshTokenURL, "https://api.pinterest.com/v5/oauth/token")
+        XCTAssertEqual(pinterest.clientAuthentication, .basicAuthorizationHeader)
+        XCTAssertEqual(pinterest.tokenLocation, .authorizationHeader)
+
+        let twitch = TwitchAPIClient(auth: auth).interceptor
+        XCTAssertEqual(twitch.refreshTokenURL, "https://id.twitch.tv/oauth2/token")
+        XCTAssertEqual(twitch.clientAuthentication, .requestBody)
+        XCTAssertEqual(twitch.tokenLocation, .authorizationHeader)
+    }
+
+    func testDefaultTokenLocation_isAuthorizationHeader() {
+        XCTAssertEqual(OAuth2Interceptor(auth: auth).tokenLocation, .authorizationHeader)
+        XCTAssertEqual(FoursquareInterceptor(auth: auth).tokenLocation, .params, "Foursquare v2 still takes oauth_token as a parameter")
+    }
+
     // MARK: - Headers
 
     func testRefreshRequest_asksForJSON() async {

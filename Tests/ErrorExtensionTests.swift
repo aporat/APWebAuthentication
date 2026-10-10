@@ -10,7 +10,7 @@ final class ErrorExtensionTests: XCTestCase {
 
     func testConnectionErrors_areRecognized() {
         let codes: [URLError.Code] = [
-            .timedOut, .dnsLookupFailed, .secureConnectionFailed,
+            .timedOut, .dnsLookupFailed,
             .notConnectedToInternet, .cannotFindHost, .networkConnectionLost
         ]
 
@@ -21,6 +21,21 @@ final class ErrorExtensionTests: XCTestCase {
 
         let nonConnectionError = makeURLError(.cancelled)
         XCTAssertFalse(nonConnectionError.isConnectionError)
+    }
+
+    func testTLSErrors_areNotConnectionOrIgnorableErrors() {
+        let codes: [URLError.Code] = [
+            .secureConnectionFailed, .serverCertificateUntrusted, .serverCertificateHasBadDate,
+            .serverCertificateHasUnknownRoot, .serverCertificateNotYetValid,
+            .clientCertificateRejected, .clientCertificateRequired
+        ]
+
+        for code in codes {
+            let error = makeURLError(code)
+            XCTAssertFalse(error.isConnectionError, "\(code) must not be a connection error")
+            XCTAssertFalse(error.isIgnorableError, "\(code) must not be ignorable")
+            XCTAssertFalse(AFError.sessionTaskFailed(error: error).isIgnorableError, "wrapped \(code) must not be ignorable")
+        }
     }
 
     func testAFErrorWrappedConnectionError() {

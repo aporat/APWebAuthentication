@@ -239,6 +239,22 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate, WKUIDe
         removeProgressObserver()
     }
 
+    /// Resolves a still-pending flow as canceled when the controller leaves
+    /// the screen without going through `complete(with:)` — e.g. the host app
+    /// dismisses the sheet programmatically, or dismisses whatever presented
+    /// it. `complete(with:)` claims the handler before dismissing, so a normal
+    /// completion never reaches this with a handler still set.
+    override open func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+
+        let isLeaving = isBeingDismissed
+            || isMovingFromParent
+            || (navigationController?.isBeingDismissed ?? false)
+        if isLeaving {
+            claimCompletionHandler()?(.failure(.canceled))
+        }
+    }
+
 
 
     override open var preferredStatusBarStyle: UIStatusBarStyle {

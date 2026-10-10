@@ -251,7 +251,10 @@ private extension OAuth1Interceptor {
             allParameters.append((key, value))
         }
         allParameters.append(contentsOf: formParameters)
-        allParameters.append(contentsOf: url.parameterItems)
+        // RFC 5849 §3.4.1.3.1: only the query component is a parameter
+        // source. The fragment never reaches the server, so signing its
+        // contents would produce a signature the server cannot reproduce.
+        allParameters.append(contentsOf: url.queryParameterItems)
 
         // Per RFC 5849 §3.4.1.3.2: percent-encode each name and value, then
         // sort by encoded name, breaking ties by encoded value.
@@ -265,13 +268,16 @@ private extension OAuth1Interceptor {
             .map { "\($0.0)=\($0.1)" }
             .joined(separator: "&")
 
-        // Create signature base string
+        // Create signature base string. Without a base string URI there is
+        // no valid signature; fail rather than sign a two-part base string.
+        guard let baseURL = url.oAuthBaseURL else {
+            throw OAuth1Error.signatureGenerationFailed
+        }
         let signatureBase = [
             method.uppercased().urlEscaped,
-            url.oAuthBaseURL?.urlEscaped,
+            baseURL.urlEscaped,
             parameterString.urlEscaped
         ]
-        .compactMap { $0 }
         .joined(separator: "&")
 
         // Create signing key

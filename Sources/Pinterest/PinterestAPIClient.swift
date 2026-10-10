@@ -8,8 +8,19 @@ public final class PinterestAPIClient: OAuth2Client {
 
     // MARK: - Initialization
 
+    /// Pinterest API v5 token endpoint, used for the refresh-token grant.
+    public static let refreshTokenURL = "https://api.pinterest.com/v5/oauth/token"
+
     public convenience init(auth: Auth2Authentication) {
-        let interceptor = OAuth2Interceptor(auth: auth, tokenLocation: .authorizationHeader)
+        // Pinterest authenticates the client with HTTP Basic
+        // (`client_id:client_secret`) at the v5 token endpoint
+        // (https://developers.pinterest.com/docs/getting-started/set-up-authentication-and-authorization/).
+        let interceptor = OAuth2Interceptor(
+            auth: auth,
+            tokenLocation: .authorizationHeader,
+            refreshTokenURL: Self.refreshTokenURL,
+            clientAuthentication: .basicAuthorizationHeader
+        )
 
         self.init(baseURLString: "https://api.pinterest.com/v5/", requestInterceptor: interceptor)
     }

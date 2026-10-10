@@ -89,7 +89,7 @@ open class ATProtoClient: AuthClient {
     override open func makeSessionManager(configuration: URLSessionConfiguration) -> Session {
         let composed = Interceptor(
             retriers: [transientNetworkRetrier],
-            interceptors: [requestInterceptor]
+            interceptors: [hostRestrictedRequestInterceptor]
         )
         // Passing monitors replaces Alamofire's default list, and the
         // request logger listens to the notifications that default posts.

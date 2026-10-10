@@ -430,20 +430,26 @@ public final class ATProtoOAuthClient {
     ) async throws(APWebAuthenticationError) {
         let params = callbackURL.parameters
 
-        if let error = params["error"] {
-            if error == "access_denied" {
-                throw .canceled
-            }
-            throw .failed(reason: params["error_description"] ?? error)
-        }
-
+        // State first: nothing in a callback we did not start — including an
+        // `error=` — may change what we do.
         guard params["state"] == request.state else {
             throw .failed(reason: "OAuth state mismatch — possible CSRF.")
         }
 
         // RFC 9207: the server names itself on the way back; refuse a mix-up.
-        if let iss = params["iss"], Self.origin(of: iss) != Self.origin(of: request.metadata.issuer) {
+        // `authorizationServerMetadata(issuer:)` only accepts servers that
+        // advertise `authorization_response_iss_parameter_supported`, so `iss`
+        // is mandatory here and must match the issuer exactly (RFC 9207 §2.4),
+        // on error responses as well as successful ones.
+        guard let iss = params["iss"], iss == request.metadata.issuer else {
             throw .failed(reason: "The login response came from an unexpected server.")
+        }
+
+        if let error = params["error"] {
+            if error == "access_denied" {
+                throw .canceled
+            }
+            throw .failed(reason: params["error_description"] ?? error)
         }
 
         guard let code = params["code"], !code.isEmpty else {
@@ -489,12 +495,21 @@ public final class ATProtoOAuthClient {
             }
         }
 
+        // An entryway login never asked for a handle; the DID document names
+        // one, but that is only a claim until the handle resolves back to this
+        // DID (the same bidirectional check `resolveIdentity` makes). An
+        // unverified or unresolvable claim leaves the handle unset.
+        var verifiedHandle: String?
+        if auth.handle == nil, let claimed = Self.handles(in: document).first,
+           let resolved = try? await resolveHandle(claimed), resolved == did {
+            verifiedHandle = claimed
+        }
+
         auth.apply(token)
         auth.did = did
         auth.pdsURL = pds
-        // An entryway login never asked for a handle; the DID document knows it.
         if auth.handle == nil {
-            auth.handle = Self.handles(in: document).first
+            auth.handle = verifiedHandle
         }
         auth.issuer = request.metadata.issuer
         auth.tokenEndpoint = request.metadata.tokenEndpoint
