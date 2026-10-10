@@ -27,6 +27,19 @@
 
 ### Added
 
+- **Proactive OAuth 2.0 refresh.** `Auth2Authentication.expiresAt` records when
+  the access token expires. It is set from `expires_in` on refresh, and on first
+  login via the new `applyTokenResponse(_:)`. It is persisted in the Keychain
+  blob; blobs saved by older versions still load, with `expiresAt` = `nil`.
+  `OAuth2Interceptor` refreshes before sending a request when the token
+  expires within `refreshLeeway` (default 60 s). Concurrent requests share one
+  in-flight refresh, which the 401 retry path now uses too. On failure the
+  current token is sent and proactive attempts pause for
+  `proactiveRefreshBackoff` (default 30 s). The clock is injectable (`now:`).
+- Token refresh responses accept `expires_in` as a number or a numeric string.
+  A refresh response without `expires_in` clears `expiresAt` rather than
+  keeping the old token's expiry.
+
 - Token refresh for Reddit (`https://www.reddit.com/api/v1/access_token`),
   Pinterest v5 (`https://api.pinterest.com/v5/oauth/token`) and Twitch
   (`https://id.twitch.tv/oauth2/token`).
