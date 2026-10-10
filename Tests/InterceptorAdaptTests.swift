@@ -146,6 +146,30 @@ final class InterceptorAdaptTests: XCTestCase {
         XCTAssertEqual(body(of: adapted), #"{"text":"a=b&c=d"}"#)
     }
 
+    func testOAuth1_fragmentParameters_areNotSigned() async throws {
+        let auth = makeOAuth1Auth()
+        let request = URLRequest(url: URL(string: "https://api.example.com/v1/thing?x=1#y=2")!)
+
+        let adapted = try await adapt(request, with: OAuth1Interceptor(auth: auth))
+
+        // RFC 5849 §3.4.1.3.1: the query is a parameter source, the fragment
+        // is not (it never reaches the server).
+        let expected = expectedSignature(
+            for: adapted,
+            method: "GET",
+            baseURL: "https://api.example.com/v1/thing",
+            extraParameters: [("x", "1")]
+        )
+        XCTAssertEqual(oauthHeaderParameters(of: adapted)["oauth_signature"], expected)
+    }
+
+    func testQueryParameterItems_ignoreFragment() {
+        let url = URL(string: "https://example.com/p?a=1&a=2&b=c+d#e=f")!
+        let items = url.queryParameterItems
+        XCTAssertEqual(items.map(\.0), ["a", "a", "b"])
+        XCTAssertEqual(items.map(\.1), ["1", "2", "c d"])
+    }
+
     // MARK: - OAuth1 test support
 
     private func makeOAuth1Auth() -> Auth1Authentication {

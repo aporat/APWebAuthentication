@@ -138,6 +138,18 @@ public extension URL {
         return items
     }
 
+    /// The query component's parameters, in order and including duplicate
+    /// keys, decoded as `application/x-www-form-urlencoded`. Unlike
+    /// ``parameterItems`` this ignores the fragment, which is what OAuth 1.0a
+    /// signing needs (RFC 5849 §3.4.1.3.1).
+    var queryParameterItems: [(String, String)] {
+        guard let components = URLComponents(url: self, resolvingAgainstBaseURL: false),
+              let query = components.percentEncodedQuery else {
+            return []
+        }
+        return Self.parseFormURLEncoded(query)
+    }
+
     /// Parses an `application/x-www-form-urlencoded` string into ordered
     /// key/value pairs. Performs `+` → space substitution and percent
     /// decoding on each side of the `=` independently so that embedded
