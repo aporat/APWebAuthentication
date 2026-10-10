@@ -9,7 +9,6 @@ final class OAuth1ClientTests: XCTestCase {
     var client: OAuth1Client!
 
     override func setUp() async throws {
-        try await super.setUp()
         auth = Auth1Authentication()
         auth.consumerKey = "key123"
         auth.consumerSecret = "secret456"

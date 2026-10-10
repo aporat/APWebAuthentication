@@ -5,13 +5,11 @@ import XCTest
 final class AccountStoreTests: XCTestCase {
 
     override func setUp() async throws {
-        try await super.setUp()
         AccountStore.disableAll()
     }
-    
+
     override func tearDown() async throws {
         AccountStore.disableAll()
-        try await super.tearDown()
     }
 
     func testAccountTypes_emptyDefaults_returnsEmpty() {

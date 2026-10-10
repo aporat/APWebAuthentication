@@ -584,30 +584,48 @@ extension WebTokenInterceptorViewController: WKScriptMessageHandler {
         _ userContentController: WKUserContentController,
         didReceive message: WKScriptMessage
     ) {
-        guard let results = message.body as? [String: Any],
-              let responseURLString = results["responseURL"] as? String,
-              let responseURL = URL(string: responseURLString) else {
-            return
+        handleScriptMessageBody(message.body)
+    }
+
+    /// Handles the body of a message posted by the injected XHR hook.
+    /// Split out of the `WKScriptMessageHandler` callback because
+    /// `WKScriptMessage` cannot be constructed outside WebKit.
+    ///
+    /// - Returns: The request handed to ``handleInterceptedRequest(_:)``, or
+    ///   `nil` when the body is malformed or its URL is not intercepted.
+    @discardableResult
+    func handleScriptMessageBody(_ body: Any) -> InterceptedRequest? {
+        guard let request = Self.interceptedRequest(fromMessageBody: body, targetURL: configuration.targetURL),
+              shouldIntercept(responseURL: request.responseURL) else {
+            return nil
         }
 
-        guard shouldIntercept(responseURL: responseURL) else {
-            return
+        Task {
+            await handleInterceptedRequest(request)
+        }
+        return request
+    }
+
+    /// Parses the injected script's message
+    /// (`{status, responseURL, requestHeaders, responseHeaders}`).
+    /// Returns `nil` unless the body is a dictionary with a valid `responseURL`.
+    static func interceptedRequest(fromMessageBody body: Any, targetURL: URL?) -> InterceptedRequest? {
+        guard let results = body as? [String: Any],
+              let responseURLString = results["responseURL"] as? String,
+              let responseURL = URL(string: responseURLString) else {
+            return nil
         }
 
         let statusCode = results["status"] as? Int ?? 0
         let requestHeaders = results["requestHeaders"] as? [String: Any]
         let responseHeaders = results["responseHeaders"] as? String
 
-        let request = InterceptedRequest(
+        return InterceptedRequest(
             responseURL: responseURL,
-            targetURL: configuration.targetURL,
+            targetURL: targetURL,
             requestHeaders: requestHeaders,
             responseHeaders: responseHeaders,
             statusCode: statusCode
         )
-
-        Task {
-            await handleInterceptedRequest(request)
-        }
     }
 }

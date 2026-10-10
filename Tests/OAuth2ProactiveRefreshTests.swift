@@ -8,8 +8,8 @@ import XCTest
 @MainActor
 final class OAuth2ProactiveRefreshTests: XCTestCase {
 
-    private nonisolated static let tokenPath = "/oauth2/token"
-    private nonisolated static let tokenResponse = Data(#"{"access_token":"new-token","refresh_token":"new-refresh","expires_in":3600}"#.utf8)
+    nonisolated private static let tokenPath = "/oauth2/token"
+    nonisolated private static let tokenResponse = Data(#"{"access_token":"new-token","refresh_token":"new-refresh","expires_in":3600}"#.utf8)
 
     /// Records every hit per path and the Authorization header on each.
     private final class Journal: @unchecked Sendable {
@@ -64,7 +64,6 @@ final class OAuth2ProactiveRefreshTests: XCTestCase {
     private var client: MockOAuth2Client!
 
     override func setUp() async throws {
-        try await super.setUp()
         clock = Clock(start)
         auth = Auth2Authentication()
         auth.clientId = "client"
@@ -75,7 +74,6 @@ final class OAuth2ProactiveRefreshTests: XCTestCase {
 
     override func tearDown() async throws {
         MockURLProtocol.handler = nil
-        try await super.tearDown()
     }
 
     /// Token endpoint answers `tokenStatus`; everything else answers 200.

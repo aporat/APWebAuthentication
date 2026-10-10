@@ -9,7 +9,6 @@ final class AuthenticationTests: XCTestCase {
     var auth: Authentication!
 
     override func setUp() async throws {
-        try await super.setUp()
         auth = TestAuth()
     }
 

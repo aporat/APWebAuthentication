@@ -68,7 +68,7 @@ public final class WebAuthRedirectHandler {
     /// `SecRandomCopyBytes` and touches no actor state — the main-actor
     /// isolation it otherwise inherits from the enclosing class would force
     /// every caller building an authorization URL to hop for no reason.
-    public nonisolated static func generateState() -> String {
+    nonisolated public static func generateState() -> String {
         var bytes = [UInt8](repeating: 0, count: 32)
         _ = SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes)
         return Data(bytes).base64EncodedString()
@@ -143,8 +143,6 @@ public final class WebAuthRedirectHandler {
         return candidatePath == targetPath
     }
 
-    /// Returns the value of the named parameter from the URL's query string
-    /// or fragment. Used for state extraction before full response parsing.
     // MARK: - JSON Parsing
 
     /// Parses a JSON response and extracts any error messages.
@@ -207,4 +205,3 @@ public final class WebAuthRedirectHandler {
         return nil
     }
 }
-

@@ -8,14 +8,12 @@ final class MastodonAuthenticationTests: XCTestCase {
     var auth: MastodonAuthentication!
 
     override func setUp() async throws {
-        try await super.setUp()
         auth = MastodonAuthentication()
         auth.accountIdentifier = UUID().uuidString
     }
 
     override func tearDown() async throws {
         await auth.delete()
-        try await super.tearDown()
     }
 
     func testIsAuthorized_needsTokenAndHost() {

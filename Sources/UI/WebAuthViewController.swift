@@ -1,3 +1,4 @@
+import APUserAgentGenerator
 import Foundation
 import JGProgressHUD
 import SnapKit
@@ -5,7 +6,6 @@ import SwifterSwift
 @preconcurrency import SwiftyJSON
 import UIKit
 @preconcurrency import WebKit
-import APUserAgentGenerator
 
 // MARK: - Type Aliases
 
@@ -255,8 +255,6 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate, WKUIDe
         }
     }
 
-
-
     override open var preferredStatusBarStyle: UIStatusBarStyle {
         statusBarStyle
     }
@@ -267,7 +265,7 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate, WKUIDe
         webView.navigationDelegate = self
         webView.uiDelegate = self
         view.addSubview(webView)
-        
+
         webView.snp.makeConstraints { make in
             make.top.leading.trailing.equalTo(view.safeAreaLayoutGuide)
             make.bottom.equalTo(view)
@@ -726,7 +724,8 @@ private extension WebAuthViewController {
                 return nil
             }
 
-            let first = await group.next() ?? nil
+            // Flattens `[HTTPCookie]??` to `[HTTPCookie]?`; not redundant.
+            let first = await group.next() ?? nil // swiftlint:disable:this redundant_nil_coalescing
             group.cancelAll()
             return first ?? []
         }
