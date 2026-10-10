@@ -393,8 +393,50 @@ final class ATProtoOAuthClientTests: XCTestCase {
         }
     }
 
-    func testCompleteAuthorization_accessDeniedIsCanceled() async {
+    func testCompleteAuthorization_missingIssuerThrows() async {
+        let callback = URL(string: "com.example.app:/oauth/callback?code=c1&state=state-1")!
+        do {
+            try await client.completeAuthorization(callbackURL: callback, request: pendingRequest(expectedDID: nil), auth: auth)
+            XCTFail("Expected failure")
+        } catch {
+            guard case .failed = error else { return XCTFail("Unexpected error \(error)") }
+        }
+    }
+
+    func testCompleteAuthorization_issuerComparedExactly() async {
+        // Same origin, but not the identical issuer string (RFC 9207 §2.4).
+        let callback = URL(string: "com.example.app:/oauth/callback?code=c1&state=state-1&iss=https://bsky.social/")!
+        do {
+            try await client.completeAuthorization(callbackURL: callback, request: pendingRequest(expectedDID: nil), auth: auth)
+            XCTFail("Expected failure")
+        } catch {
+            guard case .failed = error else { return XCTFail("Unexpected error \(error)") }
+        }
+    }
+
+    func testCompleteAuthorization_errorWithForeignStateIsNotTreatedAsCancel() async {
+        let callback = URL(string: "com.example.app:/oauth/callback?error=access_denied&state=other&iss=https://bsky.social")!
+        do {
+            try await client.completeAuthorization(callbackURL: callback, request: pendingRequest(expectedDID: nil), auth: auth)
+            XCTFail("Expected failure")
+        } catch {
+            guard case .failed(let reason, _) = error else { return XCTFail("Unexpected error \(error)") }
+            XCTAssertTrue(reason?.contains("state") ?? false)
+        }
+    }
+
+    func testCompleteAuthorization_errorWithoutIssuerIsRejected() async {
         let callback = URL(string: "com.example.app:/oauth/callback?error=access_denied&state=state-1")!
+        do {
+            try await client.completeAuthorization(callbackURL: callback, request: pendingRequest(expectedDID: nil), auth: auth)
+            XCTFail("Expected failure")
+        } catch {
+            guard case .failed = error else { return XCTFail("Unexpected error \(error)") }
+        }
+    }
+
+    func testCompleteAuthorization_accessDeniedIsCanceled() async {
+        let callback = URL(string: "com.example.app:/oauth/callback?error=access_denied&state=state-1&iss=https://bsky.social")!
         do {
             try await client.completeAuthorization(callbackURL: callback, request: pendingRequest(expectedDID: nil), auth: auth)
             XCTFail("Expected failure")
@@ -454,7 +496,7 @@ final class ATProtoOAuthClientTests: XCTestCase {
             return MockURLProtocol.response(for: request, status: 404)
         }
 
-        let callback = URL(string: "com.example.app:/oauth/callback?code=c1&state=state-1")!
+        let callback = URL(string: "com.example.app:/oauth/callback?code=c1&state=state-1&iss=https://bsky.social")!
         do {
             try await client.completeAuthorization(callbackURL: callback, request: pendingRequest(expectedDID: nil), auth: auth)
             XCTFail("Expected failure")
@@ -476,13 +518,65 @@ final class ATProtoOAuthClientTests: XCTestCase {
             if url == "https://pds.example.com/.well-known/oauth-protected-resource" {
                 return MockURLProtocol.response(for: request, status: 200, body: Self.data(["authorization_servers": ["https://bsky.social"]]))
             }
+            if url.hasPrefix("https://public.api.bsky.app/xrpc/com.atproto.identity.resolveHandle") {
+                XCTAssertTrue(url.contains("handle=alice.bsky.social"))
+                return MockURLProtocol.response(for: request, status: 200, body: Self.data(["did": "did:plc:abc"]))
+            }
             return MockURLProtocol.response(for: request, status: 404)
         }
 
-        let callback = URL(string: "com.example.app:/oauth/callback?code=c1&state=state-1")!
+        let callback = URL(string: "com.example.app:/oauth/callback?code=c1&state=state-1&iss=https://bsky.social")!
         try await client.completeAuthorization(callbackURL: callback, request: pendingRequest(expectedDID: nil), auth: auth)
 
         XCTAssertEqual(auth.handle, "alice.bsky.social")
+        XCTAssertTrue(auth.isAuthorized)
+    }
+
+    func testCompleteAuthorization_entrywayLoginDropsHandleThatResolvesElsewhere() async throws {
+        MockURLProtocol.handler = { request in
+            let url = request.url!.absoluteString
+            if url == "https://bsky.social/oauth/token" {
+                return MockURLProtocol.response(for: request, status: 200, body: Self.tokenBody())
+            }
+            if url == "https://plc.directory/did:plc:abc" {
+                return MockURLProtocol.response(for: request, status: 200, body: Self.didDocument(handles: ["victim.bsky.social"]))
+            }
+            if url == "https://pds.example.com/.well-known/oauth-protected-resource" {
+                return MockURLProtocol.response(for: request, status: 200, body: Self.data(["authorization_servers": ["https://bsky.social"]]))
+            }
+            if url.hasPrefix("https://public.api.bsky.app/xrpc/com.atproto.identity.resolveHandle") {
+                return MockURLProtocol.response(for: request, status: 200, body: Self.data(["did": "did:plc:victim"]))
+            }
+            return MockURLProtocol.response(for: request, status: 404)
+        }
+
+        let callback = URL(string: "com.example.app:/oauth/callback?code=c1&state=state-1&iss=https://bsky.social")!
+        try await client.completeAuthorization(callbackURL: callback, request: pendingRequest(expectedDID: nil), auth: auth)
+
+        XCTAssertNil(auth.handle, "A handle the DID document claims but that resolves elsewhere is not trusted")
+        XCTAssertEqual(auth.did, "did:plc:abc")
+        XCTAssertTrue(auth.isAuthorized)
+    }
+
+    func testCompleteAuthorization_entrywayLoginLeavesHandleUnsetWhenResolutionFails() async throws {
+        MockURLProtocol.handler = { request in
+            let url = request.url!.absoluteString
+            if url == "https://bsky.social/oauth/token" {
+                return MockURLProtocol.response(for: request, status: 200, body: Self.tokenBody())
+            }
+            if url == "https://plc.directory/did:plc:abc" {
+                return MockURLProtocol.response(for: request, status: 200, body: Self.didDocument(handles: ["alice.bsky.social"]))
+            }
+            if url == "https://pds.example.com/.well-known/oauth-protected-resource" {
+                return MockURLProtocol.response(for: request, status: 200, body: Self.data(["authorization_servers": ["https://bsky.social"]]))
+            }
+            return MockURLProtocol.response(for: request, status: 404)
+        }
+
+        let callback = URL(string: "com.example.app:/oauth/callback?code=c1&state=state-1&iss=https://bsky.social")!
+        try await client.completeAuthorization(callbackURL: callback, request: pendingRequest(expectedDID: nil), auth: auth)
+
+        XCTAssertNil(auth.handle)
         XCTAssertTrue(auth.isAuthorized)
     }
 
@@ -491,7 +585,7 @@ final class ATProtoOAuthClientTests: XCTestCase {
             MockURLProtocol.response(for: request, status: 200, body: Self.tokenBody(sub: "did:plc:someone-else"))
         }
 
-        let callback = URL(string: "com.example.app:/oauth/callback?code=c1&state=state-1")!
+        let callback = URL(string: "com.example.app:/oauth/callback?code=c1&state=state-1&iss=https://bsky.social")!
         do {
             try await client.completeAuthorization(callbackURL: callback, request: pendingRequest(expectedDID: "did:plc:abc"), auth: auth)
             XCTFail("Expected failure")
@@ -506,7 +600,7 @@ final class ATProtoOAuthClientTests: XCTestCase {
             MockURLProtocol.response(for: request, status: 200, body: Self.tokenBody(tokenType: "Bearer"))
         }
 
-        let callback = URL(string: "com.example.app:/oauth/callback?code=c1&state=state-1")!
+        let callback = URL(string: "com.example.app:/oauth/callback?code=c1&state=state-1&iss=https://bsky.social")!
         do {
             try await client.completeAuthorization(callbackURL: callback, request: pendingRequest(expectedDID: "did:plc:abc"), auth: auth)
             XCTFail("Expected failure")
@@ -520,7 +614,7 @@ final class ATProtoOAuthClientTests: XCTestCase {
             MockURLProtocol.response(for: request, status: 200, body: Self.tokenBody(scope: "transition:generic"))
         }
 
-        let callback = URL(string: "com.example.app:/oauth/callback?code=c1&state=state-1")!
+        let callback = URL(string: "com.example.app:/oauth/callback?code=c1&state=state-1&iss=https://bsky.social")!
         do {
             try await client.completeAuthorization(callbackURL: callback, request: pendingRequest(expectedDID: "did:plc:abc"), auth: auth)
             XCTFail("Expected failure")
