@@ -83,10 +83,9 @@ jobs:
           files: ./test-results.xml
 
   test-minimum:
-    # Package.swift declares iOS 17.4 as the deployment target. The resolved
-    # dependency graph (DeviceKit 5.9.0) needs Swift 6.1, i.e. Xcode 16.3+, and
-    # no GitHub-hosted image ships Xcode 16.3+ together with an iOS 17.4
-    # simulator (macos-14 tops out at Xcode 16.2; macos-15 ships iOS 18.0+
+    # Package.swift declares iOS 17.4 as the deployment target. No
+    # GitHub-hosted image ships a recent Swift 6 Xcode together with an iOS
+    # 17.4 simulator (macos-14 tops out at Xcode 16.2; macos-15 ships iOS 18.0+
     # runtimes only). So this lane uses macos-15 + Xcode 16.4 and downloads the
     # iOS 17.4 simulator runtime.
     name: Tests on iOS 17.4 Simulator (minimum)

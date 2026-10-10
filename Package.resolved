@@ -1,5 +1,5 @@
 {
-  "originHash" : "33030b57fc2acc671edf13be40585b1eada26e71fa0678dc910b2a2a233b9eaf",
+  "originHash" : "e8395e742c953185638fa2da50f79883ed68ce5641b8609afd5e90896f328494",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -15,17 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/aporat/APUserAgentGenerator.git",
       "state" : {
-        "branch" : "main",
-        "revision" : "4c860346c0a2984b8215d6473eb46b15bb50d46d"
-      }
-    },
-    {
-      "identity" : "devicekit",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/devicekit/DeviceKit.git",
-      "state" : {
-        "revision" : "19528aa07e1426626ea9fb2c4a161edf43c4f9e8",
-        "version" : "5.9.0"
+        "revision" : "2a73431d41f48e108ac2baed9633f463e2ae40f1",
+        "version" : "2.0.0"
       }
     },
     {
