@@ -64,7 +64,6 @@ final class OAuth2ProactiveRefreshTests: XCTestCase {
     private var client: MockOAuth2Client!
 
     override func setUp() async throws {
-        try await super.setUp()
         clock = Clock(start)
         auth = Auth2Authentication()
         auth.clientId = "client"
@@ -75,7 +74,6 @@ final class OAuth2ProactiveRefreshTests: XCTestCase {
 
     override func tearDown() async throws {
         MockURLProtocol.handler = nil
-        try await super.tearDown()
     }
 
     /// Token endpoint answers `tokenStatus`; everything else answers 200.

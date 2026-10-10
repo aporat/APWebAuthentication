@@ -19,7 +19,6 @@ final class ATProtoClientTests: XCTestCase {
     private var client: MockATProtoClient!
 
     override func setUp() async throws {
-        try await super.setUp()
         auth = ATProtoAuthentication()
         auth.did = "did:plc:abc"
         auth.pdsURL = URL(string: "https://pds.example.com")
@@ -30,7 +29,6 @@ final class ATProtoClientTests: XCTestCase {
 
     override func tearDown() async throws {
         MockURLProtocol.handler = nil
-        try await super.tearDown()
     }
 
     // MARK: - Base URL

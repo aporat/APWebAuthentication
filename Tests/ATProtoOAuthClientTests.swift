@@ -19,7 +19,6 @@ final class ATProtoOAuthClientTests: XCTestCase {
     )
 
     override func setUp() async throws {
-        try await super.setUp()
 
         let configuration = URLSessionConfiguration.ephemeral
         configuration.protocolClasses = [MockURLProtocol.self]
@@ -33,7 +32,6 @@ final class ATProtoOAuthClientTests: XCTestCase {
 
     override func tearDown() async throws {
         MockURLProtocol.handler = nil
-        try await super.tearDown()
     }
 
     // MARK: - Pure Helpers

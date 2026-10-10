@@ -22,7 +22,6 @@ final class OAuth2RefreshTests: XCTestCase {
     private var auth: Auth2Authentication!
 
     override func setUp() async throws {
-        try await super.setUp()
         auth = Auth2Authentication()
         auth.clientId = "client-123"
         auth.accessToken = "old-access"
@@ -31,7 +30,6 @@ final class OAuth2RefreshTests: XCTestCase {
 
     override func tearDown() async throws {
         MockURLProtocol.handler = nil
-        try await super.tearDown()
     }
 
     // MARK: - Helpers

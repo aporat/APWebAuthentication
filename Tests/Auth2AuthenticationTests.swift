@@ -7,14 +7,12 @@ final class Auth2AuthenticationTests: XCTestCase {
     var auth: Auth2Authentication!
 
     override func setUp() async throws {
-        try await super.setUp()
         auth = Auth2Authentication()
         auth.accountIdentifier = UUID().uuidString
     }
 
     override func tearDown() async throws {
         await auth.delete()
-        try await super.tearDown()
     }
 
     func testIsAuthorized_whenAccessTokenMissing_returnsFalse() {

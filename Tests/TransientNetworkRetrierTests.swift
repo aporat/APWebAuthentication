@@ -18,13 +18,11 @@ final class TransientNetworkRetrierTests: XCTestCase {
     private var client: MockTransportClient!
 
     override func setUp() async throws {
-        try await super.setUp()
         client = MockTransportClient()
     }
 
     override func tearDown() async throws {
         MockURLProtocol.handler = nil
-        try await super.tearDown()
     }
 
     private func installServerErrorHandler() -> Counter {

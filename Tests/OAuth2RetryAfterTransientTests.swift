@@ -57,7 +57,6 @@ final class OAuth2RetryAfterTransientTests: XCTestCase {
     private var client: MockOAuth2Client!
 
     override func setUp() async throws {
-        try await super.setUp()
         auth = Auth2Authentication()
         auth.clientId = "client"
         auth.clientSecret = "secret"
@@ -68,7 +67,6 @@ final class OAuth2RetryAfterTransientTests: XCTestCase {
 
     override func tearDown() async throws {
         MockURLProtocol.handler = nil
-        try await super.tearDown()
     }
 
     nonisolated private static let tokenResponse = Data(#"{"access_token":"new-token","refresh_token":"new-refresh"}"#.utf8)
