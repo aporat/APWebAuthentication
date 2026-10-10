@@ -25,6 +25,7 @@ final class PKCETests: XCTestCase {
         XCTAssertEqual(PKCE.method, "S256")
     }
 
+    @MainActor
     func testATProtoUsesSharedImplementation() {
         XCTAssertEqual(ATProtoOAuthClient.codeChallenge(for: rfcVerifier), rfcChallenge)
         XCTAssertTrue(PKCE.isValidVerifier(ATProtoOAuthClient.randomToken()))
