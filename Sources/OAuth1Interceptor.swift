@@ -202,7 +202,9 @@ public final class OAuth1Interceptor: RequestInterceptor, Sendable {
 
 // MARK: - OAuth 1.0a Signature Generation
 
-private extension OAuth1Interceptor {
+// Internal (not private) so the signature tests can pin nonce/timestamp and
+// check the published RFC 5849 / Twitter vectors.
+extension OAuth1Interceptor {
 
     /// Generates the OAuth 1.0a Authorization header value.
     ///

@@ -17,7 +17,7 @@ xcodebuild -scheme APWebAuthentication \
 ```
 
 - Swift tools version: 6.0
-- Platform: iOS 17.4+ (CI runs the latest simulator and an iOS 17.4 simulator on macos-14 / Xcode 16.2)
+- Platform: iOS 17.4+ (CI runs the latest simulator, plus an iOS 17.4 simulator on macos-15 / Xcode 16.4 with the runtime downloaded)
 - Lint: `swiftlint lint` (config in `.swiftlint.yml`, test overrides in `Tests/.swiftlint.yml`)
 - Uses Swift Package Manager
 
