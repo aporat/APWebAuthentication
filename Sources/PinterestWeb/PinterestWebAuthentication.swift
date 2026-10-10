@@ -15,7 +15,6 @@ public final class PinterestWebAuthentication: SessionAuthentication {
 
     var appId = "ad0e169"
     public var username: String?
-  
 
     public func loadAuthTokens(forceLoad: Bool = false) {
         if forceLoad || sessionId == nil || csrfToken == nil {

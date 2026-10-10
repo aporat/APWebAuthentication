@@ -30,10 +30,10 @@ import UIKit
 public enum AccountStore {
 
     // MARK: - Configuration
-    
+
     /// Set of currently enabled account type codes.
     private static var enabledCodes: Set<AccountType.Code> = []
-    
+
     /// Enables or disables a specific account type.
     ///
     /// - Parameters:
@@ -46,26 +46,26 @@ public enum AccountStore {
             enabledCodes.remove(code)
         }
     }
-    
+
     /// Enables multiple account types at once.
     ///
     /// - Parameter codes: The account type codes to enable
     public static func enable(_ codes: AccountType.Code...) {
         enabledCodes.formUnion(codes)
     }
-    
+
     /// Disables multiple account types at once.
     ///
     /// - Parameter codes: The account type codes to disable
     public static func disable(_ codes: AccountType.Code...) {
         enabledCodes.subtract(codes)
     }
-    
+
     /// Enables all account types.
     public static func enableAll() {
         enabledCodes = Set(AccountType.Code.allCases)
     }
-    
+
     /// Disables all account types.
     public static func disableAll() {
         enabledCodes.removeAll()

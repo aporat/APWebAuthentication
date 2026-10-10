@@ -1,6 +1,6 @@
+import AuthenticationServices
 import Foundation
 import UIKit
-import AuthenticationServices
 
 // MARK: - ASWebAuthenticationSession Async Support
 

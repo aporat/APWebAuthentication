@@ -1,0 +1,10 @@
+# Test code legitimately force-unwraps fixtures, uses implicitly unwrapped
+# properties set in setUp(), and keeps small helper types next to the test
+# case that uses them.
+disabled_rules:
+  - force_unwrapping
+  - implicitly_unwrapped_optional
+  - force_try
+  - single_test_class
+  - large_tuple
+  - let_var_whitespace

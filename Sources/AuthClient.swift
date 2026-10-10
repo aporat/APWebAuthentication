@@ -395,7 +395,7 @@ open class AuthClient {
                    urlError.code == .cancelled {
                     return .canceled
                 }
-                
+
                 let errorJson = parseJson(from: response)
                 let reason = String(
                     format: NSLocalizedString(

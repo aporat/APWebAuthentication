@@ -8,7 +8,7 @@ import XCTest
 @MainActor
 final class OAuth2RetryAfterTransientTests: XCTestCase {
 
-    private nonisolated static let tokenPath = "/oauth2/token"
+    nonisolated private static let tokenPath = "/oauth2/token"
 
     /// Records every hit per path and the Authorization header on each.
     private final class Journal: @unchecked Sendable {
@@ -71,7 +71,7 @@ final class OAuth2RetryAfterTransientTests: XCTestCase {
         try await super.tearDown()
     }
 
-    private nonisolated static let tokenResponse = Data(#"{"access_token":"new-token","refresh_token":"new-refresh"}"#.utf8)
+    nonisolated private static let tokenResponse = Data(#"{"access_token":"new-token","refresh_token":"new-refresh"}"#.utf8)
 
     // MARK: - Tests
 

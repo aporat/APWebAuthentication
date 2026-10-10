@@ -34,4 +34,3 @@ public final class GitHubUser: GenericUser, @unchecked Sendable {
         followingCount = info["following"].int32
     }
 }
-

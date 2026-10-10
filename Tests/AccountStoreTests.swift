@@ -8,7 +8,7 @@ final class AccountStoreTests: XCTestCase {
         try await super.setUp()
         AccountStore.disableAll()
     }
-    
+
     override func tearDown() async throws {
         AccountStore.disableAll()
         try await super.tearDown()
