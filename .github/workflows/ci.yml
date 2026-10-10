@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    name: Tests on iOS Simulator
+    name: Tests on iOS Simulator (latest)
     runs-on: macos-latest
 
     steps:
@@ -81,3 +81,69 @@ jobs:
           report_type: test_results
           slug: ${{ github.repository }}
           files: ./test-results.xml
+
+  test-minimum:
+    # Package.swift declares iOS 17.4 as the deployment target. macos-14 is the
+    # newest GitHub-hosted image that still ships the iOS 17.4 simulator runtime,
+    # and Xcode 16.2 (Swift 6 toolchain, required by swift-tools-version 6.0)
+    # is installed alongside it.
+    name: Tests on iOS 17.4 Simulator (minimum)
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v7
+
+      - name: Set up Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '16.2'
+
+      - name: Set Project Scheme
+        run: echo "scheme=$(basename ${{ github.repository }})" >> $GITHUB_ENV
+
+      - name: Select iOS 17.4 Simulator Destination
+        run: |
+          xcrun simctl list runtimes
+          destination=$(python3 <<'EOF'
+          import json, subprocess, sys
+          want = "17.4"
+          runtimes = json.loads(subprocess.check_output(["xcrun", "simctl", "list", "runtimes", "-j"]))["runtimes"]
+          rt = next((r for r in runtimes if r.get("isAvailable") and r["identifier"].startswith("com.apple.CoreSimulator.SimRuntime.iOS") and r["version"].startswith(want)), None)
+          if rt is None:
+              sys.exit(f"iOS {want} simulator runtime is not available on this runner")
+          devices = json.loads(subprocess.check_output(["xcrun", "simctl", "list", "devices", "-j"]))["devices"].get(rt["identifier"], [])
+          iphones = [d for d in devices if d.get("isAvailable") and "iPhone" in d["name"]]
+          if not iphones:
+              sys.exit(f"No iPhone simulator available for iOS {rt['version']}")
+          print(f"platform=iOS Simulator,name={iphones[-1]['name']},OS={rt['version']}")
+          EOF
+          )
+          echo "Selected destination: $destination"
+          echo "destination=$destination" >> "$GITHUB_ENV"
+
+      - name: Run Tests
+        run: |
+          set -o pipefail && \
+          xcodebuild \
+            -scheme "${{ env.scheme }}" \
+            -destination "${{ env.destination }}" \
+            -derivedDataPath ./DerivedData \
+            test
+
+  lint:
+    name: SwiftLint
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v7
+
+      - name: Install SwiftLint
+        run: command -v swiftlint >/dev/null || brew install swiftlint
+
+      - name: Run SwiftLint
+        # Non-strict: warnings are reported as annotations, errors fail the job.
+        run: |
+          swiftlint version
+          swiftlint lint --reporter github-actions-logging

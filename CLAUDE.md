@@ -1,10 +1,10 @@
 # APWebAuthentication
 
-A Swift package providing in-app OAuth authentication (OAuth1 + OAuth2) across social platforms (Twitter/X, Reddit, Pinterest, GitHub, Tumblr, Twitch, Foursquare).
+A Swift package providing in-app OAuth authentication (OAuth1 + OAuth2) plus AT Protocol OAuth (DPoP) across social platforms (X, Reddit, Pinterest, GitHub, Tumblr, Twitch, Foursquare, Mastodon, Bluesky).
 
 ## Build & Test
 
-The package is iOS-only (`platforms: [.iOS(.v17)]`), so plain `swift build` / `swift test` fail on a Mac host — its UIKit-based dependencies (SnapKit, JGProgressHUD) don't resolve for macOS. Build and test through xcodebuild with a simulator destination, as CI does:
+The package is iOS-only (`platforms: [.iOS("17.4")]`), so plain `swift build` / `swift test` fail on a Mac host — its UIKit-based dependencies (SnapKit, JGProgressHUD) don't resolve for macOS. Build and test through xcodebuild with a simulator destination, as CI does:
 
 ```bash
 # Compile check (no specific simulator needed)
@@ -17,14 +17,16 @@ xcodebuild -scheme APWebAuthentication \
 ```
 
 - Swift tools version: 6.0
-- Platform: iOS 17+
+- Platform: iOS 17.4+ (CI runs the latest simulator and an iOS 17.4 simulator on macos-14 / Xcode 16.2)
+- Lint: `swiftlint lint` (config in `.swiftlint.yml`, test overrides in `Tests/.swiftlint.yml`)
 - Uses Swift Package Manager
 
 ## Project Structure
 
 - `Sources/` - All library source code (flat structure with per-provider subdirectories)
 - `Tests/` - Unit tests using XCTest
-- Provider subdirectories: `Foursquare/`, `GitHub/`, `Pinterest/`, `PinterestWeb/`, `Reddit/`, `Tumblr/`, `Twitch/`, `X/`
+- Provider subdirectories: `Bluesky/`, `Foursquare/`, `GitHub/`, `Mastodon/`, `Pinterest/`, `PinterestWeb/`, `Reddit/`, `Tumblr/`, `Twitch/`, `X/`
+- `ATProto/` - AT Protocol OAuth (PAR + PKCE + DPoP) client, authentication and interceptor used by Bluesky
 - `Models/` - Shared model types (`GenericUser`, `MediaItem`, `StoryItem`, `MediaComment`)
 - `UI/` - Web-based authentication view controllers
 
@@ -42,5 +44,6 @@ xcodebuild -scheme APWebAuthentication \
 - Each provider has its own API client, interceptor, and user model
 - OAuth1 flow: `OAuth1Client` + `OAuth1Interceptor`
 - OAuth2 flow: `OAuth2Client` + `OAuth2Interceptor`
+- AT Protocol flow: `ATProtoOAuthClient` + `ATProtoClient` + `ATProtoInterceptor`
 - `APWebAuthSession` is the main entry point for authentication flows
 - `AccountStore` / `AccountType` manage provider configuration

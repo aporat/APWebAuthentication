@@ -19,7 +19,7 @@ A Swift package for in-app OAuth 1.0a and OAuth 2.0 authentication on iOS. Prese
 
 ## Requirements
 
-- iOS 17+
+- iOS 17.4+
 - Swift 6 (strict concurrency)
 
 ## Installation
@@ -28,7 +28,7 @@ Add the package to `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/aporat/APWebAuthentication.git", from: "1.0.0")
+    .package(url: "https://github.com/aporat/APWebAuthentication.git", from: "2.0.0")
 ]
 ```
 
@@ -106,6 +106,7 @@ Use the OAuth interceptors with `Alamofire`:
 
 ```swift
 import Alamofire
+import SwiftyJSON
 
 // OAuth 2.0 — bearer token in the Authorization header (the default
 // `tokenLocation`), auto-refresh on 401
@@ -115,10 +116,20 @@ let interceptor = OAuth2Interceptor(
 )
 
 let session = Session(interceptor: interceptor)
-let user: GitHubUser = try await session
+let data = try await session
     .request("https://api.github.com/user")
-    .serializingDecodable(GitHubUser.self)
+    .validate()
+    .serializingData()
     .value
+let user = GitHubUser(info: try JSON(data: data)) // nil if the payload has no "id"
+```
+
+The bundled provider clients wrap the same plumbing and return SwiftyJSON values; the user models are built from that JSON:
+
+```swift
+let client = GitHubAPIClient(auth: auth)
+let json = try await client.request("/user")   // throws APWebAuthenticationError
+let user = GitHubUser(info: json)
 ```
 
 When a request returns 401 and `refreshTokenURL` is set, the interceptor exchanges the refresh token, retries every in-flight request once, and only clears the stored tokens when the token endpoint answers `invalid_grant` (RFC 6749 §5.2). Any other failure — `invalid_client`, a 5xx, a timeout, a non-JSON body — keeps the session intact.
@@ -200,7 +211,22 @@ extension MyCoordinator: WebTokenInterceptorDelegate {
 
 ## Built-in providers
 
-`AccountStore` ships configured `AccountType` entries for X (Twitter), Reddit, Pinterest, GitHub, Tumblr, Twitch, Foursquare, 500px, and Instagram. Each provider has its own API client and user model under the matching subdirectory (`X/`, `Reddit/`, etc.) — see `Sources/`.
+The package ships an API client and user model for each of these providers, under the matching subdirectory of `Sources/`:
+
+| Provider | Client | Auth |
+|---|---|---|
+| X (Twitter) | `XAPIClient` | OAuth 2.0 |
+| Reddit | `RedditAPIClient` | OAuth 2.0 |
+| Pinterest | `PinterestAPIClient` | OAuth 2.0 |
+| Pinterest (web session) | `PinterestWebAPIClient`, `PinterestWebHTMLAPIClient` | Cookie session |
+| GitHub | `GitHubAPIClient` | OAuth 2.0 |
+| Tumblr | `TumblrAPIClient` | OAuth 2.0 |
+| Twitch | `TwitchAPIClient` | OAuth 2.0 |
+| Foursquare | `FoursquareAPIClient` | OAuth 2.0 |
+| Mastodon | `MastodonAPIClient` | OAuth 2.0 (per instance) |
+| Bluesky | `BlueskyAPIClient` (on `ATProto/`) | AT Protocol OAuth (PAR + PKCE + DPoP) |
+
+`AccountStore` holds the matching `AccountType` entries.
 
 Adding a new provider is a matter of declaring an `AccountType`, attaching an `OAuth1Interceptor` or `OAuth2Interceptor`, and writing a thin API client over `Alamofire.Session`.
 
