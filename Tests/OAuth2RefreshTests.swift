@@ -121,6 +121,17 @@ final class OAuth2RefreshTests: XCTestCase {
         XCTAssertEqual(formBody(of: capture.request)["client_secret"], "s3cret")
     }
 
+    // MARK: - Headers
+
+    func testRefreshRequest_asksForJSON() async {
+        let capture = installTokenEndpoint()
+
+        let refreshed = await makeInterceptor(.requestBody).refreshAccessToken(url: Self.tokenURL)
+
+        XCTAssertTrue(refreshed)
+        XCTAssertEqual(capture.request?.value(forHTTPHeaderField: "Accept"), "application/json")
+    }
+
     // MARK: - Credential updates
 
     func testSuccessfulRefresh_updatesTokens() async {
