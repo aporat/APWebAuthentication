@@ -222,6 +222,11 @@ open class WebTokenInterceptorViewController: UIViewController {
         state.isFinished
     }
 
+    /// Whether a `start()` call is currently awaiting its result.
+    var isAwaitingStart: Bool {
+        continuation != nil
+    }
+
     /// The URL being loaded
     public var url: URL {
         configuration.url
@@ -303,7 +308,7 @@ open class WebTokenInterceptorViewController: UIViewController {
     /// here — otherwise the awaiting caller hangs forever.
     override open func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        if isBeingDismissed || isMovingFromParent {
+        if isBeingDismissed || isMovingFromParent || (navigationController?.isBeingDismissed ?? false) {
             resolvePendingStart(throwing: .canceled)
             cleanupWebView()
         } else if view.window == nil {
@@ -332,9 +337,25 @@ open class WebTokenInterceptorViewController: UIViewController {
     // MARK: - Public API
 
     /// Start the web authentication flow
+    ///
+    /// The flow can run once. Calling `start()` again after it finished
+    /// reports the original outcome; calling it while a previous `start()` is
+    /// still pending throws instead of replacing (and stranding) the first
+    /// caller's continuation.
     public func start() async throws(APWebAuthenticationError) {
-        guard !state.isFinished else {
+        guard continuation == nil else {
+            throw .failed(reason: "The web token interceptor is already running.")
+        }
+
+        switch state {
+        case .completed:
             return
+        case .cancelled:
+            throw .canceled
+        case .failed(let error):
+            throw error
+        case .idle, .loading, .waitingForIntercept:
+            break
         }
 
         do {

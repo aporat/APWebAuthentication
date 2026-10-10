@@ -216,6 +216,9 @@ public final class APWebAuthSession {
         didSet { loginViewController?.expectedState = expectedState }
     }
 
+    /// Whether a `start()` call is currently awaiting its result.
+    private var isAuthenticating = false
+
     /// The OAuth `state` this flow expects the callback to echo back.
     ///
     /// Set it to the same value used in the authorization URL — typically
@@ -324,6 +327,14 @@ public final class APWebAuthSession {
     /// ```
     @discardableResult
     public func start() async throws(APWebAuthenticationError) -> (URL, [HTTPCookie]) {
+        // A second `start()` while one is in flight would replace the login
+        // controller's completion handler and leave the first caller waiting.
+        guard !isAuthenticating else {
+            throw APWebAuthenticationError.failed(reason: "An authentication session is already in progress.")
+        }
+        isAuthenticating = true
+        defer { isAuthenticating = false }
+
         do {
             // Safari style shows a permission dialog first
             if appearanceStyle == .safari {
@@ -341,19 +352,18 @@ public final class APWebAuthSession {
                     return
                 }
 
+                // The box resumes the continuation exactly once, and resumes it
+                // as canceled if the handler is dropped without being called
+                // (controller deallocated or its handler replaced), so the
+                // caller can never hang.
+                let pending = AuthSessionContinuation(continuation)
+
                 // Set up completion handler for web view controller. The
                 // controller owns its own dismissal and invokes this handler
                 // once the sheet is gone, so all that's left is to release it.
                 loginVC.completionHandler = { [weak self] (result: Result<(URL, [HTTPCookie]), APWebAuthenticationError>) in
                     self?.loginViewController = nil
-
-                    switch result {
-                    case .success(let value):
-                        continuation.resume(returning: value)
-
-                    case .failure(let error):
-                        continuation.resume(throwing: error)
-                    }
+                    pending.resume(with: result)
                 }
 
                 // Present the authentication interface
@@ -368,7 +378,7 @@ public final class APWebAuthSession {
                     // can't double-resume the continuation.
                     loginVC.completionHandler = nil
                     let authError = (error as? APWebAuthenticationError) ?? .failed(reason: error.localizedDescription)
-                    continuation.resume(throwing: authError)
+                    pending.resume(with: .failure(authError))
                 }
             }
         } catch {
@@ -494,5 +504,50 @@ public final class APWebAuthSession {
         }
 
         vc.present(navController, animated: true)
+    }
+}
+
+// MARK: - One-Shot Continuation
+
+/// Owns the continuation behind `APWebAuthSession.start()` and guarantees it
+/// is resumed exactly once.
+///
+/// Later calls to `resume(with:)` are ignored. If the box is released while
+/// the continuation is still pending — the completion handler holding it was
+/// dropped without ever being called — it resumes with `.canceled` instead of
+/// leaking the continuation and hanging the caller.
+final class AuthSessionContinuation: @unchecked Sendable {
+
+    private let lock = NSLock()
+    private var continuation: CheckedContinuation<(URL, [HTTPCookie]), Error>?
+
+    init(_ continuation: CheckedContinuation<(URL, [HTTPCookie]), Error>) {
+        self.continuation = continuation
+    }
+
+    /// Resumes the continuation if it has not been resumed yet.
+    /// - Returns: `true` if this call resumed it.
+    @discardableResult
+    func resume(with result: Result<(URL, [HTTPCookie]), APWebAuthenticationError>) -> Bool {
+        guard let continuation = take() else { return false }
+        switch result {
+        case .success(let value):
+            continuation.resume(returning: value)
+        case .failure(let error):
+            continuation.resume(throwing: error)
+        }
+        return true
+    }
+
+    private func take() -> CheckedContinuation<(URL, [HTTPCookie]), Error>? {
+        lock.lock()
+        defer { lock.unlock() }
+        let continuation = self.continuation
+        self.continuation = nil
+        return continuation
+    }
+
+    deinit {
+        continuation?.resume(throwing: APWebAuthenticationError.canceled)
     }
 }
