@@ -170,13 +170,14 @@ final class OAuth2ProactiveRefreshTests: XCTestCase {
         let journal = installServer()
         let client = self.client!
 
-        try await withThrowingTaskGroup(of: Void.self) { group in
-            for index in 0..<5 {
-                group.addTask { @MainActor in
-                    _ = try await client.request("/item/\(index)")
-                }
+        let requests = (0..<5).map { index in
+            Task { @MainActor () -> Bool in
+                (try? await client.request("/item/\(index)")) != nil
             }
-            try await group.waitForAll()
+        }
+        for request in requests {
+            let succeeded = await request.value
+            XCTAssertTrue(succeeded)
         }
 
         XCTAssertEqual(journal.hits(Self.tokenPath).count, 1, "Concurrent requests must share one refresh")
