@@ -461,18 +461,26 @@ public class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
         }
 
         // Only clear credentials when the authorization server has definitively
-        // rejected the refresh token (400 / 401 — typically `invalid_grant`).
-        // Transient failures (network errors, 5xx, timeouts) must leave the
-        // tokens intact so we can retry later, otherwise a flaky network logs
-        // the user out permanently.
-        if let statusCode = response.response?.statusCode,
-           statusCode == 400 || statusCode == 401 {
+        // rejected the refresh token (`invalid_grant`, RFC 6749 §5.2). Anything
+        // else — `invalid_client` / `invalid_request` misconfigurations, 5xx,
+        // timeouts, non-JSON bodies — must leave the tokens intact so we can
+        // retry later, otherwise it logs the user out permanently.
+        if Self.isInvalidGrant(response.data) {
             auth.accessToken = nil
             auth.refreshToken = nil
             await auth.save()
         }
 
         return false
+    }
+
+    /// Whether a token endpoint error body reports `invalid_grant`.
+    private static func isInvalidGrant(_ data: Data?) -> Bool {
+        guard let data,
+              let body = try? JSONDecoder().decode(TokenErrorResponse.self, from: data) else {
+            return false
+        }
+        return body.error == "invalid_grant"
     }
 }
 
@@ -491,4 +499,9 @@ private struct TokenResponse: Decodable, Sendable {
         case tokenType = "token_type"
         case expiresIn = "expires_in"
     }
+}
+
+/// Error response from an OAuth 2.0 token endpoint (RFC 6749 §5.2).
+private struct TokenErrorResponse: Decodable, Sendable {
+    let error: String?
 }

@@ -155,6 +155,39 @@ final class OAuth2RefreshTests: XCTestCase {
         XCTAssertNil(auth.refreshToken)
     }
 
+    func testUnauthorizedInvalidGrant_clearsTokens() async {
+        auth.clientSecret = "s3cret"
+        _ = installTokenEndpoint(status: 401, body: #"{"error":"invalid_grant","error_description":"Refresh token revoked"}"#)
+
+        let refreshed = await makeInterceptor(.basicAuthorizationHeader).refreshAccessToken(url: Self.tokenURL)
+
+        XCTAssertFalse(refreshed)
+        XCTAssertNil(auth.accessToken)
+        XCTAssertNil(auth.refreshToken)
+    }
+
+    func testInvalidClient_keepsTokens() async {
+        auth.clientSecret = "s3cret"
+        _ = installTokenEndpoint(status: 401, body: #"{"error":"invalid_client"}"#)
+
+        let refreshed = await makeInterceptor(.basicAuthorizationHeader).refreshAccessToken(url: Self.tokenURL)
+
+        XCTAssertFalse(refreshed)
+        XCTAssertEqual(auth.accessToken, "old-access")
+        XCTAssertEqual(auth.refreshToken, "old-refresh")
+    }
+
+    func testBadRequestWithoutBody_keepsTokens() async {
+        auth.clientSecret = "s3cret"
+        _ = installTokenEndpoint(status: 400, body: "")
+
+        let refreshed = await makeInterceptor(.basicAuthorizationHeader).refreshAccessToken(url: Self.tokenURL)
+
+        XCTAssertFalse(refreshed)
+        XCTAssertEqual(auth.accessToken, "old-access")
+        XCTAssertEqual(auth.refreshToken, "old-refresh")
+    }
+
     func testTransientFailure_keepsTokens() async {
         auth.clientSecret = "s3cret"
         _ = installTokenEndpoint(status: 503, body: "")
