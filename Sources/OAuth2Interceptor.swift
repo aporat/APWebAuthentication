@@ -33,8 +33,9 @@ public enum TokenLocation: Int, Sendable {
 ///
 /// | Provider | Mode |
 /// |---|---|
-/// | Tumblr | `.requestBody` — `client_secret` as a form field |
-/// | X (Twitter) | `.basicAuthorizationHeader` — `Authorization: Basic base64(id:secret)` |
+/// | Tumblr, Twitch | `.requestBody` — `client_secret` as a form field |
+/// | X (Twitter), Pinterest | `.basicAuthorizationHeader` — `Authorization: Basic base64(id:secret)` |
+/// | Reddit | `.basicAuthorizationHeaderAllowingEmptySecret` — Basic even for installed apps, with an empty password |
 public enum OAuth2ClientAuthentication: Sendable {
 
     /// Send `client_id` and `client_secret` as form fields in the body.
@@ -44,6 +45,14 @@ public enum OAuth2ClientAuthentication: Sendable {
     /// header. `client_id` is still included in the body, which the RFC
     /// permits and X requires.
     case basicAuthorizationHeader
+
+    /// Always send HTTP Basic `Authorization`, using an empty password when
+    /// no `clientSecret` is configured (`base64("client_id:")`).
+    ///
+    /// Reddit authenticates every token request this way, including those
+    /// from installed apps, which have no secret
+    /// (https://github.com/reddit-archive/reddit/wiki/OAuth2).
+    case basicAuthorizationHeaderAllowingEmptySecret
 }
 
 // MARK: - OAuth 2.0 Interceptor
@@ -72,8 +81,8 @@ public enum OAuth2ClientAuthentication: Sendable {
 /// let auth = Auth2Authentication()
 /// auth.accessToken = "user_access_token"
 ///
+/// // Sends `Authorization: Bearer …` (the default token location)
 /// let interceptor = OAuth2Interceptor(auth: auth)
-/// interceptor.tokenLocation = .authorizationHeader // Recommended
 ///
 /// let client = OAuth2Client(
 ///     baseURLString: "https://api.example.com/",
@@ -227,7 +236,8 @@ public class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
     ///
     /// - Parameters:
     ///   - auth: The authentication manager with access token
-    ///   - tokenLocation: Where to include the token (default: `.params`)
+    ///   - tokenLocation: Where to include the token (default: `.authorizationHeader`;
+    ///     before 3.0 the default was `.params`)
     ///   - tokenParamName: Parameter name for token (default: `"access_token"`)
     ///   - tokenHeaderParamName: Authorization scheme name (default: `"Bearer"`)
     ///   - refreshTokenURL: The token endpoint URL for refresh grants (default: `nil`, disabling auto-refresh)
@@ -235,7 +245,7 @@ public class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
     ///   - refreshSession: Session used for the refresh request (default: `AF`)
     public init(
         auth: Auth2Authentication,
-        tokenLocation: TokenLocation = .params,
+        tokenLocation: TokenLocation = .authorizationHeader,
         tokenParamName: String = "access_token",
         tokenHeaderParamName: String = "Bearer",
         refreshTokenURL: String? = nil,
@@ -431,13 +441,18 @@ public class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
             .accept("application/json")
         ]
 
-        if let clientSecret = auth.clientSecret, !clientSecret.isEmpty {
-            switch clientAuthentication {
-            case .requestBody:
+        let clientSecret = auth.clientSecret.flatMap { $0.isEmpty ? nil : $0 }
+        switch clientAuthentication {
+        case .requestBody:
+            if let clientSecret {
                 parameters["client_secret"] = clientSecret
-            case .basicAuthorizationHeader:
+            }
+        case .basicAuthorizationHeader:
+            if let clientSecret {
                 headers.add(.authorization(username: clientId, password: clientSecret))
             }
+        case .basicAuthorizationHeaderAllowingEmptySecret:
+            headers.add(.authorization(username: clientId, password: clientSecret ?? ""))
         }
 
         let response = await refreshSession.request(

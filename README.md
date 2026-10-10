@@ -107,10 +107,10 @@ Use the OAuth interceptors with `Alamofire`:
 ```swift
 import Alamofire
 
-// OAuth 2.0 — bearer token, auto-refresh on 401
+// OAuth 2.0 — bearer token in the Authorization header (the default
+// `tokenLocation`), auto-refresh on 401
 let interceptor = OAuth2Interceptor(
     auth: auth,
-    tokenLocation: .authorizationHeader,
     refreshTokenURL: "https://github.com/login/oauth/access_token"
 )
 
@@ -121,7 +121,11 @@ let user: GitHubUser = try await session
     .value
 ```
 
-When a request returns 401 and `refreshTokenURL` is set, the interceptor exchanges the refresh token, retries every in-flight request once, and only clears the stored tokens on a definitive 400/401 from the token endpoint (transient errors keep the session intact).
+When a request returns 401 and `refreshTokenURL` is set, the interceptor exchanges the refresh token, retries every in-flight request once, and only clears the stored tokens when the token endpoint answers `invalid_grant` (RFC 6749 §5.2). Any other failure — `invalid_client`, a 5xx, a timeout, a non-JSON body — keeps the session intact.
+
+`tokenLocation` defaults to `.authorizationHeader` (`Authorization: Bearer …`, RFC 6750). APIs that want the token as a query parameter must opt in with `tokenLocation: .params` (and `tokenParamName:` if it isn't `access_token`), as `FoursquareInterceptor` does.
+
+When used through an `AuthClient` subclass, credentials (bearer tokens, DPoP proofs, CSRF headers, OAuth 1.0a signatures) are only attached to requests for the host of `baseURLString` — add any other host that should receive them to `additionalAuthorizedHosts`. Absolute URLs on other hosts are sent unauthenticated. A bare `Session(interceptor:)` as above applies no such restriction.
 
 OAuth 1.0a works the same way:
 
