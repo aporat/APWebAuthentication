@@ -424,7 +424,12 @@ public class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
             "client_id": clientId,
             "refresh_token": refreshToken
         ]
-        var headers: HTTPHeaders = [.contentType("application/x-www-form-urlencoded")]
+        // Ask for JSON explicitly: GitHub's token endpoint answers with a
+        // form-encoded body unless the client requests JSON.
+        var headers: HTTPHeaders = [
+            .contentType("application/x-www-form-urlencoded"),
+            .accept("application/json")
+        ]
 
         if let clientSecret = auth.clientSecret, !clientSecret.isEmpty {
             switch clientAuthentication {
