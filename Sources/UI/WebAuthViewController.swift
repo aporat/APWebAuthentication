@@ -107,6 +107,20 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate, WKUIDe
     /// Ignored when `customUserAgent` is set explicitly.
     public var usesBrowserUserAgent = false
 
+    /// The Mobile Safari user agent used when `usesBrowserUserAgent` is on.
+    ///
+    /// Reports the running device's real iOS version (so WebKit's iOS 26+
+    /// frozen `18_7` token applies exactly when it would in Safari), falling
+    /// back to APUserAgentGenerator's default iPhone.
+    static var browserUserAgent: String {
+        #if os(iOS) && !targetEnvironment(macCatalyst)
+        if let userAgent = try? BrowserUserAgent(device: IOSDevice.current, browser: SafariBrowser()) {
+            return userAgent.value
+        }
+        #endif
+        return BrowserUserAgent.default.value
+    }
+
     /// Some sign-in flows drop the user somewhere else after logging in
     /// instead of returning to `authURL` (x.com's login lands on the home
     /// timeline). When this returns true for a main-frame navigation, the
@@ -207,10 +221,7 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate, WKUIDe
 
         // WKWebView reports an empty string, not nil, until one is set.
         if usesBrowserUserAgent, customUserAgent?.isEmpty ?? true {
-            customUserAgent = APWebBrowserAgentBuilder.builder()
-                .withDevice(IOSDevice())
-                .withBrowser(SafariBrowser())
-                .generate()
+            customUserAgent = Self.browserUserAgent
         }
 
         setupWebView()

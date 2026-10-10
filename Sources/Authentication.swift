@@ -50,34 +50,24 @@ open class Authentication {
         // the same as `.default` — the platform-default mobile Safari agent.
         switch browserMode ?? .default {
         case .default, .ios, .iphone:
-            return APWebBrowserAgentBuilder.builder().generate()
+            return BrowserUserAgent.default.value
 
         case .iosChrome:
-            return APWebBrowserAgentBuilder.builder()
-                .withDevice(IOSDevice())
-                .withBrowser(ChromeBrowser())
-                .generate()
+            return (try? BrowserUserAgent(device: IOSDevice(), browser: ChromeBrowser()))?.value
 
         case .webView:
             return nil
 
         case .android:
-            return APWebBrowserAgentBuilder.builder()
-                .withDevice(AndroidDevice(deviceModel: "Pixel 7"))
-                .withBrowser(ChromeBrowser(version: "123.0.6312.86"))
-                .generate()
+            // Chromium's reduced token (`Android 10; K`) with the current
+            // Chrome — what real Chrome for Android sends.
+            return (try? BrowserUserAgent(device: AndroidDevice(), browser: ChromeBrowser()))?.value
 
         case .desktop:
-            return APWebBrowserAgentBuilder.builder()
-                .withDevice(MacDevice())
-                .withBrowser(ChromeBrowser())
-                .generate()
+            return (try? BrowserUserAgent(device: MacDevice(), browser: ChromeBrowser()))?.value
 
         case .desktopFirefox:
-            return APWebBrowserAgentBuilder.builder()
-                .withDevice(MacDevice())
-                .withBrowser(FirefoxBrowser())
-                .generate()
+            return (try? BrowserUserAgent(device: MacDevice(), browser: FirefoxBrowser()))?.value
         }
     }
 

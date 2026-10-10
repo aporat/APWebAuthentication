@@ -29,7 +29,7 @@ Add the package to `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/aporat/APWebAuthentication.git", from: "2.0.0")
+    .package(url: "https://github.com/aporat/APWebAuthentication.git", from: "3.0.0")
 ]
 ```
 

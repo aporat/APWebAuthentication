@@ -1,9 +1,24 @@
 # Changelog
 
-## Unreleased
+## [3.0.0] - 2026-10-10
 
 ### Breaking changes
 
+- **APUserAgentGenerator 2.0.** The dependency is now pinned with
+  `from: "2.0.0"` instead of `branch: "main"`, so APWebAuthentication itself
+  can be installed with a version requirement, and DeviceKit is no longer
+  pulled in. Generated `userAgent` strings change accordingly:
+  - `.default` / `.ios` / `.iphone` / `nil`: Mobile Safari on the current iOS,
+    which WebKit reports with the frozen `iPhone OS 18_7` token.
+  - `.android`: real Chrome for Android, i.e. the reduced
+    `Linux; Android 10; K` token and the current `Chrome/<major>.0.0.0`
+    (was a Pixel 7 with Chrome 123).
+  - `.iosChrome`, `.desktop`, `.desktopFirefox`: current Chrome / Firefox
+    versions with vendor-accurate reduced tokens.
+  - `WebAuthViewController.usesBrowserUserAgent` reports the running device's
+    real iOS version (`IOSDevice.current`), as before.
+- The minimum deployment target is iOS 17.4.
+- The TikTok web client (`TikTokWeb*`, `AccountType.tiktok`) was removed (#17).
 - **`OAuth2Interceptor` now sends the access token in the `Authorization` header by default.**
   The default `tokenLocation` changed from `.params` to `.authorizationHeader`
   (RFC 6750 §2.1; query-string tokens leak into logs and caches). Every built-in
@@ -27,6 +42,18 @@
 
 ### Added
 
+- **Bluesky / AT Protocol.** OAuth with PAR, PKCE and DPoP
+  (`ATProtoOAuthClient`), `ATProtoAuthentication`, `ATProtoClient`,
+  `BlueskyAPIClient` and `BlueskyUser`.
+- **Mastodon.** `MastodonAuthentication` (persists the server host with the
+  token), `MastodonAPIClient` (per-server base URL, host normalization,
+  authorize URL), `MastodonUser` and `MastodonRelationship`.
+- `WebAuthViewController`: `usesBrowserUserAgent` (present the web view as
+  Mobile Safari; x.com's login link does nothing for the in-app user agent),
+  links targeting a new window load in place, callback URLs are picked out of
+  failed app-scheme redirects, and a `shouldReturnToAuthURL` hook bounces a
+  flow back to the auth URL when login lands elsewhere (capped at three
+  reloads).
 - **OAuth 2.0 authorization code flow with PKCE.** `OAuth2AuthorizationCodeFlow`
   builds the authorization URL (`response_type=code`, random `state`, `S256`
   challenge), runs it in `ASWebAuthenticationSession` or `APWebAuthSession`,
@@ -73,3 +100,13 @@
   resolves back to the same DID.
 - `JSON.int32Number` no longer traps on values outside the `Int32` range.
 - `TransientNetworkRetrier` no longer retries `501 Not Implemented`.
+
+### Tests and CI
+
+- WebTokenInterceptor and OAuth 1.0a signature vector tests, an iOS 17.4
+  minimum-version simulator lane, and a SwiftLint lane (#22).
+- Tests assert the APUserAgentGenerator 2.0 user agents for every browser mode.
+
+## [2.0.0] - 2026-09-20
+
+See the [GitHub release](https://github.com/aporat/APWebAuthentication/releases/tag/2.0.0).
