@@ -182,13 +182,27 @@ public class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
     /// (which would recurse on a 401 from the token endpoint).
     let refreshSession: Session
 
+    /// How close to ``Auth2Authentication/expiresAt`` a token may get before
+    /// `adapt` refreshes it proactively, in seconds.
+    public let refreshLeeway: TimeInterval
+
+    /// After a proactive refresh fails, how long `adapt` waits before trying
+    /// another one, so an unreachable token endpoint is not hit by every
+    /// request. The 401 retry path is not affected.
+    public let proactiveRefreshBackoff: TimeInterval
+
+    /// The clock used for expiry decisions. Injectable for tests.
+    let now: @Sendable () -> Date
+
     // MARK: - Refresh Token State
 
-    /// Whether a token refresh is currently in progress.
-    private var isRefreshing = false
+    /// The refresh in flight, shared by every caller (proactive refresh in
+    /// `adapt` and the 401 path in `retry`) so concurrent requests trigger
+    /// exactly one token request.
+    @MainActor private var refreshTask: Task<Bool, Never>?
 
-    /// Queued retry completions waiting for the token refresh to finish.
-    private var requestsToRetry: [(RetryResult) -> Void] = []
+    /// No proactive refresh before this time; set after one fails.
+    @MainActor private var proactiveRefreshBlockedUntil: Date?
 
     /// IDs of requests that have already been granted one refresh. A request
     /// that 401s again after its refresh is failed rather than refreshed a
@@ -243,6 +257,11 @@ public class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
     ///   - refreshTokenURL: The token endpoint URL for refresh grants (default: `nil`, disabling auto-refresh)
     ///   - clientAuthentication: Where a confidential client's secret goes during refresh (default: `.requestBody`)
     ///   - refreshSession: Session used for the refresh request (default: `AF`)
+    ///   - refreshLeeway: Refresh proactively when the token expires within
+    ///     this many seconds (default: 60). Needs `refreshTokenURL` and a known
+    ///     ``Auth2Authentication/expiresAt``.
+    ///   - proactiveRefreshBackoff: Pause after a failed proactive refresh (default: 30 s)
+    ///   - now: Clock for expiry decisions (default: `Date()`); injectable for tests
     public init(
         auth: Auth2Authentication,
         tokenLocation: TokenLocation = .authorizationHeader,
@@ -250,7 +269,10 @@ public class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
         tokenHeaderParamName: String = "Bearer",
         refreshTokenURL: String? = nil,
         clientAuthentication: OAuth2ClientAuthentication = .requestBody,
-        refreshSession: Session = AF
+        refreshSession: Session = AF,
+        refreshLeeway: TimeInterval = 60,
+        proactiveRefreshBackoff: TimeInterval = 30,
+        now: @escaping @Sendable () -> Date = { Date() }
     ) {
         self.auth = auth
         self.tokenLocation = tokenLocation
@@ -259,6 +281,9 @@ public class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
         self.refreshTokenURL = refreshTokenURL
         self.clientAuthentication = clientAuthentication
         self.refreshSession = refreshSession
+        self.refreshLeeway = refreshLeeway
+        self.proactiveRefreshBackoff = proactiveRefreshBackoff
+        self.now = now
     }
 
     // MARK: - RequestAdapter
@@ -266,7 +291,8 @@ public class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
     /// Adapts requests by adding OAuth 2.0 bearer token authentication.
     ///
     /// This method:
-    /// 1. Gets the access token from the authentication manager
+    /// 1. Refreshes the token first if it expires within ``refreshLeeway``
+    ///    (see ``refreshIfExpiring()``)
     /// 2. Adds the user agent if available
     /// 3. Adds the access token based on `tokenLocation`:
     ///    - Header: `Authorization: Bearer {token}`
@@ -301,6 +327,11 @@ public class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
             if let currentUserAgent = auth.userAgent, !currentUserAgent.isEmpty {
                 urlRequest.headers.add(.userAgent(currentUserAgent))
             }
+
+            // Refresh ahead of expiry instead of spending a round trip on a
+            // 401. On failure the current token is sent anyway, and the 401
+            // retry path still applies.
+            await self.refreshIfExpiring()
 
             // Get access token
             let currentAccessToken = auth.accessToken
@@ -367,46 +398,69 @@ public class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
             return
         }
 
-        // Atomically: refuse a second refresh for the same request, enqueue
-        // the completion, and decide whether we're the request that kicks
-        // off the refresh. Holding the lock across all three steps prevents
-        // another request from observing `isRefreshing` before we've claimed it.
-        //
-        // `nil`  → this request already had its one refresh; fail it.
-        // `true` → we start the refresh; `false` → one is already in flight.
-        let shouldStartRefresh: Bool? = lock.withLock {
+        // Refuse a second refresh for the same request; that is what stops
+        // an endless refresh loop.
+        let isFirstRefreshForRequest: Bool = lock.withLock {
             guard !refreshedRequestIDs.contains(request.id) else {
-                return nil
+                return false
             }
             refreshedRequestIDs.append(request.id)
             if refreshedRequestIDs.count > Self.refreshedRequestIDsLimit {
                 refreshedRequestIDs.removeFirst()
             }
-
-            requestsToRetry.append(completion)
-            guard !isRefreshing else { return false }
-            isRefreshing = true
             return true
         }
 
-        guard let shouldStartRefresh else {
+        guard isFirstRefreshForRequest else {
             completion(.doNotRetry)
             return
         }
-        guard shouldStartRefresh else { return }
 
         Task { @MainActor in
-            let succeeded = await self.refreshAccessToken(url: refreshTokenURL)
-
-            let completions: [(RetryResult) -> Void] = self.lock.withLock {
-                let drained = self.requestsToRetry
-                self.requestsToRetry.removeAll()
-                self.isRefreshing = false
-                return drained
-            }
-
-            completions.forEach { $0(succeeded ? .retry : .doNotRetry) }
+            let succeeded = await self.sharedRefresh(url: refreshTokenURL)
+            completion(succeeded ? .retry : .doNotRetry)
         }
+    }
+
+    // MARK: - Proactive Refresh
+
+    /// Refreshes the token first when it is known to expire within
+    /// ``refreshLeeway`` (or already has), refresh is configured, and no
+    /// recent proactive refresh failed.
+    @MainActor
+    func refreshIfExpiring() async {
+        guard let refreshTokenURL, auth.refreshToken?.isEmpty == false else {
+            return
+        }
+        let current = now()
+        guard auth.isAccessTokenExpiring(within: refreshLeeway, now: current) else { return }
+        if let blockedUntil = proactiveRefreshBlockedUntil, current < blockedUntil {
+            return
+        }
+
+        let succeeded = await sharedRefresh(url: refreshTokenURL)
+        proactiveRefreshBlockedUntil = succeeded ? nil : now().addingTimeInterval(proactiveRefreshBackoff)
+    }
+
+    /// Runs the refresh grant, joining the one already in flight if any.
+    ///
+    /// Everything up to storing the new task happens synchronously on the
+    /// main actor, so two callers can never both start a refresh.
+    @MainActor
+    func sharedRefresh(url: String) async -> Bool {
+        if let refreshTask {
+            return await refreshTask.value
+        }
+
+        let task = Task { @MainActor in
+            await self.refreshAccessToken(url: url)
+        }
+        refreshTask = task
+        let succeeded = await task.value
+        if refreshTask == task {
+            refreshTask = nil
+        }
+        return succeeded
     }
 
     // MARK: - Token Refresh
@@ -468,9 +522,12 @@ public class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
 
         if let tokenResponse = response.value {
             auth.accessToken = tokenResponse.accessToken
-            if let newRefreshToken = tokenResponse.refreshToken {
+            // Servers that rotate refresh tokens return a new one; keep the
+            // old one otherwise.
+            if let newRefreshToken = tokenResponse.refreshToken, !newRefreshToken.isEmpty {
                 auth.refreshToken = newRefreshToken
             }
+            auth.setExpiration(expiresIn: tokenResponse.expiresIn, now: now())
             await auth.save()
             return true
         }
@@ -483,6 +540,7 @@ public class OAuth2Interceptor: RequestInterceptor, @unchecked Sendable {
         if Self.isInvalidGrant(response.data) {
             auth.accessToken = nil
             auth.refreshToken = nil
+            auth.expiresAt = nil
             await auth.save()
         }
 
@@ -506,13 +564,30 @@ private struct TokenResponse: Decodable, Sendable {
     let accessToken: String
     let refreshToken: String?
     let tokenType: String?
-    let expiresIn: Int?
+    /// Seconds until the access token expires. Accepts a JSON number or a
+    /// numeric string (some providers send `"3600"`); anything else is
+    /// treated as absent rather than failing the whole refresh.
+    let expiresIn: TimeInterval?
 
     enum CodingKeys: String, CodingKey {
         case accessToken = "access_token"
         case refreshToken = "refresh_token"
         case tokenType = "token_type"
         case expiresIn = "expires_in"
+    }
+
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        accessToken = try container.decode(String.self, forKey: .accessToken)
+        refreshToken = try? container.decodeIfPresent(String.self, forKey: .refreshToken)
+        tokenType = try? container.decodeIfPresent(String.self, forKey: .tokenType)
+        if let seconds = try? container.decodeIfPresent(Double.self, forKey: .expiresIn) {
+            expiresIn = seconds
+        } else if let string = try? container.decodeIfPresent(String.self, forKey: .expiresIn) {
+            expiresIn = TimeInterval(string.trimmingCharacters(in: .whitespaces))
+        } else {
+            expiresIn = nil
+        }
     }
 }
 

@@ -123,6 +123,16 @@ let user: GitHubUser = try await session
 
 When a request returns 401 and `refreshTokenURL` is set, the interceptor exchanges the refresh token, retries every in-flight request once, and only clears the stored tokens when the token endpoint answers `invalid_grant` (RFC 6749 §5.2). Any other failure — `invalid_client`, a 5xx, a timeout, a non-JSON body — keeps the session intact.
 
+The interceptor also refreshes **before** a token expires. `Auth2Authentication.expiresAt` is set from `expires_in` on every refresh and persisted with the other credentials. When you store the first token yourself, call `auth.applyTokenResponse(json)` with the token endpoint's JSON, or with `JSON(callbackURL.parameters)` for an implicit-flow callback. That sets `accessToken`, `refreshToken` and `expiresAt`. When a request is about to go out and the token expires within `refreshLeeway` (60 s by default) or already has, the interceptor refreshes it first. Concurrent requests share one refresh, and the request is sent with the new token. If that refresh fails, the request is sent with the current token, the 401 path above still applies, and proactive attempts pause for `proactiveRefreshBackoff` (30 s). With no known `expiresAt`, only the 401 path is used.
+
+```swift
+let interceptor = OAuth2Interceptor(
+    auth: auth,
+    refreshTokenURL: "https://api.example.com/oauth2/token",
+    refreshLeeway: 120            // refresh up to 2 minutes early
+)
+```
+
 `tokenLocation` defaults to `.authorizationHeader` (`Authorization: Bearer …`, RFC 6750). APIs that want the token as a query parameter must opt in with `tokenLocation: .params` (and `tokenParamName:` if it isn't `access_token`), as `FoursquareInterceptor` does.
 
 When used through an `AuthClient` subclass, credentials (bearer tokens, DPoP proofs, CSRF headers, OAuth 1.0a signatures) are only attached to requests for the host of `baseURLString` — add any other host that should receive them to `additionalAuthorizedHosts`. Absolute URLs on other hosts are sent unauthenticated. A bare `Session(interceptor:)` as above applies no such restriction.

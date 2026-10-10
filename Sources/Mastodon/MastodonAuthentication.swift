@@ -22,6 +22,8 @@ public final class MastodonAuthentication: Auth2Authentication {
         let clientId: String?
         let clientSecret: String?
         let instanceHost: String?
+        /// Optional, so blobs saved before it existed still decode.
+        let expiresAt: Date?
     }
 
     // MARK: - Instance
@@ -52,7 +54,8 @@ public final class MastodonAuthentication: Auth2Authentication {
             refreshToken: refreshToken,
             clientId: clientId,
             clientSecret: clientSecret,
-            instanceHost: instanceHost
+            instanceHost: instanceHost,
+            expiresAt: expiresAt
         )
         await saveSettings(settings)
     }
@@ -64,6 +67,7 @@ public final class MastodonAuthentication: Auth2Authentication {
         clientId = settings.clientId
         clientSecret = settings.clientSecret
         instanceHost = settings.instanceHost
+        expiresAt = settings.expiresAt
     }
 
     override public func delete() async {
