@@ -128,7 +128,7 @@ final class StartCompletionTests: XCTestCase {
         )
 
         let first = Task { @MainActor () -> APWebAuthenticationError? in
-            do {
+            do throws(APWebAuthenticationError) {
                 try await controller.start()
                 return nil
             } catch {
