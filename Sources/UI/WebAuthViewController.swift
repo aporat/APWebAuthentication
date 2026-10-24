@@ -725,20 +725,22 @@ private extension WebAuthViewController {
     /// callback URL carries the tokens for every OAuth flow, and only the
     /// session-cookie providers care, which is exactly the case where the web
     /// view is alive and this returns immediately.
+    ///
+    /// Not a task group: a group waits for every child before it returns, and
+    /// `allCookies()` ignores cancellation, so the 5 seconds would never cut it short.
     func cookiesForCompletion() async -> [HTTPCookie] {
         let cookieStore = webView.configuration.websiteDataStore.httpCookieStore
 
-        return await withTaskGroup(of: [HTTPCookie]?.self) { group in
-            group.addTask { await cookieStore.allCookies() }
-            group.addTask {
-                try? await Task.sleep(for: .seconds(5))
-                return nil
+        @MainActor final class Once { var resumed = false }
+        let once = Once()
+        return await withCheckedContinuation { (continuation: CheckedContinuation<[HTTPCookie], Never>) in
+            @MainActor func resume(_ cookies: [HTTPCookie]) {
+                guard !once.resumed else { return }
+                once.resumed = true
+                continuation.resume(returning: cookies)
             }
-
-            // Flattens `[HTTPCookie]??` to `[HTTPCookie]?`; not redundant.
-            let first = await group.next() ?? nil // swiftlint:disable:this redundant_nil_coalescing
-            group.cancelAll()
-            return first ?? []
+            Task { @MainActor in resume(await cookieStore.allCookies()) }
+            Task { @MainActor in try? await Task.sleep(for: .seconds(5)); resume([]) }
         }
     }
 
