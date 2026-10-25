@@ -317,6 +317,13 @@ open class WebTokenInterceptorViewController: UIViewController {
     }
 
     private func setupUI() {
+        // See `WebAuthViewController.setupWebView()`: no white flash before the page paints.
+        view.backgroundColor = .systemBackground
+        webView.isOpaque = false
+        webView.backgroundColor = .systemBackground
+        webView.scrollView.backgroundColor = .systemBackground
+        webView.underPageBackgroundColor = .systemBackground
+
         view.addSubview(webView)
 
         navigationItem.leftBarButtonItem = UIBarButtonItem(

@@ -275,6 +275,16 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate, WKUIDe
     private func setupWebView() {
         webView.navigationDelegate = self
         webView.uiDelegate = self
+
+        // An opaque WKWebView paints white until the page's first frame, whatever the
+        // appearance, so a sheet opened in dark mode flashes white. Follow the system
+        // background instead; the page's own background covers it once it has loaded.
+        view.backgroundColor = .systemBackground
+        webView.isOpaque = false
+        webView.backgroundColor = .systemBackground
+        webView.scrollView.backgroundColor = .systemBackground
+        webView.underPageBackgroundColor = .systemBackground
+
         view.addSubview(webView)
 
         webView.snp.makeConstraints { make in

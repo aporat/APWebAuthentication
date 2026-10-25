@@ -1,5 +1,14 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- `WebAuthViewController` and `WebTokenInterceptorViewController` no longer
+  flash a white page before the first frame paints. The web view and the
+  controller's view now follow the system background (`.systemBackground`),
+  so a sheet opened in dark mode is dark while it loads.
+
 ## [3.0.0] - 2026-10-10
 
 ### Breaking changes
