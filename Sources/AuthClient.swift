@@ -398,7 +398,7 @@ open class AuthClient {
 
                 let errorJson = parseJson(from: response)
                 let reason = String(
-                    format: NSLocalizedString(
+                    format: String(localized:
                         "Check your network connection. %@ could also be down.",
                         comment: ""
                     ),

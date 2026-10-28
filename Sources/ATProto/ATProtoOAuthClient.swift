@@ -704,7 +704,7 @@ public final class ATProtoOAuthClient {
         if let urlError = error.underlyingError as? URLError, urlError.code == .cancelled {
             return .canceled
         }
-        return .connectionError(reason: NSLocalizedString("Check your network connection. Bluesky could also be down.", comment: ""))
+        return .connectionError(reason: String(localized: "Check your network connection. Bluesky could also be down.", comment: ""))
     }
 
     private static func oauthError(status: Int, json: JSON) -> APWebAuthenticationError {

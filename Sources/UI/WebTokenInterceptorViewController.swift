@@ -34,7 +34,7 @@ public struct WebTokenInterceptorConfiguration {
         isInteractive: Bool = false,
         timeout: TimeInterval = 60,
         usePersistentDataStore: Bool = false,
-        cancelButtonTitle: String = NSLocalizedString("Cancel", comment: "")
+        cancelButtonTitle: String = String(localized: "Cancel", comment: "")
     ) {
         self.url = url
         self.targetURL = targetURL

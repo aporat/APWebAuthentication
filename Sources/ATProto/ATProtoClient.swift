@@ -111,11 +111,11 @@ open class ATProtoClient: AuthClient {
         }
 
         let json = parseJson(from: response)
-        var reason = NSLocalizedString("Rate limit reached.", comment: "")
+        var reason = String(localized: "Rate limit reached.", comment: "")
         if let header = response.response?.value(forHTTPHeaderField: "RateLimit-Reset"), let value = TimeInterval(header) {
             let resetDate = Self.resetDate(from: value, receivedAt: Date())
             let minutes = max(1, Int((resetDate.timeIntervalSinceNow / 60).rounded(.up)))
-            reason = String(format: NSLocalizedString("Rate limit reached. Try again in %d min.", comment: ""), minutes)
+            reason = String(format: String(localized: "Rate limit reached. Try again in %d min.", comment: ""), minutes)
         }
         return .rateLimit(reason: reason, responseJSON: json)
     }

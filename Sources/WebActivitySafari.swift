@@ -18,7 +18,7 @@ public final class WebActivitySafari: UIActivity, @unchecked Sendable {
     }
 
     override public var activityTitle: String {
-        NSLocalizedString("Open in Safari", comment: "Title for a button that opens a link in the Safari browser.")
+        String(localized: "Open in Safari", comment: "Title for a button that opens a link in the Safari browser.")
     }
 
     override public var activityType: UIActivity.ActivityType? {

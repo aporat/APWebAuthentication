@@ -512,7 +512,7 @@ public final class OAuth2AuthorizationCodeFlow {
                 break
             }
         }
-        return .connectionError(reason: NSLocalizedString("Check your network connection.", comment: ""))
+        return .connectionError(reason: String(localized: "Check your network connection.", comment: ""))
     }
 
     private static func tokenError(status: Int, json: JSON) -> APWebAuthenticationError {

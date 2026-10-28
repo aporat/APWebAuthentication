@@ -228,11 +228,11 @@ public final class WebAuthNavigationManager {
 
     private func createBarButtonItems() {
         // Dismiss button
-        var dismissLabel = NSLocalizedString("Cancel", comment: "")
+        var dismissLabel = String(localized: "Cancel", comment: "")
         if dismissButtonStyle == .close {
-            dismissLabel = NSLocalizedString("Close", comment: "")
+            dismissLabel = String(localized: "Close", comment: "")
         } else if dismissButtonStyle == .done {
-            dismissLabel = NSLocalizedString("Done", comment: "")
+            dismissLabel = String(localized: "Done", comment: "")
         }
 
         dismissBarButtonItem = UIBarButtonItem(

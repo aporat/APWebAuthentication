@@ -408,14 +408,14 @@ public final class APWebAuthSession {
     /// ```
     private func showLoginPermission() async -> Bool {
         await withCheckedContinuation { continuation in
-            let title = String(format: NSLocalizedString("“%@” Wants to Use “%@” to Sign In", comment: ""), UIApplication.shared.displayName ?? "", self.accountType.webAddress)
-            let message = NSLocalizedString("This allows the app and website to share information about you.", comment: "")
+            let title = String(format: String(localized: "“%@” Wants to Use “%@” to Sign In", comment: ""), UIApplication.shared.displayName ?? "", self.accountType.webAddress)
+            let message = String(localized: "This allows the app and website to share information about you.", comment: "")
             let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
 
-            alert.addAction(title: NSLocalizedString("Cancel", comment: ""), style: .cancel) { _ in
+            alert.addAction(title: String(localized: "Cancel", comment: ""), style: .cancel) { _ in
                 continuation.resume(returning: false)
             }
-            alert.addAction(title: NSLocalizedString("Continue", comment: ""), style: .default) { _ in
+            alert.addAction(title: String(localized: "Continue", comment: ""), style: .default) { _ in
                 continuation.resume(returning: true)
             }
             alert.preferredAction = alert.actions.last
@@ -444,7 +444,7 @@ public final class APWebAuthSession {
 
         // Configure view controller
         loginViewController.title = String(
-            format: NSLocalizedString("Sign in to %@", comment: ""),
+            format: String(localized: "Sign in to %@", comment: ""),
             accountType.description
         )
         loginViewController.progressView.tintColor = APWebAuthSession.resolvedTintColor
