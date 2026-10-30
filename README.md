@@ -20,7 +20,7 @@ A Swift package for in-app OAuth 1.0a and OAuth 2.0 authentication on iOS. Prese
 
 ## Requirements
 
-- iOS 17.4+
+- iOS 18.0+
 - Swift 6 (strict concurrency)
 
 ## Installation

@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Breaking changes
+
+- The minimum deployment target is iOS 18.0 (was 17.4). iOS 18 runs on the
+  same devices as iOS 17, so no hardware is dropped.
+
 ### Fixed
 
 - `WebAuthViewController` and `WebTokenInterceptorViewController` no longer

@@ -5,7 +5,7 @@ import PackageDescription
 let package = Package(
     name: "APWebAuthentication",
     platforms: [
-        .iOS("17.4")
+        .iOS("18.0")
     ],
     products: [
         .library(

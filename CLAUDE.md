@@ -4,7 +4,7 @@ A Swift package providing in-app OAuth authentication (OAuth1 + OAuth2) plus AT 
 
 ## Build & Test
 
-The package is iOS-only (`platforms: [.iOS("17.4")]`), so plain `swift build` / `swift test` fail on a Mac host — its UIKit-based dependencies (SnapKit, JGProgressHUD) don't resolve for macOS. Build and test through xcodebuild with a simulator destination, as CI does:
+The package is iOS-only (`platforms: [.iOS("18.0")]`), so plain `swift build` / `swift test` fail on a Mac host — its UIKit-based dependencies (SnapKit, JGProgressHUD) don't resolve for macOS. Build and test through xcodebuild with a simulator destination, as CI does:
 
 ```bash
 # Compile check (no specific simulator needed)
@@ -17,7 +17,7 @@ xcodebuild -scheme APWebAuthentication \
 ```
 
 - Swift tools version: 6.0
-- Platform: iOS 17.4+ (CI runs the latest simulator, plus an iOS 17.4 simulator on macos-15 / Xcode 16.4 with the runtime downloaded)
+- Platform: iOS 18.0+ (CI runs the latest simulator, plus an iOS 18.0 simulator on macos-15 / Xcode 16.4 with the runtime downloaded)
 - Lint: `swiftlint lint` (config in `.swiftlint.yml`, test overrides in `Tests/.swiftlint.yml`)
 - Uses Swift Package Manager
 
