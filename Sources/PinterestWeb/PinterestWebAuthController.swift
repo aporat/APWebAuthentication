@@ -99,7 +99,7 @@ public final class PinterestWebAuthController: WebAuthViewController {
                 return true
             }
 
-            try? await Task.sleep(nanoseconds: UInt64(delaySeconds * 1_000_000_000))
+            try? await Task.sleep(for: .seconds(delaySeconds))
         }
 
         return false

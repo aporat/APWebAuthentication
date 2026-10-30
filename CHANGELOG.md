@@ -6,6 +6,10 @@
 
 - The minimum deployment target is iOS 18.0 (was 17.4). iOS 18 runs on the
   same devices as iOS 17, so no hardware is dropped.
+- JGProgressHUD is no longer a dependency. `WebAuthViewController.showHUD()`
+  / `hideHUD()` draw their own spinner.
+- `ASWebAuthenticationSession.start(url:callbackURLScheme:...)` was removed;
+  pass `callback: .customScheme(scheme)` to `start(url:callback:...)`.
 
 ### Fixed
 

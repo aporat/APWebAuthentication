@@ -1,6 +1,5 @@
 import APUserAgentGenerator
 import Foundation
-import JGProgressHUD
 import SnapKit
 import SwifterSwift
 @preconcurrency import SwiftyJSON
@@ -190,9 +189,7 @@ open class WebAuthViewController: UIViewController, WKNavigationDelegate, WKUIDe
 
     // MARK: - Private Properties - UI
 
-    private lazy var loginHUD: JGProgressHUD = {
-        JGProgressHUD(style: .dark)
-    }()
+    private lazy var loginHUD = LoadingHUD()
 
     private var progressObserver: NSKeyValueObservation?
 

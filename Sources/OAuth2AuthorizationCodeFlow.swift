@@ -444,24 +444,21 @@ public final class OAuth2AuthorizationCodeFlow {
         let request = makeAuthorizationRequest()
         let redirect = configuration.redirectURI
 
-        let callbackURL: URL
+        let callback: ASWebAuthenticationSession.Callback
         if redirect.scheme?.lowercased() == "https", let host = redirect.host {
-            callbackURL = try await ASWebAuthenticationSession.start(
-                url: request.url,
-                callback: .https(host: host, path: redirect.path.isEmpty ? "/" : redirect.path),
-                contextProvider: contextProvider,
-                ephemeral: ephemeral
-            )
+            callback = .https(host: host, path: redirect.path.isEmpty ? "/" : redirect.path)
         } else if let scheme = redirect.scheme {
-            callbackURL = try await ASWebAuthenticationSession.start(
-                url: request.url,
-                callbackURLScheme: scheme,
-                contextProvider: contextProvider,
-                ephemeral: ephemeral
-            )
+            callback = .customScheme(scheme)
         } else {
             throw .failed(reason: "The redirect URI has no scheme.")
         }
+
+        let callbackURL = try await ASWebAuthenticationSession.start(
+            url: request.url,
+            callback: callback,
+            contextProvider: contextProvider,
+            ephemeral: ephemeral
+        )
 
         return try await completeAuthorization(callbackURL: callbackURL, request: request, auth: auth)
     }

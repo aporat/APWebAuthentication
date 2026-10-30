@@ -28,23 +28,6 @@ public extension ASWebAuthenticationSession {
         }
     }
 
-    /// Starts a session that completes when the browser redirects to a URL
-    /// with the given custom scheme.
-    @MainActor
-    static func start(
-        url: URL,
-        callbackURLScheme: String,
-        contextProvider: ASWebAuthenticationPresentationContextProviding,
-        ephemeral: Bool = false
-    ) async throws(APWebAuthenticationError) -> URL {
-        try await run(
-            contextProvider: contextProvider,
-            ephemeral: ephemeral
-        ) { completion in
-            ASWebAuthenticationSession(url: url, callbackURLScheme: callbackURLScheme, completionHandler: completion)
-        }
-    }
-
     @MainActor
     private static func run(
         contextProvider: ASWebAuthenticationPresentationContextProviding,

@@ -384,7 +384,7 @@ open class WebTokenInterceptorViewController: UIViewController {
 
         timeoutTask = Task { [weak self] in
             guard let self else { return }
-            try? await Task.sleep(nanoseconds: UInt64(self.configuration.timeout * 1_000_000_000))
+            try? await Task.sleep(for: .seconds(self.configuration.timeout))
 
             guard !Task.isCancelled else { return }
 

@@ -1,3 +1,4 @@
+import SwiftUI
 import UIKit
 
 /// A simple, customizable progress bar view.
@@ -61,7 +62,7 @@ public final class ProgressView: UIView {
             return
         }
 
-        UIView.animate(withDuration: 0.25) {
+        UIView.animate(.easeInOut(duration: 0.25)) {
             self.layoutIfNeeded()
         }
     }
@@ -71,12 +72,12 @@ public final class ProgressView: UIView {
         setProgress(1.0, animated: true)
 
         // After the progress animation completes, fade out the bar.
-        UIView.animate(withDuration: 0.25, delay: 0.25, options: [], animations: {
+        UIView.animate(.easeInOut(duration: 0.25).delay(0.25)) {
             self.bar.alpha = 0
-        }, completion: { _ in
+        } completion: {
             // Reset for the next use.
             self.progress = 0
-        })
+        }
     }
 
     /// Animates the progress to the beginning (0.0) and fades out the bar.
@@ -84,7 +85,7 @@ public final class ProgressView: UIView {
         setProgress(0.0, animated: true)
 
         // Fade out the bar. A short delay can make it look smoother.
-        UIView.animate(withDuration: 0.25, delay: 0.1, options: []) {
+        UIView.animate(.easeInOut(duration: 0.25).delay(0.1)) {
             self.bar.alpha = 0
         }
     }

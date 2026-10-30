@@ -1,5 +1,5 @@
 {
-  "originHash" : "e8395e742c953185638fa2da50f79883ed68ce5641b8609afd5e90896f328494",
+  "originHash" : "12fe2be3c2a38a1b017df636483f7f60e05b07773eb2bcd7322d280d3491ea55",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -17,15 +17,6 @@
       "state" : {
         "revision" : "2a73431d41f48e108ac2baed9633f463e2ae40f1",
         "version" : "2.0.0"
-      }
-    },
-    {
-      "identity" : "jgprogresshud",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/JonasGessner/JGProgressHUD.git",
-      "state" : {
-        "revision" : "78d7cd35f1d90ff74fd82e486f2cbe4b24be8cf9",
-        "version" : "2.2.0"
       }
     },
     {
